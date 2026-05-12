@@ -66,11 +66,10 @@ workflows:
 
       - name: Fetch signing files
         script: |
-          echo "$APP_STORE_CONNECT_PRIVATE_KEY" > /tmp/auth_key.p8
           app-store-connect fetch-signing-files \
             "$BUNDLE_ID" \
             --type IOS_APP_STORE \
-            --private-key-path /tmp/auth_key.p8 \
+            --private-key "$APP_STORE_CONNECT_PRIVATE_KEY" \
             --key-id "$APP_STORE_CONNECT_KEY_IDENTIFIER" \
             --issuer-id "$APP_STORE_CONNECT_ISSUER_ID" \
             --create
