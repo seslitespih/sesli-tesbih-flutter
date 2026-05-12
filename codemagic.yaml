@@ -14,10 +14,6 @@ workflows:
         BUNDLE_ID: com.sesliTesbih.app
         APP_ORG: com.sesliTesbih
         APP_PROJECT: sesli_tesbih
-      app_store_connect:
-        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
-        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
-        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.sesliTesbih.app
@@ -68,6 +64,23 @@ workflows:
           sed -i '' \
             "s/PRODUCT_BUNDLE_IDENTIFIER = .*/PRODUCT_BUNDLE_IDENTIFIER = $BUNDLE_ID;/g" \
             Runner.xcodeproj/project.pbxproj
+
+      - name: Set up keychain
+        script: keychain initialize
+
+      - name: Fetch signing files
+        script: |
+          echo "$APP_STORE_CONNECT_PRIVATE_KEY" > /tmp/auth_key.p8
+          app-store-connect fetch-signing-files \
+            "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --private-key-path /tmp/auth_key.p8 \
+            --key-id "$APP_STORE_CONNECT_KEY_IDENTIFIER" \
+            --issuer-id "$APP_STORE_CONNECT_ISSUER_ID" \
+            --create
+
+      - name: Add certificates to keychain
+        script: keychain add-certificates
 
       - name: Set up code signing
         script: xcode-project use-profiles
