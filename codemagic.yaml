@@ -8,6 +8,8 @@ workflows:
       flutter: stable
       xcode: latest
       cocoapods: default
+      groups:
+        - "1"
       vars:
         BUNDLE_ID: com.sesliTesbih.app
         APP_ORG: com.sesliTesbih
