@@ -8,8 +8,6 @@ workflows:
       flutter: stable
       xcode: latest
       cocoapods: default
-      groups:
-        - app_store_credentials   # Codemagic dashboard'da oluşturulacak grup
       vars:
         BUNDLE_ID: com.sesliTesbih.app
         APP_ORG: com.sesliTesbih
