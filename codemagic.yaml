@@ -14,10 +14,6 @@ workflows:
         BUNDLE_ID: com.sesliTesbih.app
         APP_ORG: com.sesliTesbih
         APP_PROJECT: sesli_tesbih
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.sesliTesbih.app
-
     triggering:
       events:
         - push
