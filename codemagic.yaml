@@ -14,6 +14,13 @@ workflows:
         BUNDLE_ID: com.sesliTesbih.app
         APP_ORG: com.sesliTesbih
         APP_PROJECT: sesli_tesbih
+      app_store_connect:
+        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
+        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
+        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.sesliTesbih.app
 
     triggering:
       events:
@@ -26,21 +33,17 @@ workflows:
       - name: Flutter pub get
         script: flutter pub get
 
-      # ios/ klasörü yoksa (git'e commit edilmediyse) oluştur
       - name: Create iOS project if missing
         script: |
           if [ ! -d "ios" ]; then
-            echo "ios/ klasörü bulunamadı, flutter create çalıştırılıyor..."
             flutter create --platforms ios . \
               --org "$APP_ORG" \
               --project-name "$APP_PROJECT"
           fi
 
-      # Info.plist izinlerini ekle
       - name: Add iOS permissions to Info.plist
         script: |
           PLIST="ios/Runner/Info.plist"
-          # Zaten eklenmişse tekrar ekleme
           if ! grep -q "NSMicrophoneUsageDescription" "$PLIST"; then
             /usr/libexec/PlistBuddy -c \
               "Add :NSMicrophoneUsageDescription string 'Sesli tesbih sayımı için mikrofon gereklidir. Ses verisi kaydedilmez.'" \
@@ -57,12 +60,8 @@ workflows:
             /usr/libexec/PlistBuddy -c \
               "Add :ITSAppUsesNonExemptEncryption bool false" \
               "$PLIST"
-            echo "Permissions eklendi."
-          else
-            echo "Permissions zaten mevcut."
           fi
 
-      # Bundle ID'yi güncelle (flutter create farklı ID üretebilir)
       - name: Set bundle identifier
         script: |
           cd ios
@@ -70,26 +69,11 @@ workflows:
             "s/PRODUCT_BUNDLE_IDENTIFIER = .*/PRODUCT_BUNDLE_IDENTIFIER = $BUNDLE_ID;/g" \
             Runner.xcodeproj/project.pbxproj
 
-      - name: Set up keychain
-        script: keychain initialize
-
-      - name: Fetch signing files
-        script: |
-          app-store-connect fetch-signing-files \
-            "$BUNDLE_ID" \
-            --type IOS_APP_STORE \
-            --create
-
-      - name: Add certificates to keychain
-        script: keychain add-certificates
-
       - name: Set up code signing
         script: xcode-project use-profiles
 
       - name: Flutter build IPA
-        script: |
-          flutter build ipa --release \
-            --export-options-plist=/Users/builder/export_options.plist
+        script: flutter build ipa --release
 
     artifacts:
       - build/ios/ipa/*.ipa
