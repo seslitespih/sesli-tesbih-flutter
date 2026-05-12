@@ -14,9 +14,6 @@ workflows:
         BUNDLE_ID: com.sesliTesbih.app
         APP_ORG: com.sesliTesbih
         APP_PROJECT: sesli_tesbih
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.sesliTesbih.app
 
     triggering:
       events:
@@ -70,6 +67,16 @@ workflows:
 
       - name: Add certificates to keychain
         script: keychain add-certificates
+
+      - name: Fetch signing files
+        script: |
+          app-store-connect fetch-signing-files \
+            "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --private-key "$APP_STORE_CONNECT_PRIVATE_KEY" \
+            --key-id "$APP_STORE_CONNECT_KEY_IDENTIFIER" \
+            --issuer-id "$APP_STORE_CONNECT_ISSUER_ID" \
+            --create
 
       - name: Set up code signing
         script: xcode-project use-profiles
