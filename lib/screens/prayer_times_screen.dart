@@ -69,9 +69,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
 
       return await Geolocator.getLastKnownPosition() ??
           await Geolocator.getCurrentPosition(
-            locationSettings: const LocationSettings(
-              accuracy: LocationAccuracy.low,
-            ),
+            desiredAccuracy: LocationAccuracy.low,
           );
     } catch (_) {
       return null;
