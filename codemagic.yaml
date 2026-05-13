@@ -72,7 +72,7 @@ workflows:
         script: xcode-project use-profiles
 
       - name: Flutter build IPA
-        script: flutter build ipa --release
+        script: flutter build ipa --release --export-options-plist=/Users/builder/export_options.plist
 
     artifacts:
       - build/ios/ipa/*.ipa
