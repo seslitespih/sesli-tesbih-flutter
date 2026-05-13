@@ -29,6 +29,9 @@ workflows:
       - name: Flutter pub get
         script: flutter pub get
 
+      - name: Generate app icons
+        script: flutter pub run flutter_launcher_icons
+
       - name: Create iOS project if missing
         script: |
           if [ ! -d "ios" ]; then
