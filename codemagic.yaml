@@ -29,9 +29,6 @@ workflows:
       - name: Flutter pub get
         script: flutter pub get
 
-      - name: Generate app icons
-        script: flutter pub run flutter_launcher_icons
-
       - name: Create iOS project if missing
         script: |
           if [ ! -d "ios" ]; then
@@ -40,21 +37,24 @@ workflows:
               --project-name "$APP_PROJECT"
           fi
 
+      - name: Generate app icons
+        script: flutter pub run flutter_launcher_icons
+
       - name: Add iOS permissions to Info.plist
         script: |
           PLIST="ios/Runner/Info.plist"
           if ! grep -q "NSMicrophoneUsageDescription" "$PLIST"; then
             /usr/libexec/PlistBuddy -c \
-              "Add :NSMicrophoneUsageDescription string 'Sesli tesbih sayımı için mikrofon gereklidir. Ses verisi kaydedilmez.'" \
+              "Add :NSMicrophoneUsageDescription string 'Microphone is required for voice dhikr counting. Audio is never recorded.'" \
               "$PLIST"
             /usr/libexec/PlistBuddy -c \
-              "Add :NSSpeechRecognitionUsageDescription string 'Zikir kelimelerini tanımak için ses tanıma kullanılır.'" \
+              "Add :NSSpeechRecognitionUsageDescription string 'Speech recognition is used to detect dhikr words.'" \
               "$PLIST"
             /usr/libexec/PlistBuddy -c \
-              "Add :NSLocationWhenInUseUsageDescription string 'Namaz vakitleri ve kıble yönü hesaplamak için konum gereklidir.'" \
+              "Add :NSLocationWhenInUseUsageDescription string 'Location is required to calculate prayer times and Qibla direction.'" \
               "$PLIST"
             /usr/libexec/PlistBuddy -c \
-              "Add :NSLocationAlwaysAndWhenInUseUsageDescription string 'Namaz vakitleri ve kıble yönü hesaplamak için konum gereklidir.'" \
+              "Add :NSLocationAlwaysAndWhenInUseUsageDescription string 'Location is required to calculate prayer times and Qibla direction.'" \
               "$PLIST"
             /usr/libexec/PlistBuddy -c \
               "Add :ITSAppUsesNonExemptEncryption bool false" \
