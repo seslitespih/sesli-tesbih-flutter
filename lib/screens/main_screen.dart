@@ -63,7 +63,7 @@ class _MainScreenState extends State<MainScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           const Text(
-            'Sesli Tesbih',
+            'Vocal Tasbeeh',
             style: TextStyle(
               color: Colors.white,
               fontSize: 22,
@@ -75,7 +75,7 @@ class _MainScreenState extends State<MainScreen> {
               IconButton(
                 onPressed: _showAddDhikrDialog,
                 icon: const Icon(Icons.add, color: Colors.white),
-                tooltip: 'Özel Zikir Ekle',
+                tooltip: _ls('Özel Zikir Ekle', 'Add Custom Dhikr', 'إضافة ذكر مخصص'),
               ),
               IconButton(
                 onPressed: () => Navigator.pushNamed(context, '/privacy'),
@@ -176,16 +176,26 @@ class _MainScreenState extends State<MainScreen> {
     setState(() {});
   }
 
+  String _ls(String tr, String en, String ar) {
+    if (_lang == 'en') return en;
+    if (_lang == 'ar') return ar;
+    return tr;
+  }
+
   void _confirmDelete(Dhikr dhikr) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Zikri Sil'),
-        content: Text('"${dhikr.nameTr}" silinsin mi?'),
+        title: Text(_ls('Zikri Sil', 'Delete Dhikr', 'حذف الذكر')),
+        content: Text(_ls(
+          '"${dhikr.nameTr}" silinsin mi?',
+          'Delete "${dhikr.nameTr}"?',
+          'هل تريد حذف "${dhikr.nameTr}"؟',
+        )),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('İptal'),
+            child: Text(_ls('İptal', 'Cancel', 'إلغاء')),
           ),
           TextButton(
             onPressed: () async {
@@ -193,7 +203,7 @@ class _MainScreenState extends State<MainScreen> {
               await CustomDhikrManager.remove(dhikr.id);
               _loadDhikr();
             },
-            child: const Text('Sil', style: TextStyle(color: Colors.red)),
+            child: Text(_ls('Sil', 'Delete', 'حذف'), style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -208,31 +218,35 @@ class _MainScreenState extends State<MainScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Özel Zikir Ekle'),
+        title: Text(_ls('Özel Zikir Ekle', 'Add Custom Dhikr', 'إضافة ذكر مخصص')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: nameCtrl,
-              decoration: const InputDecoration(
-                hintText: 'Zikir adı',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                hintText: _ls('Zikir adı', 'Dhikr name', 'اسم الذكر'),
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 10),
             TextField(
               controller: kwCtrl,
-              decoration: const InputDecoration(
-                hintText: 'Anahtar kelime (sesle söylenecek)',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                hintText: _ls(
+                  'Anahtar kelime (sesle söylenecek)',
+                  'Keyword (spoken aloud)',
+                  'كلمة مفتاحية (تُقال بصوت)',
+                ),
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 10),
             TextField(
               controller: countCtrl,
-              decoration: const InputDecoration(
-                hintText: 'Hedef sayı',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                hintText: _ls('Hedef sayı', 'Target count', 'العدد المستهدف'),
+                border: const OutlineInputBorder(),
               ),
               keyboardType: TextInputType.number,
             ),
@@ -241,7 +255,7 @@ class _MainScreenState extends State<MainScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('İptal'),
+            child: Text(_ls('İptal', 'Cancel', 'إلغاء')),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -250,7 +264,13 @@ class _MainScreenState extends State<MainScreen> {
               final target = int.tryParse(countCtrl.text) ?? 100;
               if (name.isEmpty || kw.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Tüm alanları doldurun')),
+                  SnackBar(
+                    content: Text(_ls(
+                      'Tüm alanları doldurun',
+                      'Please fill in all fields',
+                      'يرجى ملء جميع الحقول',
+                    )),
+                  ),
                 );
                 return;
               }
@@ -258,7 +278,7 @@ class _MainScreenState extends State<MainScreen> {
               await CustomDhikrManager.add(name, kw, target.clamp(1, 99999));
               _loadDhikr();
             },
-            child: const Text('Ekle'),
+            child: Text(_ls('Ekle', 'Add', 'إضافة')),
           ),
         ],
       ),

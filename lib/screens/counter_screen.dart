@@ -136,21 +136,23 @@ class _CounterScreenState extends State<CounterScreen>
     if (!_speechAvailable || !mounted) return;
     _sessionPartialCount = 0;
 
-    // Determine best locale
-    String localeId = 'tr-TR';
+    // Pick locale matching the selected language, fall back to device default
+    final selectedLang = LocaleService.instance.language;
+    final preferredPrefix = selectedLang == 'ar' ? 'ar' : (selectedLang == 'en' ? 'en' : 'tr');
+    String localeId = '';
     try {
       final locales = await _speech.locales();
-      final trLocale = locales
-          .where((l) => l.localeId.startsWith('tr'))
+      final match = locales
+          .where((l) => l.localeId.startsWith(preferredPrefix))
           .map((l) => l.localeId)
           .firstOrNull;
-      if (trLocale != null) localeId = trLocale;
+      if (match != null) localeId = match;
     } catch (_) {}
 
     await _speech.listen(
       onResult: _onResult,
       partialResults: true,
-      localeId: localeId,
+      localeId: localeId.isNotEmpty ? localeId : null,
       cancelOnError: false,
       listenMode: ListenMode.dictation,
       onSoundLevelChange: (level) {

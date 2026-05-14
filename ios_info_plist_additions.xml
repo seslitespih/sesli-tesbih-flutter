@@ -1,0 +1,18 @@
+<!-- Add these entries inside the <dict> tag of ios/Runner/Info.plist -->
+
+<key>NSMicrophoneUsageDescription</key>
+<string>Microphone access is required for voice dhikr counting. Audio is processed only on your device and is never recorded or stored.</string>
+
+<key>NSSpeechRecognitionUsageDescription</key>
+<string>Speech recognition is used to detect dhikr keywords spoken aloud. Audio data is never recorded or sent to any server.</string>
+
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>Location is used to calculate prayer times and qibla direction. Your location is never sent to any server.</string>
+
+<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+<string>Location is used to calculate prayer times and qibla direction. Your location is never sent to any server.</string>
+
+<key>UIBackgroundModes</key>
+<array>
+    <string>fetch</string>
+</array>

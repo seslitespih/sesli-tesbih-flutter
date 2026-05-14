@@ -57,7 +57,7 @@ class _SplashScreenState extends State<SplashScreen>
               ),
               const SizedBox(height: 16),
               const Text(
-                'Sesli Tesbih',
+                'Vocal Tasbeeh',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 36,
@@ -67,7 +67,7 @@ class _SplashScreenState extends State<SplashScreen>
               ),
               const SizedBox(height: 8),
               Text(
-                'Sesli İslami Zikir Sayacı',
+                'Vocal Islamic Dhikr Counter',
                 style: TextStyle(
                   color: Colors.white.withOpacity(0.7),
                   fontSize: 14,

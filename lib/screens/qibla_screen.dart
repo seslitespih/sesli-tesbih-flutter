@@ -27,7 +27,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
   }
 
   Future<void> _loadQibla() async {
-    if (mounted) setState(() => _statusText = 'Konum alınıyor...');
+    if (mounted) setState(() => _statusText = _s('Konum alınıyor...', 'Getting location...', 'جارٍ تحديد الموقع...'));
     try {
       final serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {

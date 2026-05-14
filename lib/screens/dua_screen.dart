@@ -10,7 +10,9 @@ class DuaScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final lang = LocaleService.instance.language;
-    final title = lang == 'en' ? 'Prayers & Surahs' : (lang == 'ar' ? 'الأدعية والسور' : 'Dualar ve Sureler');
+    final title = lang == 'en'
+        ? 'Prayers & Surahs'
+        : (lang == 'ar' ? 'الأدعية والسور' : 'Dualar ve Sureler');
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -23,7 +25,7 @@ class DuaScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(12),
                 itemCount: kDuaList.length,
                 itemBuilder: (context, index) =>
-                    _DuaCard(dua: kDuaList[index]),
+                    _DuaCard(dua: kDuaList[index], lang: lang),
               ),
             ),
           ],
@@ -68,7 +70,8 @@ class _AppBar extends StatelessWidget {
 
 class _DuaCard extends StatefulWidget {
   final Dua dua;
-  const _DuaCard({required this.dua});
+  final String lang;
+  const _DuaCard({required this.dua, required this.lang});
 
   @override
   State<_DuaCard> createState() => _DuaCardState();
@@ -79,6 +82,10 @@ class _DuaCardState extends State<_DuaCard> {
 
   @override
   Widget build(BuildContext context) {
+    final title = widget.dua.localizedTitle(widget.lang);
+    final translationText = widget.dua.localizedText(widget.lang);
+    final infoText = widget.dua.localizedInfo(widget.lang);
+
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -103,7 +110,7 @@ class _DuaCardState extends State<_DuaCard> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      widget.dua.title,
+                      title,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -137,25 +144,28 @@ class _DuaCardState extends State<_DuaCard> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 10),
-                Text(
-                  widget.dua.turkish,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textPrimary,
-                    height: 1.6,
+                if (translationText.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  Text(
+                    translationText,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textPrimary,
+                      height: 1.6,
+                    ),
                   ),
-                ),
+                ],
                 const SizedBox(height: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
                     color: const Color(0xFFFFF8E1),
                     borderRadius: BorderRadius.circular(6),
                     border: Border.all(color: Colors.amber.shade200),
                   ),
                   child: Text(
-                    widget.dua.info,
+                    infoText,
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.orange.shade800,

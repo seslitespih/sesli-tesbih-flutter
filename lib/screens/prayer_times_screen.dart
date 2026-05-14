@@ -105,10 +105,15 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
         }
       }
 
-      final months = [
-        '', 'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
-        'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık',
-      ];
+      final lang = LocaleService.instance.language;
+      final months = lang == 'en'
+          ? ['', 'January', 'February', 'March', 'April', 'May', 'June',
+              'July', 'August', 'September', 'October', 'November', 'December']
+          : lang == 'ar'
+          ? ['', 'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+              'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر']
+          : ['', 'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+              'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
 
       if (mounted) {
         setState(() {
@@ -127,7 +132,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _error = 'Hesaplama hatası: $e';
+          _error = _s('Hesaplama hatası: $e', 'Calculation error: $e', 'خطأ في الحساب: $e');
           _loading = false;
         });
       }

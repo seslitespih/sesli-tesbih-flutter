@@ -25,7 +25,7 @@ class SesliTesbihApp extends StatelessWidget {
       listenable: LocaleService.instance,
       builder: (context, _) {
         return MaterialApp(
-          title: 'Sesli Tesbih',
+          title: 'Vocal Tasbeeh',
           debugShowCheckedModeBanner: false,
           theme: _buildTheme(),
           initialRoute: '/splash',
