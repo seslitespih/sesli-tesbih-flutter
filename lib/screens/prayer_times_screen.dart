@@ -79,7 +79,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
   void _showTimes(double lat, double lng, String city) {
     try {
       final coords = Coordinates(lat, lng);
-      final params = CalculationMethodParameters.turkey();
+      final params = CalculationMethodParameters.muslimWorldLeague();
       final now = DateTime.now();
       final prayerTimes = PrayerTimes(
         coordinates: coords,
