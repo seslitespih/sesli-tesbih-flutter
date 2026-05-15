@@ -79,7 +79,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
   void _showTimes(double lat, double lng, String city) {
     try {
       final coords = Coordinates(lat, lng);
-      final params = CalculationMethodParameters.muslimWorldLeague();
+      final params = CalculationMethodParameters.turkey();
       final now = DateTime.now();
       final prayerTimes = PrayerTimes(
         coordinates: coords,
@@ -88,6 +88,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
       );
 
       final fmt = _formatTime;
+      final nowUtc = now.toUtc();
       final prayers = [
         prayerTimes.fajr,
         prayerTimes.sunrise,
@@ -99,7 +100,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
 
       int nextIdx = -1;
       for (var i = 0; i < prayers.length; i++) {
-        if (prayers[i] != null && prayers[i]!.isAfter(now)) {
+        if (prayers[i] != null && prayers[i]!.isAfter(nowUtc)) {
           nextIdx = i;
           break;
         }
@@ -141,7 +142,8 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
 
   String _formatTime(DateTime? dt) {
     if (dt == null) return '--:--';
-    return '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+    final local = dt.toLocal();
+    return '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
   }
 
   String _s(String tr, String en, String ar) =>
