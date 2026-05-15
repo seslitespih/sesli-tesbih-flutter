@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:http/http.dart' as http;
 import 'package:adhan_dart/adhan_dart.dart';
 import '../main.dart';
 import '../services/locale_service.dart';
@@ -32,6 +34,50 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
     _loadPrayerTimes();
   }
 
+  // Country code → Aladhan method number
+  int _methodForCountry(String? cc) {
+    switch (cc?.toUpperCase()) {
+      case 'TR':
+        return 13; // Diyanet İşleri Başkanlığı
+      case 'SA':
+      case 'AE':
+      case 'KW':
+      case 'QA':
+      case 'BH':
+      case 'OM':
+        return 4; // Umm al-Qura (Gulf)
+      case 'EG':
+        return 5; // Egyptian General Authority
+      case 'US':
+      case 'CA':
+        return 2; // ISNA
+      case 'PK':
+      case 'IN':
+      case 'BD':
+      case 'AF':
+        return 1; // University of Islamic Sciences, Karachi
+      case 'SG':
+      case 'MY':
+        return 11; // MUIS Singapore
+      case 'IR':
+        return 7; // Tehran
+      case 'GB':
+      case 'FR':
+      case 'DE':
+      case 'NL':
+      case 'BE':
+        return 3; // Muslim World League (Europe)
+      default:
+        return 3; // Muslim World League (worldwide default)
+    }
+  }
+
+  // Country code → school (0=Shafi'i, 1=Hanafi)
+  int _schoolForCountry(String? cc) {
+    const hanafi = {'TR', 'PK', 'IN', 'BD', 'AF', 'AZ', 'UZ', 'KZ', 'TM', 'TJ', 'KG'};
+    return hanafi.contains(cc?.toUpperCase()) ? 1 : 0;
+  }
+
   Future<void> _loadPrayerTimes() async {
     try {
       final position = await _getLocation();
@@ -39,44 +85,73 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
       final lng = position?.longitude ?? 28.9784;
 
       String cityName = '';
+      String? countryCode;
+
       if (position != null) {
         try {
           final placemarks = await placemarkFromCoordinates(lat, lng);
-          cityName = placemarks.firstOrNull?.locality ??
-              placemarks.firstOrNull?.administrativeArea ??
-              '';
+          final p = placemarks.firstOrNull;
+          cityName = p?.locality ?? p?.administrativeArea ?? '';
+          countryCode = p?.isoCountryCode;
         } catch (_) {}
       }
-      if (cityName.isEmpty) cityName = position == null ? 'İstanbul' : '';
 
-      _showTimes(lat, lng, cityName);
-    } catch (e) {
-      _showTimes(41.0082, 28.9784, 'İstanbul');
-    }
-  }
+      if (cityName.isEmpty) cityName = position == null ? 'Istanbul' : '';
 
-  Future<Position?> _getLocation() async {
-    try {
-      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) return null;
-
-      var permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) return null;
+      // Try Aladhan API first
+      final apiOk = await _fetchFromAladhan(lat, lng, cityName, countryCode);
+      if (!apiOk) {
+        // Fallback: local calculation with adhan_dart
+        _showTimesLocal(lat, lng, cityName);
       }
-      if (permission == LocationPermission.deniedForever) return null;
-
-      return await Geolocator.getLastKnownPosition() ??
-          await Geolocator.getCurrentPosition(
-            desiredAccuracy: LocationAccuracy.low,
-          );
-    } catch (_) {
-      return null;
+    } catch (e) {
+      _showTimesLocal(41.0082, 28.9784, 'Istanbul');
     }
   }
 
-  void _showTimes(double lat, double lng, String city) {
+  Future<bool> _fetchFromAladhan(
+      double lat, double lng, String city, String? countryCode) async {
+    try {
+      final method = _methodForCountry(countryCode);
+      final school = _schoolForCountry(countryCode);
+      final uri = Uri.parse(
+        'https://api.aladhan.com/v1/timings'
+        '?latitude=$lat&longitude=$lng&method=$method&school=$school',
+      );
+
+      final response = await http.get(uri).timeout(const Duration(seconds: 10));
+      if (response.statusCode != 200) return false;
+
+      final body = json.decode(response.body) as Map<String, dynamic>;
+      if (body['code'] != 200) return false;
+
+      final timings = body['data']['timings'] as Map<String, dynamic>;
+      final date = body['data']['date']['readable'] as String? ?? '';
+
+      if (mounted) {
+        setState(() {
+          _city = city.isNotEmpty
+              ? city
+              : '${lat.toStringAsFixed(2)}°, ${lng.toStringAsFixed(2)}°';
+          _dateStr = _localizedDate(date);
+          _fajr = timings['Fajr'] ?? '--:--';
+          _sunrise = timings['Sunrise'] ?? '--:--';
+          _dhuhr = timings['Dhuhr'] ?? '--:--';
+          _asr = timings['Asr'] ?? '--:--';
+          _maghrib = timings['Maghrib'] ?? '--:--';
+          _isha = timings['Isha'] ?? '--:--';
+          _nextPrayerIndex = _calcNextIndex();
+          _loading = false;
+        });
+      }
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  // Fallback: local adhan_dart calculation
+  void _showTimesLocal(double lat, double lng, String city) {
     try {
       final coords = Coordinates(lat, lng);
       final params = CalculationMethodParameters.muslimWorldLeague();
@@ -87,63 +162,121 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
         calculationParameters: params,
       );
 
-      final fmt = _formatTime;
-      final nowUtc = now.toUtc();
-      final prayers = [
-        prayerTimes.fajr,
-        prayerTimes.sunrise,
-        prayerTimes.dhuhr,
-        prayerTimes.asr,
-        prayerTimes.maghrib,
-        prayerTimes.isha,
-      ];
-
-      int nextIdx = -1;
-      for (var i = 0; i < prayers.length; i++) {
-        if (prayers[i] != null && prayers[i]!.isAfter(nowUtc)) {
-          nextIdx = i;
-          break;
-        }
-      }
-
-      final lang = LocaleService.instance.language;
-      final months = lang == 'en'
-          ? ['', 'January', 'February', 'March', 'April', 'May', 'June',
-              'July', 'August', 'September', 'October', 'November', 'December']
-          : lang == 'ar'
-          ? ['', 'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
-              'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر']
-          : ['', 'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
-              'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
-
       if (mounted) {
         setState(() {
-          _city = city.isNotEmpty ? city : '${lat.toStringAsFixed(2)}°, ${lng.toStringAsFixed(2)}°';
-          _dateStr = '${now.day} ${months[now.month]} ${now.year}';
-          _fajr = fmt(prayerTimes.fajr);
-          _sunrise = fmt(prayerTimes.sunrise);
-          _dhuhr = fmt(prayerTimes.dhuhr);
-          _asr = fmt(prayerTimes.asr);
-          _maghrib = fmt(prayerTimes.maghrib);
-          _isha = fmt(prayerTimes.isha);
-          _nextPrayerIndex = nextIdx;
+          _city = city.isNotEmpty
+              ? city
+              : '${lat.toStringAsFixed(2)}°, ${lng.toStringAsFixed(2)}°';
+          _dateStr = _buildDateStr(now);
+          _fajr = _fmt(prayerTimes.fajr);
+          _sunrise = _fmt(prayerTimes.sunrise);
+          _dhuhr = _fmt(prayerTimes.dhuhr);
+          _asr = _fmt(prayerTimes.asr);
+          _maghrib = _fmt(prayerTimes.maghrib);
+          _isha = _fmt(prayerTimes.isha);
+          _nextPrayerIndex = _calcNextIndex();
           _loading = false;
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _error = _s('Hesaplama hatası: $e', 'Calculation error: $e', 'خطأ في الحساب: $e');
+          _error = _s('Hesaplama hatası', 'Calculation error', 'خطأ في الحساب');
           _loading = false;
         });
       }
     }
   }
 
-  String _formatTime(DateTime? dt) {
+  // "15 May 2026" → locale-aware
+  String _localizedDate(String readable) {
+    try {
+      final parts = readable.split(' ');
+      if (parts.length < 3) return readable;
+      final day = parts[0];
+      final monthEn = parts[1];
+      final year = parts[2];
+      const enMonths = [
+        'January','February','March','April','May','June',
+        'July','August','September','October','November','December'
+      ];
+      const trMonths = [
+        'Ocak','Şubat','Mart','Nisan','Mayıs','Haziran',
+        'Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'
+      ];
+      const arMonths = [
+        'يناير','فبراير','مارس','أبريل','مايو','يونيو',
+        'يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'
+      ];
+      final idx = enMonths.indexWhere(
+          (m) => m.toLowerCase() == monthEn.toLowerCase());
+      if (idx == -1) return readable;
+      final lang = LocaleService.instance.language;
+      final months = lang == 'ar' ? arMonths : (lang == 'tr' ? trMonths : enMonths);
+      return '$day ${months[idx]} $year';
+    } catch (_) {
+      return readable;
+    }
+  }
+
+  String _buildDateStr(DateTime now) {
+    final lang = LocaleService.instance.language;
+    final months = lang == 'en'
+        ? ['','January','February','March','April','May','June',
+            'July','August','September','October','November','December']
+        : lang == 'ar'
+        ? ['','يناير','فبراير','مارس','أبريل','مايو','يونيو',
+            'يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر']
+        : ['','Ocak','Şubat','Mart','Nisan','Mayıs','Haziran',
+            'Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+    return '${now.day} ${months[now.month]} ${now.year}';
+  }
+
+  int _calcNextIndex() {
+    final times = [_fajr, _sunrise, _dhuhr, _asr, _maghrib, _isha];
+    final now = TimeOfDay.now();
+    for (var i = 0; i < times.length; i++) {
+      final t = _parseTime(times[i]);
+      if (t == null) continue;
+      if (t.hour > now.hour || (t.hour == now.hour && t.minute > now.minute)) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  TimeOfDay? _parseTime(String s) {
+    final parts = s.split(':');
+    if (parts.length < 2) return null;
+    final h = int.tryParse(parts[0]);
+    final m = int.tryParse(parts[1]);
+    if (h == null || m == null) return null;
+    return TimeOfDay(hour: h, minute: m);
+  }
+
+  String _fmt(DateTime? dt) {
     if (dt == null) return '--:--';
     final local = dt.toLocal();
     return '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
+  }
+
+  Future<Position?> _getLocation() async {
+    try {
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) return null;
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) return null;
+      }
+      if (permission == LocationPermission.deniedForever) return null;
+      return await Geolocator.getLastKnownPosition() ??
+          await Geolocator.getCurrentPosition(
+            desiredAccuracy: LocationAccuracy.low,
+          );
+    } catch (_) {
+      return null;
+    }
   }
 
   String _s(String tr, String en, String ar) =>
