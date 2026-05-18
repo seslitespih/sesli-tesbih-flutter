@@ -1,8 +1,6 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:http/http.dart' as http;
 import 'package:adhan_dart/adhan_dart.dart';
 import '../main.dart';
 import '../services/locale_service.dart';
@@ -34,48 +32,39 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
     _loadPrayerTimes();
   }
 
-  // Country code → Aladhan method number
-  int _methodForCountry(String? cc) {
+  CalculationMethodParameters _paramsForCountry(String? cc) {
     switch (cc?.toUpperCase()) {
       case 'TR':
-        return 13; // Diyanet İşleri Başkanlığı
+        final p = CalculationMethodParameters.muslimWorldLeague();
+        p.madhab = Madhab.hanafi;
+        return p;
+      case 'PK':
+      case 'IN':
+      case 'BD':
+      case 'AF':
+        final p2 = CalculationMethodParameters.karachi();
+        p2.madhab = Madhab.hanafi;
+        return p2;
+      case 'EG':
+        return CalculationMethodParameters.egyptianGeneralAuthorityOfSurvey();
       case 'SA':
       case 'AE':
       case 'KW':
       case 'QA':
       case 'BH':
       case 'OM':
-        return 4; // Umm al-Qura (Gulf)
-      case 'EG':
-        return 5; // Egyptian General Authority
-      case 'US':
-      case 'CA':
-        return 2; // ISNA
-      case 'PK':
-      case 'IN':
-      case 'BD':
-      case 'AF':
-        return 1; // University of Islamic Sciences, Karachi
+        return CalculationMethodParameters.ummAlQura();
+      case 'IR':
+        return CalculationMethodParameters.tehran();
       case 'SG':
       case 'MY':
-        return 11; // MUIS Singapore
-      case 'IR':
-        return 7; // Tehran
-      case 'GB':
-      case 'FR':
-      case 'DE':
-      case 'NL':
-      case 'BE':
-        return 3; // Muslim World League (Europe)
+        return CalculationMethodParameters.singapore();
+      case 'US':
+      case 'CA':
+        return CalculationMethodParameters.islamicSocietyOfNorthAmerica();
       default:
-        return 3; // Muslim World League (worldwide default)
+        return CalculationMethodParameters.muslimWorldLeague();
     }
-  }
-
-  // Country code → school (0=Shafi'i, 1=Hanafi)
-  int _schoolForCountry(String? cc) {
-    const hanafi = {'TR', 'PK', 'IN', 'BD', 'AF', 'AZ', 'UZ', 'KZ', 'TM', 'TJ', 'KG'};
-    return hanafi.contains(cc?.toUpperCase()) ? 1 : 0;
   }
 
   Future<void> _loadPrayerTimes() async {
@@ -98,63 +87,16 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
 
       if (cityName.isEmpty) cityName = position == null ? 'Istanbul' : '';
 
-      // Try Aladhan API first
-      final apiOk = await _fetchFromAladhan(lat, lng, cityName, countryCode);
-      if (!apiOk) {
-        // Fallback: local calculation with adhan_dart
-        _showTimesLocal(lat, lng, cityName);
-      }
+      _calculateTimes(lat, lng, cityName, countryCode);
     } catch (e) {
-      _showTimesLocal(41.0082, 28.9784, 'Istanbul');
+      _calculateTimes(41.0082, 28.9784, 'Istanbul', 'TR');
     }
   }
 
-  Future<bool> _fetchFromAladhan(
-      double lat, double lng, String city, String? countryCode) async {
-    try {
-      final method = _methodForCountry(countryCode);
-      final school = _schoolForCountry(countryCode);
-      final uri = Uri.parse(
-        'https://api.aladhan.com/v1/timings'
-        '?latitude=$lat&longitude=$lng&method=$method&school=$school',
-      );
-
-      final response = await http.get(uri).timeout(const Duration(seconds: 10));
-      if (response.statusCode != 200) return false;
-
-      final body = json.decode(response.body) as Map<String, dynamic>;
-      if (body['code'] != 200) return false;
-
-      final timings = body['data']['timings'] as Map<String, dynamic>;
-      final date = body['data']['date']['readable'] as String? ?? '';
-
-      if (mounted) {
-        setState(() {
-          _city = city.isNotEmpty
-              ? city
-              : '${lat.toStringAsFixed(2)}°, ${lng.toStringAsFixed(2)}°';
-          _dateStr = _localizedDate(date);
-          _fajr = timings['Fajr'] ?? '--:--';
-          _sunrise = timings['Sunrise'] ?? '--:--';
-          _dhuhr = timings['Dhuhr'] ?? '--:--';
-          _asr = timings['Asr'] ?? '--:--';
-          _maghrib = timings['Maghrib'] ?? '--:--';
-          _isha = timings['Isha'] ?? '--:--';
-          _nextPrayerIndex = _calcNextIndex();
-          _loading = false;
-        });
-      }
-      return true;
-    } catch (_) {
-      return false;
-    }
-  }
-
-  // Fallback: local adhan_dart calculation
-  void _showTimesLocal(double lat, double lng, String city) {
+  void _calculateTimes(double lat, double lng, String city, String? cc) {
     try {
       final coords = Coordinates(lat, lng);
-      final params = CalculationMethodParameters.muslimWorldLeague();
+      final params = _paramsForCountry(cc);
       final now = DateTime.now();
       final prayerTimes = PrayerTimes(
         coordinates: coords,
@@ -188,35 +130,11 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
     }
   }
 
-  // "15 May 2026" → locale-aware
-  String _localizedDate(String readable) {
-    try {
-      final parts = readable.split(' ');
-      if (parts.length < 3) return readable;
-      final day = parts[0];
-      final monthEn = parts[1];
-      final year = parts[2];
-      const enMonths = [
-        'January','February','March','April','May','June',
-        'July','August','September','October','November','December'
-      ];
-      const trMonths = [
-        'Ocak','Şubat','Mart','Nisan','Mayıs','Haziran',
-        'Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'
-      ];
-      const arMonths = [
-        'يناير','فبراير','مارس','أبريل','مايو','يونيو',
-        'يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'
-      ];
-      final idx = enMonths.indexWhere(
-          (m) => m.toLowerCase() == monthEn.toLowerCase());
-      if (idx == -1) return readable;
-      final lang = LocaleService.instance.language;
-      final months = lang == 'ar' ? arMonths : (lang == 'tr' ? trMonths : enMonths);
-      return '$day ${months[idx]} $year';
-    } catch (_) {
-      return readable;
-    }
+  // adhan_dart returns UTC DateTimes — toLocal() applies device timezone
+  String _fmt(DateTime? dt) {
+    if (dt == null) return '--:--';
+    final local = dt.toLocal();
+    return '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
   }
 
   String _buildDateStr(DateTime now) {
@@ -252,12 +170,6 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
     final m = int.tryParse(parts[1]);
     if (h == null || m == null) return null;
     return TimeOfDay(hour: h, minute: m);
-  }
-
-  String _fmt(DateTime? dt) {
-    if (dt == null) return '--:--';
-    final local = dt.toLocal();
-    return '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
   }
 
   Future<Position?> _getLocation() async {
