@@ -144,6 +144,19 @@ class _DuaCardState extends State<_DuaCard> {
                     ),
                   ),
                 ),
+                if (widget.dua.transliteration.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    widget.dua.transliteration,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppColors.textSecondary,
+                      fontStyle: FontStyle.italic,
+                      height: 1.6,
+                    ),
+                  ),
+                ],
                 if (translationText.isNotEmpty) ...[
                   const SizedBox(height: 10),
                   Text(

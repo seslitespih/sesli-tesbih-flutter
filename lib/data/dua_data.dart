@@ -6,6 +6,8 @@ const List<Dua> kDuaList = [
     titleEn: 'Ayat al-Kursi',
     arabicText:
         'اَللّٰهُ لَٓا اِلٰهَ اِلَّا هُوَ اَلْحَيُّ الْقَيُّومُۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌۚ لَهُ مَا فِي السَّمٰوَاتِ وَمَا فِي الْاَرْضِۚ مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُٓ اِلَّا بِاِذْنِهِۚ يَعْلَمُ مَا بَيْنَ اَيْدِيهِمْ وَمَا خَلْفَهُمْۚ وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِٓ اِلَّا بِمَا شَٓاءَۚ وَسِعَ كُرْسِيُّهُ السَّمٰوَاتِ وَالْاَرْضَۚ وَلَا يَؤُدُهُ حِفْظُهُمَاۚ وَهُوَ الْعَلِيُّ الْعَظِيمُ',
+    transliteration:
+        "Allahu laa ilaaha illaa huw-al-Hayyul-Qayyuum. Laa ta'khudhuhu sinatuw-wa laa nawm. Lahuu maa fis-samaawaati wa maa fil-ard. Man dhal-ladhii yashfa'u 'indahuu illaa bi-idhnih. Ya'lamu maa bayna aydiihim wa maa khalfahum. Wa laa yuhiituuna bi-shay'im-min 'ilmihii illaa bimaa shaa'. Wasi'a kursiyyuhus-samaawaati wal-ard. Wa laa ya'uduhu hifzuhumaa. Wa huwal-'Aliyyul-'Aziim.",
     turkish:
         "Allah, O'ndan başka hiçbir ilah olmayandır. Diridir, kâinatı ayakta tutandır. O'nu ne uyuklama ne de uyku tutar. Göklerdeki ve yerdeki her şey O'nundur. İzni olmadan O'nun katında kim şefaat edebilir? O, kulların önlerinde ve arkalarında ne varsa hepsini bilir. Onlar ise O'nun ilminden, dilediği kadarından başka bir şeyi kavrayamazlar. O'nun kürsüsü gökleri ve yeri kaplamıştır. Gökleri ve yeri koruyup gözetmek O'na güç gelmez. O, çok yücedir, çok büyüktür.",
     english:
@@ -18,6 +20,8 @@ const List<Dua> kDuaList = [
     titleEn: 'Al-Fatiha',
     arabicText:
         'بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيمِ۝ اَلْحَمْدُ لِلّٰهِ رَبِّ الْعَالَمِينَ۝ اَلرَّحْمٰنِ الرَّحِيمِ۝ مَالِكِ يَوْمِ الدِّينِ۝ اِيَّاكَ نَعْبُدُ وَاِيَّاكَ نَسْتَعِينُ۝ اِهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ۝ صِرَاطَ الَّذِينَ اَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّٓالِّينَ',
+    transliteration:
+        "Bismillaahir-Rahmaanir-Rahiim. Alhamdulillaahi Rabbil-'aalamiin. Ar-Rahmaanir-Rahiim. Maaliki Yawmid-Diin. Iyyaaka na'budu wa iyyaaka nasta'iin. Ihdinas-Siraatal-Mustaqiim. Siraatalladhiina an'amta 'alayhim, ghayril-maghdhuubi 'alayhim wa lad-daalliin.",
     turkish:
         "Rahman ve Rahim olan Allah'ın adıyla. Hamd, âlemlerin Rabbi olan Allah'adır. O, Rahman'dır, Rahim'dir. Din gününün sahibidir. Yalnız sana ibadet eder, yalnız senden yardım dileriz. Bizi doğru yola ilet. Kendilerine nimet verdiklerinin yoluna; gazaba uğrayanların ve sapkınların yoluna değil.",
     english:
@@ -30,6 +34,8 @@ const List<Dua> kDuaList = [
     titleEn: 'Al-Ikhlas',
     arabicText:
         'بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيمِ۝ قُلْ هُوَ اللّٰهُ اَحَدٌ۝ اَللّٰهُ الصَّمَدُ۝ لَمْ يَلِدْ وَلَمْ يُولَدْ۝ وَلَمْ يَكُنْ لَهُ كُفُوًا اَحَدٌ',
+    transliteration:
+        "Bismillaahir-Rahmaanir-Rahiim. Qul Huwallahu Ahad. Allahus-Samad. Lam yalid wa lam yuulad. Wa lam yakul-lahuu kufuwan ahad.",
     turkish:
         "De ki: O Allah birdir. Allah Samed'dir. O doğurmamış ve doğmamıştır. O'nun hiçbir dengi yoktur.",
     english:
@@ -42,6 +48,8 @@ const List<Dua> kDuaList = [
     titleEn: 'Al-Falaq',
     arabicText:
         'بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيمِ۝ قُلْ اَعُوذُ بِرَبِّ الْفَلَقِ۝ مِنْ شَرِّ مَا خَلَقَ۝ وَمِنْ شَرِّ غَاسِقٍ اِذَا وَقَبَ۝ وَمِنْ شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ۝ وَمِنْ شَرِّ حَاسِدٍ اِذَا حَسَدَ',
+    transliteration:
+        "Bismillaahir-Rahmaanir-Rahiim. Qul a'uudhu bi-Rabbil-falaq. Min sharri maa khalaq. Wa min sharri ghaasiqin idhaa waqab. Wa min sharrin-naffaathaati fil-'uqad. Wa min sharri haasidin idhaa hasad.",
     turkish:
         "De ki: Sığınırım şafağın Rabbine. Yarattığı şeylerin şerrinden. Karardığında gecenin şerrinden. Düğümlere üfleyenlerin şerrinden. Kıskandığında kıskanç kişinin şerrinden.",
     english:
@@ -54,6 +62,8 @@ const List<Dua> kDuaList = [
     titleEn: 'An-Nas',
     arabicText:
         'بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيمِ۝ قُلْ اَعُوذُ بِرَبِّ النَّاسِ۝ مَلِكِ النَّاسِ۝ اِلٰهِ النَّاسِ۝ مِنْ شَرِّ الْوَسْوَاسِ الْخَنَّاسِ۝ اَلَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ۝ مِنَ الْجِنَّةِ وَالنَّاسِ',
+    transliteration:
+        "Bismillaahir-Rahmaanir-Rahiim. Qul a'uudhu bi-Rabbin-naas. Malikin-naas. Ilaahin-naas. Min sharril-waswaasil-khannaas. Alladhii yuwaswisu fii suduurin-naas. Minal-jinnati wan-naas.",
     turkish:
         "De ki: Sığınırım insanların Rabbine. İnsanların hükümdarına. İnsanların ilahına. Sinsi vesvesecinin şerrinden. O ki insanların göğüslerine vesvese verir. Gerek cinlerden gerek insanlardan.",
     english:
@@ -66,6 +76,8 @@ const List<Dua> kDuaList = [
     titleEn: 'Morning Prayer',
     arabicText:
         'اَللّٰهُمَّ بِكَ اَصْبَحْنَا وَبِكَ اَمْسَيْنَا وَبِكَ نَحْيَا وَبِكَ نَمُوتُ وَاِلَيْكَ النُّشُورُ',
+    transliteration:
+        "Allaahummaa bika asbahna wa bika amsaynaa, wa bika nahyaa wa bika namuutu wa ilaykan-nushuur.",
     turkish:
         "Allah'ım! Senin adınla sabahladık, senin adınla akşamladık. Senin adınla yaşar, senin adınla ölürüz. Dönüş yalnız sanadır.",
     english:
@@ -78,6 +90,8 @@ const List<Dua> kDuaList = [
     titleEn: 'Evening Prayer',
     arabicText:
         'اَللّٰهُمَّ بِكَ اَمْسَيْنَا وَبِكَ اَصْبَحْنَا وَبِكَ نَحْيَا وَبِكَ نَمُوتُ وَاِلَيْكَ الْمَصِيرُ',
+    transliteration:
+        "Allaahummaa bika amsaynaa wa bika asbahna, wa bika nahyaa wa bika namuutu wa ilaykal-masiir.",
     turkish:
         "Allah'ım! Senin adınla akşamladık, senin adınla sabahladık. Senin adınla yaşar, senin adınla ölürüz. Dönüş yalnız sanadır.",
     english:
@@ -90,6 +104,8 @@ const List<Dua> kDuaList = [
     titleEn: 'Qunut Prayer',
     arabicText:
         'اَللّٰهُمَّ اِنَّا نَسْتَعِينُكَ وَنَسْتَغْفِرُكَ وَنُؤْمِنُ بِكَ وَنَتَوَكَّلُ عَلَيْكَ وَنُثْنِي عَلَيْكَ الْخَيْرَ وَنَشْكُرُكَ وَلَا نَكْفُرُكَ وَنَخْلَعُ وَنَتْرُكُ مَنْ يَفْجُرُكَ',
+    transliteration:
+        "Allaahummaa innaa nasta'iinuka wa nastaghfiruk. Wa nu'minu bika wa natawakkalu 'alayk. Wa nuthnii 'alaykal-khayr. Wa nashkuruka wa laa nakfuruk. Wa nakhla'u wa natruku man yafjuruk.",
     turkish:
         "Allah'ım! Senden yardım ister, senden bağışlanma diler, sana inanır, sana dayanır, seni hayırla över, sana şükrederiz. Seni inkâr etmez, sana karşı geleni terk eder ve bırakırız.",
     english:
@@ -102,6 +118,8 @@ const List<Dua> kDuaList = [
     titleEn: 'Subhanaka',
     arabicText:
         'سُبْحَانَكَ اللّٰهُمَّ وَبِحَمْدِكَ وَتَبَارَكَ اسْمُكَ وَتَعَالَى جَدُّكَ وَلَا اِلٰهَ غَيْرُكَ',
+    transliteration:
+        "Subhaanakallaahumma wa bihamdik. Wa tabaarakasmuk. Wa ta'aalaa jadduk. Wa laa ilaaha ghayruk.",
     turkish:
         "Allah'ım! Seni her türlü noksanlıktan tenzih eder, seni hamd ile yâd ederim. İsmin mübarektir, şanın yücedir. Senden başka ilah yoktur.",
     english:
@@ -114,6 +132,8 @@ const List<Dua> kDuaList = [
     titleEn: 'At-Tahiyyat',
     arabicText:
         'اَلتَّحِيَّاتُ لِلّٰهِ وَالصَّلَوَاتُ وَالطَّيِّبَاتُ اَلسَّلَامُ عَلَيْكَ اَيُّهَا النَّبِيُّ وَرَحْمَةُ اللّٰهِ وَبَرَكَاتُهُ اَلسَّلَامُ عَلَيْنَا وَعَلَى عِبَادِ اللّٰهِ الصَّالِحِينَ اَشْهَدُ اَنْ لَا اِلٰهَ اِلَّا اللّٰهُ وَاَشْهَدُ اَنَّ مُحَمَّدًا عَبْدُهُ وَرَسُولُهُ',
+    transliteration:
+        "At-tahiyyaatu lillaahi was-salawaatu wat-tayyibaat. As-salaamu 'alayka ayyuhan-nabiyyu wa rahmatullaahi wa barakaatuh. As-salaamu 'alaynaa wa 'alaa 'ibaadillaahis-saalihiin. Ash-hadu al-laa ilaaha illallaah, wa ash-hadu anna Muhammadan 'abduhu wa rasuuluh.",
     turkish:
         "Her türlü tazim, dua ve iyilik Allah'adır. Ey Peygamber! Allah'ın selamı, rahmeti ve bereketi üzerine olsun. Selam bizim üzerimize ve Allah'ın salih kulları üzerine olsun. Şehadet ederim ki Allah'tan başka ilah yoktur; yine şehadet ederim ki Muhammed O'nun kulu ve elçisidir.",
     english:
@@ -126,6 +146,8 @@ const List<Dua> kDuaList = [
     titleEn: 'Salawat',
     arabicText:
         'اَللّٰهُمَّ صَلِّ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ كَمَا صَلَّيْتَ عَلَى اِبْرَاهِيمَ وَعَلَى آلِ اِبْرَاهِيمَ اِنَّكَ حَمِيدٌ مَجِيدٌ',
+    transliteration:
+        "Allaahumma salli 'alaa Muhammadin wa 'alaa aali Muhammad. Kamaa sallayta 'alaa Ibraaheema wa 'alaa aali Ibraaheem. Innaka Hamiidun Majiid.",
     turkish:
         "Allah'ım! İbrahim'e ve İbrahim'in ailesine rahmet ettiğin gibi Muhammed'e ve Muhammed'in ailesine de rahmet et. Şüphesiz sen Hamid ve Mecid'sin.",
     english:
@@ -138,6 +160,8 @@ const List<Dua> kDuaList = [
     titleEn: 'Salawat (Barakah)',
     arabicText:
         'اَللّٰهُمَّ بَارِكْ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ كَمَا بَارَكْتَ عَلَى اِبْرَاهِيمَ وَعَلَى آلِ اِبْرَاهِيمَ اِنَّكَ حَمِيدٌ مَجِيدٌ',
+    transliteration:
+        "Allaahumma baarik 'alaa Muhammadin wa 'alaa aali Muhammad. Kamaa baarakta 'alaa Ibraaheema wa 'alaa aali Ibraaheem. Innaka Hamiidun Majiid.",
     turkish:
         "Allah'ım! İbrahim'e ve İbrahim'in ailesine bereket verdiğin gibi Muhammed'e ve Muhammed'in ailesine de bereket ver. Şüphesiz sen Hamid ve Mecid'sin.",
     english:
@@ -150,6 +174,8 @@ const List<Dua> kDuaList = [
     titleEn: 'Rabbana Atina',
     arabicText:
         'رَبَّنَٓا اٰتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْاٰخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ',
+    transliteration:
+        "Rabbanaa aatinaa fid-dunyaa hasanatan wa fil-aakhirati hasanatan wa qinaa 'adhaaban-naar.",
     turkish:
         "Rabbimiz! Bize dünyada iyilik ver, ahirette de iyilik ver ve bizi ateş azabından koru.",
     english:
@@ -162,6 +188,8 @@ const List<Dua> kDuaList = [
     titleEn: 'Before Meal Prayer',
     arabicText:
         'بِسْمِ اللّٰهِ وَعَلَى بَرَكَةِ اللّٰهِ۝ اَللّٰهُمَّ بَارِكْ لَنَا فِيمَا رَزَقْتَنَا وَقِنَا عَذَابَ النَّارِ',
+    transliteration:
+        "Bismillaahi wa 'alaa barakatillaah. Allaahummaa baarik lanaa fiimaa razaqtanaa wa qinaa 'adhaaban-naar.",
     turkish:
         "Allah'ın adıyla ve Allah'ın bereketine sığınarak. Allah'ım! Bize verdiğin rızıkta bereket ver ve bizi ateş azabından koru.",
     english:
@@ -174,6 +202,8 @@ const List<Dua> kDuaList = [
     titleEn: 'After Meal Prayer',
     arabicText:
         'اَلْحَمْدُ لِلّٰهِ الَّذِٓي اَطْعَمَنَا وَسَقَانَا وَجَعَلَنَا مِنَ الْمُسْلِمِينَ',
+    transliteration:
+        "Alhamdulillaahilladhii at'amanaa wa saqaanaa wa ja'alanaa minal-muslimiin.",
     turkish:
         "Bizi doyuran, içiren ve Müslümanlardan kılan Allah'a hamdolsun.",
     english:
@@ -185,6 +215,7 @@ const List<Dua> kDuaList = [
     title: 'Uyku Duası',
     titleEn: 'Before Sleep Prayer',
     arabicText: 'بِاسْمِكَ اللّٰهُمَّ اَمُوتُ وَاَحْيَا',
+    transliteration: "Bismikallaahumma amuutu wa ahyaa.",
     turkish:
         "Allah'ım, senin adınla ölür (uyur) ve dirilrim (uyanırım).",
     english:
@@ -197,6 +228,8 @@ const List<Dua> kDuaList = [
     titleEn: 'Waking Prayer',
     arabicText:
         'اَلْحَمْدُ لِلّٰهِ الَّذِٓي اَحْيَانَا بَعْدَمَٓا اَمَاتَنَا وَاِلَيْهِ النُّشُورُ',
+    transliteration:
+        "Alhamdulillaahilladhii ahyaanaa ba'damaa amaatanaa wa ilayhin-nushuur.",
     turkish:
         "Bizi öldürdükten (uyuttuktan) sonra dirilten (uyandıran) Allah'a hamdolsun. Diriliş O'nadır.",
     english:
@@ -209,6 +242,8 @@ const List<Dua> kDuaList = [
     titleEn: 'Entering the Home',
     arabicText:
         'بِسْمِ اللّٰهِ وَلَجْنَا وَبِسْمِ اللّٰهِ خَرَجْنَا وَعَلَى اللّٰهِ رَبِّنَا تَوَكَّلْنَا',
+    transliteration:
+        "Bismillaahi walajanaa wa bismillaahi kharajnaa, wa 'alallaahi Rabbinaa tawakkalnaa.",
     turkish:
         "Allah'ın adıyla girdik, Allah'ın adıyla çıkarız. Rabbimiz olan Allah'a tevekkül ettik.",
     english:
@@ -221,6 +256,8 @@ const List<Dua> kDuaList = [
     titleEn: 'Leaving the Home',
     arabicText:
         'بِسْمِ اللّٰهِ تَوَكَّلْتُ عَلَى اللّٰهِ وَلَا حَوْلَ وَلَا قُوَّةَ اِلَّا بِاللّٰهِ',
+    transliteration:
+        "Bismillaahi tawakkaltu 'alallaahi wa laa hawla wa laa quwwata illaa billaah.",
     turkish:
         "Allah'ın adıyla çıkıyorum. Allah'a tevekkül ettim. Güç ve kuvvet ancak Allah'a aittir.",
     english:
@@ -233,6 +270,8 @@ const List<Dua> kDuaList = [
     titleEn: 'Healing Prayer',
     arabicText:
         'اَللّٰهُمَّ رَبَّ النَّاسِ اَذْهِبِ الْبَاسَ اِشْفِ اَنْتَ الشَّافِٓي لَا شِفَاءَ اِلَّا شِفَاؤُكَ شِفَاءً لَا يُغَادِرُ سَقَمًا',
+    transliteration:
+        "Allaahummaa Rabban-naasi adhhib il-ba's. Ishfi Antash-shaafii, laa shifaa'a illaa shifaa'uk. Shifaa'al-laa yughaadiru saqamaa.",
     turkish:
         "Ey insanların Rabbi Allah'ım! Şu hastalığı gider, şifa ver. Şifa veren yalnız sensin. Senin şifandan başka şifa yoktur. Hiçbir hastalık bırakmayan bir şifa ver.",
     english:
@@ -245,6 +284,8 @@ const List<Dua> kDuaList = [
     titleEn: 'Prayer of Yunus (Hardship)',
     arabicText:
         'لَٓا اِلٰهَ اِلَّٓا اَنْتَ سُبْحَانَكَ اِنِّي كُنْتُ مِنَ الظَّالِمِينَ',
+    transliteration:
+        "Laa ilaaha illaa Anta subhaanaka innii kuntu minaz-zaalimiin.",
     turkish:
         "Senden başka ilah yoktur. Seni tenzih ederim. Ben gerçekten zalimlerden oldum.",
     english:
@@ -259,6 +300,8 @@ const List<Dua> kDuaList = [
     titleEn: 'Blessing Prayer',
     arabicText:
         'اَللّٰهُمَّ اِنِّٓي اَسْئَلُكَ عِلْمًا نَافِعًا وَرِزْقًا طَيِّبًا وَعَمَلًا مُتَقَبَّلًا',
+    transliteration:
+        "Allaahummaa innii as'aluka 'ilman naafi'an wa rizqan tayyiban wa 'amalan mutaqabbalaa.",
     turkish:
         "Allah'ım! Senden faydalı ilim, temiz rızık ve makbul amel istiyorum.",
     english:
@@ -270,6 +313,7 @@ const List<Dua> kDuaList = [
     title: 'Tövbe Duası',
     titleEn: 'Prayer of Repentance',
     arabicText: 'رَبِّ اِنِّي ظَلَمْتُ نَفْسِي فَاغْفِرْ لِي',
+    transliteration: "Rabbi innii zalamtu nafsii faghfir lii.",
     turkish:
         "Rabbim! Şüphesiz ben kendime zulmettim. Beni bağışla.",
     english:
@@ -282,6 +326,8 @@ const List<Dua> kDuaList = [
     titleEn: 'Prayer for Provision',
     arabicText:
         'اَللّٰهُمَّ اكْفِنِي بِحَلَالِكَ عَنْ حَرَامِكَ وَاَغْنِنِي بِفَضْلِكَ عَمَّنْ سِوَاكَ',
+    transliteration:
+        "Allaahummakfinii bihalaalika 'an haraamik, wa aghninii bifadlika 'amman siwaak.",
     turkish:
         "Allah'ım! Helalinle beni haramından koru. Lütuf ve ihsanınla beni senden başkasına muhtaç etme.",
     english:
@@ -294,6 +340,8 @@ const List<Dua> kDuaList = [
     titleEn: 'Graveyard Visitation',
     arabicText:
         'اَلسَّلَامُ عَلَيْكُمْ يَا اَهْلَ الْقُبُورِ يَغْفِرُ اللّٰهُ لَنَا وَلَكُمْ اَنْتُمْ سَلَفُنَا وَنَحْنُ بِالْاَثَرِ',
+    transliteration:
+        "As-salaamu 'alaykum yaa ahlal-qubuur. Yaghfirul-laahu lanaa wa lakum. Antum salafunaa wa nahnu bil-athar.",
     turkish:
         "Ey kabir ehli! Allah'ın selamı üzerinize olsun. Allah bizi de sizi de bağışlasın. Siz bizden önce geçtiniz, biz de arkanızdan geliyoruz.",
     english:

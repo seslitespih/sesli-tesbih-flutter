@@ -2,6 +2,7 @@ class Dua {
   final String title;
   final String titleEn;
   final String arabicText;
+  final String transliteration;
   final String turkish;
   final String english;
   final String info;
@@ -11,6 +12,7 @@ class Dua {
     required this.title,
     required this.titleEn,
     required this.arabicText,
+    required this.transliteration,
     required this.turkish,
     required this.english,
     required this.info,

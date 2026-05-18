@@ -36,11 +36,6 @@ class _CounterScreenState extends State<CounterScreen>
   // Partial result tracking (per listen session)
   int _sessionPartialCount = 0;
 
-  // Adaptive cooldown
-  int _lastCountTime = 0;
-  int _adaptiveCooldownMs = 400;
-  final List<int> _paceTracker = [];
-
   late AnimationController _pulseCtrl;
   late Animation<double> _pulseAnim;
 
@@ -178,27 +173,7 @@ class _CounterScreenState extends State<CounterScreen>
       _sessionPartialCount = rawOcc;
     }
 
-    if (delta > 0) _countFromSpeech(delta);
-  }
-
-  void _countFromSpeech(int delta) {
-    final now = DateTime.now().millisecondsSinceEpoch;
-    final elapsed = now - _lastCountTime;
-
-    if (_lastCountTime > 0 && elapsed < _adaptiveCooldownMs) return;
-
-    // Update adaptive cooldown based on pace
-    if (_lastCountTime > 0 && elapsed < 10000) {
-      _paceTracker.add(elapsed);
-      if (_paceTracker.length > 5) _paceTracker.removeAt(0);
-      if (_paceTracker.length >= 2) {
-        final avg = _paceTracker.reduce((a, b) => a + b) ~/ _paceTracker.length;
-        _adaptiveCooldownMs = (avg * 65 ~/ 100).clamp(200, 1200);
-      }
-    }
-
-    _lastCountTime = now;
-    if (mounted) _incrementCount(delta);
+    if (delta > 0 && mounted) _incrementCount(delta);
   }
 
   // Normalize text: remove diacritics, Turkic chars → ASCII, remove spaces/punctuation
@@ -301,9 +276,6 @@ class _CounterScreenState extends State<CounterScreen>
     setState(() {
       _count = 0;
       _sessionPartialCount = 0;
-      _lastCountTime = 0;
-      _adaptiveCooldownMs = 400;
-      _paceTracker.clear();
       if (_isListening) {
         _statusText = _s('Dinleniyor...', 'Listening...', 'يستمع...');
       }
