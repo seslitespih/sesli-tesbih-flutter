@@ -60,6 +60,12 @@ workflows:
               "Add :ITSAppUsesNonExemptEncryption bool false" \
               "$PLIST"
           fi
+          /usr/libexec/PlistBuddy -c \
+            "Set :CFBundleDisplayName 'Vocal Tasbeeh'" \
+            "$PLIST" 2>/dev/null || \
+          /usr/libexec/PlistBuddy -c \
+            "Add :CFBundleDisplayName string 'Vocal Tasbeeh'" \
+            "$PLIST"
 
       - name: Set bundle identifier
         script: |
