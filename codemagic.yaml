@@ -37,6 +37,54 @@ workflows:
               --project-name "$APP_PROJECT"
           fi
 
+      - name: Localize app name
+        script: |
+          # English
+          mkdir -p ios/Runner/en.lproj
+          if [ -f "ios/Runner/en.lproj/InfoPlist.strings" ]; then
+            sed -i '' 's/CFBundleDisplayName = .*/CFBundleDisplayName = "Vocal Tasbeeh";/' \
+              ios/Runner/en.lproj/InfoPlist.strings
+          else
+            printf 'CFBundleDisplayName = "Vocal Tasbeeh";\n' \
+              > ios/Runner/en.lproj/InfoPlist.strings
+          fi
+          # Turkish
+          mkdir -p ios/Runner/tr.lproj
+          printf 'CFBundleDisplayName = "Sesli Tespih";\n' \
+            > ios/Runner/tr.lproj/InfoPlist.strings
+          # Arabic
+          mkdir -p ios/Runner/ar.lproj
+          printf 'CFBundleDisplayName = "مسبحة صوتية";\n' \
+            > ios/Runner/ar.lproj/InfoPlist.strings
+          # Add TR and AR to Xcode project via xcodeproj gem
+          ruby << 'RUBY'
+          require 'xcodeproj'
+          proj = Xcodeproj::Project.open('ios/Runner.xcodeproj')
+          target = proj.targets.find { |t| t.name == 'Runner' }
+          runner_group = proj.main_group.find_subpath('Runner', false)
+          ['tr', 'ar'].each { |l| proj.root_object.known_regions |= [l] }
+          vg = runner_group.children.find { |c|
+            c.is_a?(Xcodeproj::Project::Object::PBXVariantGroup) &&
+            c.name == 'InfoPlist.strings'
+          }
+          unless vg
+            vg = proj.new(Xcodeproj::Project::Object::PBXVariantGroup)
+            vg.name = 'InfoPlist.strings'
+            runner_group.children << vg
+            target.resources_build_phase.add_file_reference(vg)
+          end
+          ['tr', 'ar'].each do |lang|
+            next if vg.children.any? { |c| c.name == lang }
+            ref = proj.new(Xcodeproj::Project::Object::PBXFileReference)
+            ref.name = lang
+            ref.path = "#{lang}.lproj/InfoPlist.strings"
+            ref.source_tree = '<group>'
+            ref.last_known_file_type = 'text.plist.strings'
+            vg.children << ref
+          end
+          proj.save
+          RUBY
+
       - name: Generate app icons
         script: flutter pub run flutter_launcher_icons
 
