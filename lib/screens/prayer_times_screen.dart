@@ -35,7 +35,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
   CalculationParameters _paramsForCountry(String? cc) {
     switch (cc?.toUpperCase()) {
       case 'TR':
-        final p = CalculationMethodParameters.muslimWorldLeague();
+        final p = CalculationMethodParameters.turkiye();
         p.madhab = Madhab.hanafi;
         return p;
       case 'PK':
@@ -46,7 +46,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
         p2.madhab = Madhab.hanafi;
         return p2;
       case 'EG':
-        return CalculationMethodParameters.muslimWorldLeague();
+        return CalculationMethodParameters.egyptian();
       case 'SA':
       case 'AE':
       case 'KW':
@@ -61,7 +61,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
         return CalculationMethodParameters.singapore();
       case 'US':
       case 'CA':
-        return CalculationMethodParameters.muslimWorldLeague();
+        return CalculationMethodParameters.northAmerica();
       default:
         return CalculationMethodParameters.muslimWorldLeague();
     }
