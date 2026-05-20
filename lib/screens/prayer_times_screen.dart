@@ -32,7 +32,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
     _loadPrayerTimes();
   }
 
-  CalculationMethodParameters _paramsForCountry(String? cc) {
+  CalculationParameters _paramsForCountry(String? cc) {
     switch (cc?.toUpperCase()) {
       case 'TR':
         final p = CalculationMethodParameters.muslimWorldLeague();
