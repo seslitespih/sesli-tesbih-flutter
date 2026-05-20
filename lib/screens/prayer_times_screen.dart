@@ -46,7 +46,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
         p2.madhab = Madhab.hanafi;
         return p2;
       case 'EG':
-        return CalculationMethodParameters.egyptianGeneralAuthorityOfSurvey();
+        return CalculationMethodParameters.muslimWorldLeague();
       case 'SA':
       case 'AE':
       case 'KW':
@@ -61,7 +61,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
         return CalculationMethodParameters.singapore();
       case 'US':
       case 'CA':
-        return CalculationMethodParameters.islamicSocietyOfNorthAmerica();
+        return CalculationMethodParameters.muslimWorldLeague();
       default:
         return CalculationMethodParameters.muslimWorldLeague();
     }
