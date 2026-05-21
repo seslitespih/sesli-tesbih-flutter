@@ -13,7 +13,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.sesliTesbih.app"
+    namespace = "com.sesliTesbih.sesli_tesbih"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
