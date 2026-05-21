@@ -198,12 +198,9 @@ class _CounterScreenState extends State<CounterScreen>
 
   int _countOccurrences(String rawText) {
     final text = _normalize(rawText);
-    final sorted = _dhikr.keywords
-        .where((k) => k.isNotEmpty)
-        .toList()
-      ..sort((a, b) => b.length.compareTo(a.length));
+    int maxCount = 0;
 
-    for (final keyword in sorted) {
+    for (final keyword in _dhikr.keywords) {
       final kw = _normalize(keyword);
       if (kw.isEmpty) continue;
       var n = 0;
@@ -214,9 +211,10 @@ class _CounterScreenState extends State<CounterScreen>
         n++;
         pos = found + kw.length;
       }
-      if (n > 0) return n;
+      if (n > maxCount) maxCount = n;
     }
-    return 0;
+
+    return maxCount;
   }
 
   void _incrementCount(int by) {

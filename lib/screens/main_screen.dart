@@ -121,14 +121,6 @@ class _MainScreenState extends State<MainScreen> {
           const SizedBox(width: 8),
           Expanded(
             child: _NavTab(
-              label: _lang == 'en' ? 'Prayer Times' : (_lang == 'ar' ? 'أوقات الصلاة' : 'Namaz'),
-              icon: Icons.access_time,
-              onTap: () => Navigator.pushNamed(context, '/prayer'),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: _NavTab(
               label: _lang == 'en' ? 'Qibla' : (_lang == 'ar' ? 'القبلة' : 'Kıble'),
               icon: Icons.explore_outlined,
               onTap: () => Navigator.pushNamed(context, '/qibla'),

@@ -5,7 +5,6 @@ import 'screens/splash_screen.dart';
 import 'screens/main_screen.dart';
 import 'screens/counter_screen.dart';
 import 'screens/dua_screen.dart';
-import 'screens/prayer_times_screen.dart';
 import 'screens/qibla_screen.dart';
 import 'screens/privacy_screen.dart';
 
@@ -33,7 +32,6 @@ class SesliTesbihApp extends StatelessWidget {
             '/splash': (_) => const SplashScreen(),
             '/main': (_) => const MainScreen(),
             '/dua': (_) => const DuaScreen(),
-            '/prayer': (_) => const PrayerTimesScreen(),
             '/qibla': (_) => const QiblaScreen(),
             '/privacy': (_) => const PrivacyScreen(),
           },

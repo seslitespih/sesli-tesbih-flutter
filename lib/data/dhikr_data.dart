@@ -11,7 +11,7 @@ const List<Dhikr> kDhikrList = [
     keywords: [
       'sübhanallah', 'subhanallah', 'süphanallah', 'suphanallah',
       'sübhan', 'subhan', 'süphan', 'suphan',
-      'nallah', 'bhan', 'ubhan',
+      'nallah', 'bhan', 'ubhan', 'sub',
     ],
   ),
   Dhikr(
@@ -24,7 +24,7 @@ const List<Dhikr> kDhikrList = [
     keywords: [
       'elhamdülillah', 'alhamdulillah', 'elhamdillah',
       'elhamdu', 'elhamd', 'alhamdu',
-      'lillah', 'hamdu', 'hamdü',
+      'lillah', 'hamdu', 'hamdü', 'hamd',
     ],
   ),
   Dhikr(
@@ -37,7 +37,7 @@ const List<Dhikr> kDhikrList = [
     keywords: [
       'allahu ekber', 'allahu akbar', 'allahüekber',
       'ekber', 'akbar', 'akber',
-      'llahu', 'kber',
+      'llahu', 'kber', 'akb',
     ],
   ),
   Dhikr(
