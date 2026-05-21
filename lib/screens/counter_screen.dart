@@ -146,10 +146,7 @@ class _CounterScreenState extends State<CounterScreen>
 
     await _speech.listen(
       onResult: _onResult,
-      partialResults: true,
       localeId: localeId.isNotEmpty ? localeId : null,
-      cancelOnError: false,
-      listenMode: ListenMode.dictation,
       onSoundLevelChange: (level) {
         if (mounted) {
           setState(() {
@@ -157,6 +154,11 @@ class _CounterScreenState extends State<CounterScreen>
           });
         }
       },
+      listenOptions: SpeechListenOptions(
+        partialResults: true,
+        cancelOnError: false,
+        listenMode: ListenMode.dictation,
+      ),
     );
   }
 
