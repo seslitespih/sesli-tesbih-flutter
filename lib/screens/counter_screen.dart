@@ -20,8 +20,6 @@ class CounterScreen extends StatefulWidget {
 
 class _CounterScreenState extends State<CounterScreen>
     with SingleTickerProviderStateMixin {
-  static const _prefsName = 'sesli_tesbih_prefs';
-
   late Dhikr _dhikr;
   bool _dhikrLoaded = false;
 
@@ -146,7 +144,6 @@ class _CounterScreenState extends State<CounterScreen>
 
     await _speech.listen(
       onResult: _onResult,
-      localeId: localeId.isNotEmpty ? localeId : null,
       onSoundLevelChange: (level) {
         if (mounted) {
           setState(() {
@@ -158,6 +155,7 @@ class _CounterScreenState extends State<CounterScreen>
         partialResults: true,
         cancelOnError: false,
         listenMode: ListenMode.dictation,
+        localeId: localeId.isNotEmpty ? localeId : '',
       ),
     );
   }
@@ -428,7 +426,7 @@ class _CounterScreenState extends State<CounterScreen>
                     AnimatedOpacity(
                       duration: const Duration(milliseconds: 200),
                       opacity: _isListening ? _micLevel.clamp(0.3, 1.0) : 0.0,
-                      child: Icon(
+                      child: const Icon(
                         Icons.mic,
                         size: 48,
                         color: AppColors.greenAccent,
@@ -572,7 +570,7 @@ class _ActionButton extends StatelessWidget {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: color.withOpacity(0.4),
+                  color: color.withValues(alpha: 0.4),
                   blurRadius: 8,
                   offset: const Offset(0, 3),
                 )

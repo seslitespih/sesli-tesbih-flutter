@@ -57,7 +57,6 @@ class SesliTesbihApp extends StatelessWidget {
         primary: const Color(0xFF2E7D32),
         secondary: const Color(0xFF66BB6A),
         surface: Colors.white,
-        background: const Color(0xFFF1F8E9),
       ),
       scaffoldBackgroundColor: const Color(0xFFF1F8E9),
       appBarTheme: const AppBarTheme(

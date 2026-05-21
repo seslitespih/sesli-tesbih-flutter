@@ -70,7 +70,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
     const meccaLng = 39.8262;
 
     final lat1 = userLat * math.pi / 180;
-    final lat2 = meccaLat * math.pi / 180;
+    const lat2 = meccaLat * math.pi / 180;
     final dLng = (meccaLng - userLng) * math.pi / 180;
 
     final y = math.sin(dLng) * math.cos(lat2);
@@ -210,7 +210,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
                     color: Colors.white,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withValues(alpha: 0.1),
                         blurRadius: 12,
                       )
                     ],
