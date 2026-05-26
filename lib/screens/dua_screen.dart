@@ -19,13 +19,13 @@ class DuaScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            _AppBar(title: title),
+            _buildAppBar(context, title),
             Expanded(
               child: ListView.builder(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(14),
                 itemCount: kDuaList.length,
                 itemBuilder: (context, index) =>
-                    _DuaCard(dua: kDuaList[index], lang: lang),
+                    _DuaCard(dua: kDuaList[index], lang: lang, index: index),
               ),
             ),
           ],
@@ -33,17 +33,17 @@ class DuaScreen extends StatelessWidget {
       ),
     );
   }
-}
 
-class _AppBar extends StatelessWidget {
-  final String title;
-  const _AppBar({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildAppBar(BuildContext context, String title) {
     return Container(
-      color: AppColors.greenDark,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF1A5C1E), Color(0xFF2E7D32), Color(0xFF43A047)],
+        ),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       child: Row(
         children: [
           IconButton(
@@ -68,17 +68,61 @@ class _AppBar extends StatelessWidget {
   }
 }
 
+// ─── Category accent colors ───────────────────────────────────────────────────
+
+const _kDuaAccents = [
+  Color(0xFF2E7D32),
+  Color(0xFF00838F),
+  Color(0xFF6A1B9A),
+  Color(0xFF1565C0),
+  Color(0xFF4E342E),
+];
+
 class _DuaCard extends StatefulWidget {
   final Dua dua;
   final String lang;
-  const _DuaCard({required this.dua, required this.lang});
+  final int index;
+  const _DuaCard({required this.dua, required this.lang, required this.index});
 
   @override
   State<_DuaCard> createState() => _DuaCardState();
 }
 
-class _DuaCardState extends State<_DuaCard> {
+class _DuaCardState extends State<_DuaCard>
+    with SingleTickerProviderStateMixin {
   bool _expanded = false;
+  late AnimationController _expandCtrl;
+  late Animation<double> _expandAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _expandCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 280),
+    );
+    _expandAnim = CurvedAnimation(
+      parent: _expandCtrl,
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _expandCtrl.dispose();
+    super.dispose();
+  }
+
+  void _toggle() {
+    setState(() => _expanded = !_expanded);
+    if (_expanded) {
+      _expandCtrl.forward();
+    } else {
+      _expandCtrl.reverse();
+    }
+  }
+
+  Color get _accent => _kDuaAccents[widget.index % _kDuaAccents.length];
 
   @override
   Widget build(BuildContext context) {
@@ -86,109 +130,183 @@ class _DuaCardState extends State<_DuaCard> {
     final translationText = widget.dua.localizedText(widget.lang);
     final infoText = widget.dua.localizedInfo(widget.lang);
 
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 10),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () => setState(() => _expanded = !_expanded),
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: AppColors.greenAccent,
-                      shape: BoxShape.circle,
-                    ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: _accent.withValues(alpha: 0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: Column(
+          children: [
+            // Header row
+            InkWell(
+              onTap: _toggle,
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    left: BorderSide(color: _accent, width: 4),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                ),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 14, vertical: 14),
+                child: Row(
+                  children: [
+                    // Number badge
+                    Container(
+                      width: 28,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        color: _accent.withValues(alpha: 0.12),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Text(
+                          '${widget.index + 1}',
+                          style: TextStyle(
+                            color: _accent,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                  Icon(
-                    _expanded ? Icons.expand_less : Icons.expand_more,
-                    color: AppColors.greenMid,
-                  ),
-                ],
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ),
+                    AnimatedRotation(
+                      turns: _expanded ? 0.5 : 0,
+                      duration: const Duration(milliseconds: 280),
+                      child: Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        color: _accent,
+                        size: 24,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              if (_expanded) ...[
-                const SizedBox(height: 12),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.greenLight,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    widget.dua.arabicText,
-                    textAlign: TextAlign.right,
-                    textDirection: TextDirection.rtl,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: AppColors.greenDark,
-                      height: 1.9,
-                    ),
+            ),
+            // Expandable content
+            SizeTransition(
+              sizeFactor: _expandAnim,
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    left: BorderSide(color: _accent, width: 4),
+                    top: BorderSide(
+                        color: _accent.withValues(alpha: 0.15), width: 1),
                   ),
                 ),
-                if (widget.dua.transliteration.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    widget.dua.transliteration,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: AppColors.textSecondary,
-                      fontStyle: FontStyle.italic,
-                      height: 1.6,
+                padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Arabic text
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            _accent.withValues(alpha: 0.06),
+                            _accent.withValues(alpha: 0.02),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: _accent.withValues(alpha: 0.2),
+                        ),
+                      ),
+                      child: Text(
+                        widget.dua.arabicText,
+                        textAlign: TextAlign.right,
+                        textDirection: TextDirection.rtl,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: _accent,
+                          height: 2.0,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ),
-                  ),
-                ],
-                if (translationText.isNotEmpty) ...[
-                  const SizedBox(height: 10),
-                  Text(
-                    translationText,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: AppColors.textPrimary,
-                      height: 1.6,
+                    // Transliteration
+                    if (widget.dua.transliteration.isNotEmpty) ...[
+                      const SizedBox(height: 10),
+                      Text(
+                        widget.dua.transliteration,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: AppColors.textSecondary,
+                          fontStyle: FontStyle.italic,
+                          height: 1.7,
+                        ),
+                      ),
+                    ],
+                    // Translation
+                    if (translationText.isNotEmpty) ...[
+                      const SizedBox(height: 10),
+                      Text(
+                        translationText,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: AppColors.textPrimary,
+                          height: 1.65,
+                        ),
+                      ),
+                    ],
+                    // Info box
+                    const SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFF8E1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.amber.shade200),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.info_outline,
+                              size: 14, color: Colors.orange.shade700),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              infoText,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.orange.shade800,
+                                fontStyle: FontStyle.italic,
+                                height: 1.4,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-                const SizedBox(height: 8),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFF8E1),
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: Colors.amber.shade200),
-                  ),
-                  child: Text(
-                    infoText,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.orange.shade800,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
+                  ],
                 ),
-              ],
-            ],
-          ),
+              ),
+            ),
+          ],
         ),
       ),
     );

@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:speech_to_text/speech_to_text.dart';
@@ -19,7 +20,7 @@ class CounterScreen extends StatefulWidget {
 }
 
 class _CounterScreenState extends State<CounterScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late Dhikr _dhikr;
   bool _dhikrLoaded = false;
 
@@ -30,25 +31,33 @@ class _CounterScreenState extends State<CounterScreen>
 
   int _count = 0;
   int _targetCount = 33;
-
-  // Partial result tracking (per listen session)
   int _sessionPartialCount = 0;
 
   late AnimationController _pulseCtrl;
   late Animation<double> _pulseAnim;
 
+  late AnimationController _ringCtrl;
+
   String _statusText = '';
+
+  // ── init ──────────────────────────────────────────────────────────────────
 
   @override
   void initState() {
     super.initState();
     _pulseCtrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 280),
     );
     _pulseAnim = Tween<double>(begin: 1.0, end: 1.18).animate(
       CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeOut),
     );
+
+    _ringCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1600),
+    )..repeat();
+
     _loadDhikrAndPrefs();
   }
 
@@ -62,7 +71,8 @@ class _CounterScreenState extends State<CounterScreen>
 
     final prefs = await SharedPreferences.getInstance();
     final savedCount = prefs.getInt('count_${dhikr.id}') ?? 0;
-    final savedTarget = prefs.getInt('target_${dhikr.id}') ?? dhikr.targetCount;
+    final savedTarget =
+        prefs.getInt('target_${dhikr.id}') ?? dhikr.targetCount;
 
     if (mounted) {
       setState(() {
@@ -94,6 +104,8 @@ class _CounterScreenState extends State<CounterScreen>
     if (mounted) _startListening();
   }
 
+  // ── STT callbacks ─────────────────────────────────────────────────────────
+
   void _onStatus(String status) {
     if (!mounted) return;
     if (status == SpeechToText.listeningStatus) {
@@ -103,10 +115,8 @@ class _CounterScreenState extends State<CounterScreen>
       });
     } else if (status == SpeechToText.notListeningStatus ||
         status == SpeechToText.doneStatus) {
-      // Reset partial counter for new session
       _sessionPartialCount = 0;
       if (_isListening) {
-        // Restart immediately
         Future.delayed(const Duration(milliseconds: 80), () {
           if (_isListening && mounted) _startListening();
         });
@@ -129,9 +139,10 @@ class _CounterScreenState extends State<CounterScreen>
     if (!_speechAvailable || !mounted) return;
     _sessionPartialCount = 0;
 
-    // Pick locale matching the selected language, fall back to device default
     final selectedLang = LocaleService.instance.language;
-    final preferredPrefix = selectedLang == 'ar' ? 'ar' : (selectedLang == 'en' ? 'en' : 'tr');
+    final preferredPrefix = selectedLang == 'ar'
+        ? 'ar'
+        : (selectedLang == 'en' ? 'en' : 'tr');
     String localeId = '';
     try {
       final locales = await _speech.locales();
@@ -176,7 +187,8 @@ class _CounterScreenState extends State<CounterScreen>
     if (delta > 0 && mounted) _incrementCount(delta);
   }
 
-  // Normalize text: remove diacritics, Turkic chars → ASCII, remove spaces/punctuation
+  // ── Counting logic ────────────────────────────────────────────────────────
+
   String _normalize(String s) {
     return s
         .toLowerCase()
@@ -199,7 +211,6 @@ class _CounterScreenState extends State<CounterScreen>
   int _countOccurrences(String rawText) {
     final text = _normalize(rawText);
     int maxCount = 0;
-
     for (final keyword in _dhikr.keywords) {
       final kw = _normalize(keyword);
       if (kw.isEmpty) continue;
@@ -213,7 +224,6 @@ class _CounterScreenState extends State<CounterScreen>
       }
       if (n > maxCount) maxCount = n;
     }
-
     return maxCount;
   }
 
@@ -222,16 +232,16 @@ class _CounterScreenState extends State<CounterScreen>
       _count += by;
       if (_count % _targetCount == 0 && _count > 0) {
         _statusText = _s(
-          '${_count ~/ _targetCount}. tur tamamlandı!',
-          'Round ${_count ~/ _targetCount} completed!',
-          'اكتملت الجولة ${_count ~/ _targetCount}!',
+          '${_count ~/ _targetCount}. tur tamamlandı! 🎉',
+          'Round ${_count ~/ _targetCount} completed! 🎉',
+          'اكتملت الجولة ${_count ~/ _targetCount}! 🎉',
         );
       } else if (_isListening) {
         _statusText = _s('Dinleniyor...', 'Listening...', 'يستمع...');
       }
     });
     _saveCount();
-    _triggerFeedback();
+    HapticFeedback.lightImpact();
     _pulseCtrl.forward().then((_) => _pulseCtrl.reverse());
   }
 
@@ -243,10 +253,6 @@ class _CounterScreenState extends State<CounterScreen>
   Future<void> _saveTarget() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('target_${_dhikr.id}', _targetCount);
-  }
-
-  void _triggerFeedback() {
-    HapticFeedback.lightImpact();
   }
 
   void _stopListening() {
@@ -289,12 +295,16 @@ class _CounterScreenState extends State<CounterScreen>
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(_s('Hedef Değiştir', 'Change Target', 'تغيير الهدف')),
         content: TextField(
           controller: ctrl,
           keyboardType: TextInputType.number,
           autofocus: true,
-          decoration: const InputDecoration(border: OutlineInputBorder()),
+          decoration: InputDecoration(
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+            prefixIcon: const Icon(Icons.flag_outlined),
+          ),
         ),
         actions: [
           TextButton(
@@ -315,14 +325,19 @@ class _CounterScreenState extends State<CounterScreen>
     );
   }
 
+  // ── Computed values ───────────────────────────────────────────────────────
+
   int get _cycleCount => _count % _targetCount;
   double get _progress =>
       (_cycleCount == 0 && _count > 0) ? 1.0 : _cycleCount / _targetCount;
   int get _remaining =>
       (_cycleCount == 0 && _count > 0) ? 0 : _targetCount - _cycleCount;
+  int get _roundCount => _count ~/ _targetCount;
 
   String _s(String tr, String en, String ar) =>
       LocaleService.instance.tr(tr, en, ar);
+
+  // ── Build ─────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -342,157 +357,61 @@ class _CounterScreenState extends State<CounterScreen>
             _buildTopBar(lang),
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 child: Column(
                   children: [
-                    if (_dhikr.arabicText.isNotEmpty) ...[
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: AppColors.greenLight,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          _dhikr.arabicText,
-                          textAlign: TextAlign.center,
-                          textDirection: TextDirection.rtl,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            color: AppColors.greenDark,
-                            height: 1.8,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                    ],
+                    if (_dhikr.arabicText.isNotEmpty) _buildArabicCard(),
+                    const SizedBox(height: 10),
                     Text(
                       _dhikr.localizedMeaning(lang),
                       textAlign: TextAlign.center,
                       style: const TextStyle(
-                        fontSize: 13,
+                        fontSize: 12,
                         color: AppColors.textSecondary,
                         fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    // Progress bar
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(6),
-                      child: LinearProgressIndicator(
-                        value: _progress,
-                        minHeight: 10,
-                        backgroundColor: AppColors.greenLight,
-                        color: AppColors.greenAccent,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      _remaining == 0 && _count > 0
-                          ? _s('Hedefe ulaşıldı!', 'Target reached!', 'تم الوصول للهدف!')
-                          : _s('Kalan: $_remaining', 'Remaining: $_remaining', 'المتبقي: $_remaining'),
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    // Count display with pulse animation
-                    ScaleTransition(
-                      scale: _pulseAnim,
-                      child: Column(
-                        children: [
-                          Text(
-                            '$_count',
-                            style: const TextStyle(
-                              fontSize: 88,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.greenDark,
-                              height: 1,
-                            ),
-                          ),
-                          Text(
-                            '/ $_targetCount',
-                            style: const TextStyle(
-                              fontSize: 22,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    // Mic icon
-                    AnimatedOpacity(
-                      duration: const Duration(milliseconds: 200),
-                      opacity: _isListening ? _micLevel.clamp(0.3, 1.0) : 0.0,
-                      child: const Icon(
-                        Icons.mic,
-                        size: 48,
-                        color: AppColors.greenAccent,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      _statusText,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    // Tap button
-                    GestureDetector(
-                      onTap: () => _incrementCount(1),
-                      child: Container(
-                        width: 100,
-                        height: 100,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: AppColors.greenLight,
-                          border: Border.all(
-                            color: AppColors.greenAccent,
-                            width: 3,
-                          ),
-                        ),
-                        child: Center(
-                          child: Text(
-                            _s('Dokun', 'Tap', 'لمس'),
-                            style: const TextStyle(
-                              color: AppColors.greenDark,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
+                        height: 1.5,
                       ),
                     ),
                     const SizedBox(height: 28),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _ActionButton(
-                          label: _isListening
-                              ? _s('Duraklat', 'Pause', 'إيقاف')
-                              : _s('Başlat', 'Start', 'ابدأ'),
-                          icon: _isListening ? Icons.pause : Icons.play_arrow,
-                          color: AppColors.greenMid,
-                          onTap: _toggleListening,
-                        ),
-                        _ActionButton(
-                          label: _s('Sıfırla', 'Reset', 'إعادة'),
-                          icon: Icons.refresh,
-                          color: Colors.orange,
-                          onTap: _reset,
-                        ),
-                        _ActionButton(
-                          label: _s('Hedef', 'Target', 'الهدف'),
-                          icon: Icons.flag_outlined,
-                          color: AppColors.greenDark,
-                          onTap: _showTargetDialog,
-                        ),
-                      ],
+                    _buildCircularCounter(),
+                    const SizedBox(height: 12),
+                    Text(
+                      _remaining == 0 && _count > 0
+                          ? _s(
+                              '✓ Hedefe ulaşıldı!',
+                              '✓ Target reached!',
+                              '✓ تم الوصول للهدف!',
+                            )
+                          : _s(
+                              'Kalan: $_remaining',
+                              'Remaining: $_remaining',
+                              'المتبقي: $_remaining',
+                            ),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: (_remaining == 0 && _count > 0)
+                            ? AppColors.greenAccent
+                            : AppColors.textSecondary,
+                        fontWeight: (_remaining == 0 && _count > 0)
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
                     ),
+                    const SizedBox(height: 28),
+                    _buildMicSection(),
+                    const SizedBox(height: 6),
+                    Text(
+                      _statusText,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    _buildTapButton(),
+                    const SizedBox(height: 28),
+                    _buildActionButtons(),
                     const SizedBox(height: 20),
                   ],
                 ),
@@ -506,8 +425,14 @@ class _CounterScreenState extends State<CounterScreen>
 
   Widget _buildTopBar(String lang) {
     return Container(
-      color: AppColors.greenDark,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF1A5C1E), Color(0xFF2E7D32), Color(0xFF43A047)],
+        ),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       child: Row(
         children: [
           IconButton(
@@ -534,25 +459,378 @@ class _CounterScreenState extends State<CounterScreen>
     );
   }
 
+  Widget _buildArabicCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFE8F5E9), Color(0xFFC8E6C9)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.greenAccent.withValues(alpha: 0.4)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.greenMid.withValues(alpha: 0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Text(
+        _dhikr.arabicText,
+        textAlign: TextAlign.center,
+        textDirection: TextDirection.rtl,
+        style: const TextStyle(
+          fontSize: 18,
+          color: AppColors.greenDark,
+          height: 1.9,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCircularCounter() {
+    final isComplete = _remaining == 0 && _count > 0;
+    final arcColor = isComplete
+        ? const Color(0xFFFFCA28)
+        : AppColors.greenAccent;
+
+    return SizedBox(
+      width: 230,
+      height: 230,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Outer glow ring
+          Container(
+            width: 230,
+            height: 230,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.greenMid.withValues(alpha: 0.15),
+                  blurRadius: 24,
+                  spreadRadius: 4,
+                ),
+              ],
+            ),
+          ),
+          // White background circle
+          Container(
+            width: 218,
+            height: 218,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white,
+            ),
+          ),
+          // Arc progress
+          CustomPaint(
+            size: const Size(218, 218),
+            painter: _ArcPainter(
+              progress: _progress,
+              bgColor: AppColors.greenLight,
+              fgColor: arcColor,
+              strokeWidth: 15,
+            ),
+          ),
+          // Count + target + round badge
+          ScaleTransition(
+            scale: _pulseAnim,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '$_count',
+                  style: TextStyle(
+                    fontSize: 78,
+                    fontWeight: FontWeight.bold,
+                    color: isComplete
+                        ? const Color(0xFFFFCA28)
+                        : AppColors.greenDark,
+                    height: 1.0,
+                  ),
+                ),
+                Text(
+                  '/ $_targetCount',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                if (_roundCount > 0) ...[
+                  const SizedBox(height: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 4),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF1B5E20), Color(0xFF388E3C)],
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.greenDark.withValues(alpha: 0.3),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Text(
+                      '$_roundCount. ${_s("tur", "round", "جولة")}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMicSection() {
+    return SizedBox(
+      height: 80,
+      child: AnimatedBuilder(
+        animation: _ringCtrl,
+        builder: (context, _) {
+          final t = _ringCtrl.value;
+          if (_isListening) {
+            return Stack(
+              alignment: Alignment.center,
+              children: [
+                // Outer ring
+                Opacity(
+                  opacity: ((1 - t) * 0.35 * _micLevel).clamp(0.0, 1.0),
+                  child: Container(
+                    width: 68 + _micLevel * 20,
+                    height: 68 + _micLevel * 20,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: AppColors.greenAccent,
+                        width: 2,
+                      ),
+                    ),
+                  ),
+                ),
+                // Middle ring
+                Opacity(
+                  opacity:
+                      ((1 - ((t + 0.4) % 1.0)) * 0.5 * _micLevel)
+                          .clamp(0.0, 1.0),
+                  child: Container(
+                    width: 52 + _micLevel * 14,
+                    height: 52 + _micLevel * 14,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: AppColors.greenAccent,
+                        width: 1.5,
+                      ),
+                    ),
+                  ),
+                ),
+                // Mic icon core
+                Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [Color(0xFF4CAF50), Color(0xFF2E7D32)],
+                    ),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.greenAccent.withValues(alpha: 0.5),
+                        blurRadius: 14,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                  ),
+                  child: const Icon(Icons.mic, color: Colors.white, size: 26),
+                ),
+              ],
+            );
+          } else {
+            return Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.mic_off,
+                  color: AppColors.textSecondary, size: 26),
+            );
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _buildTapButton() {
+    return GestureDetector(
+      onTap: () => _incrementCount(1),
+      child: Container(
+        width: 110,
+        height: 110,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFFE8F5E9), Color(0xFFC8E6C9)],
+          ),
+          border: Border.all(color: AppColors.greenAccent, width: 2.5),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.greenMid.withValues(alpha: 0.25),
+              blurRadius: 14,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.touch_app_outlined,
+                color: AppColors.greenDark, size: 28),
+            const SizedBox(height: 2),
+            Text(
+              _s('Dokun', 'Tap', 'لمس'),
+              style: const TextStyle(
+                color: AppColors.greenDark,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButtons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        _ActionButton(
+          label: _isListening
+              ? _s('Duraklat', 'Pause', 'إيقاف')
+              : _s('Başlat', 'Start', 'ابدأ'),
+          icon: _isListening ? Icons.pause_circle : Icons.play_circle,
+          gradient: const LinearGradient(
+            colors: [Color(0xFF1B5E20), Color(0xFF388E3C)],
+          ),
+          onTap: _toggleListening,
+        ),
+        _ActionButton(
+          label: _s('Sıfırla', 'Reset', 'إعادة'),
+          icon: Icons.refresh_rounded,
+          gradient: const LinearGradient(
+            colors: [Color(0xFFE65100), Color(0xFFF57C00)],
+          ),
+          onTap: _reset,
+        ),
+        _ActionButton(
+          label: _s('Hedef', 'Target', 'الهدف'),
+          icon: Icons.flag_rounded,
+          gradient: const LinearGradient(
+            colors: [Color(0xFF1565C0), Color(0xFF1976D2)],
+          ),
+          onTap: _showTargetDialog,
+        ),
+      ],
+    );
+  }
+
   @override
   void dispose() {
     _isListening = false;
     _speech.stop();
     _pulseCtrl.dispose();
+    _ringCtrl.dispose();
     super.dispose();
   }
 }
 
+// ─── Arc Painter ─────────────────────────────────────────────────────────────
+
+class _ArcPainter extends CustomPainter {
+  final double progress;
+  final Color bgColor;
+  final Color fgColor;
+  final double strokeWidth;
+
+  const _ArcPainter({
+    required this.progress,
+    required this.bgColor,
+    required this.fgColor,
+    required this.strokeWidth,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (size.width - strokeWidth) / 2;
+
+    // Background ring
+    canvas.drawCircle(
+      center,
+      radius,
+      Paint()
+        ..color = bgColor
+        ..strokeWidth = strokeWidth
+        ..style = PaintingStyle.stroke,
+    );
+
+    // Progress arc
+    if (progress > 0) {
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius),
+        -math.pi / 2,
+        2 * math.pi * progress,
+        false,
+        Paint()
+          ..color = fgColor
+          ..strokeWidth = strokeWidth
+          ..style = PaintingStyle.stroke
+          ..strokeCap = StrokeCap.round,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_ArcPainter old) =>
+      progress != old.progress || fgColor != old.fgColor;
+}
+
+// ─── Action Button ────────────────────────────────────────────────────────────
+
 class _ActionButton extends StatelessWidget {
   final String label;
   final IconData icon;
-  final Color color;
+  final Gradient gradient;
   final VoidCallback onTap;
 
   const _ActionButton({
     required this.label,
     required this.icon,
-    required this.color,
+    required this.gradient,
     required this.onTap,
   });
 
@@ -563,27 +841,28 @@ class _ActionButton extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            width: 56,
-            height: 56,
+            width: 58,
+            height: 58,
             decoration: BoxDecoration(
-              color: color,
+              gradient: gradient,
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: color.withValues(alpha: 0.4),
+                  color: Colors.black.withValues(alpha: 0.18),
                   blurRadius: 8,
                   offset: const Offset(0, 3),
-                )
+                ),
               ],
             ),
-            child: Icon(icon, color: Colors.white, size: 26),
+            child: Icon(icon, color: Colors.white, size: 28),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           Text(
             label,
             style: const TextStyle(
               fontSize: 12,
               color: AppColors.textSecondary,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
