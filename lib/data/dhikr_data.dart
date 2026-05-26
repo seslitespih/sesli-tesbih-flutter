@@ -276,6 +276,21 @@ const List<Dhikr> kDhikrList = [
     ],
   ),
   Dhikr(
+    id: 22,
+    nameTr: 'Kulhuvallah', nameEn: 'Qul Huwallah', nameAr: 'قل هو الله أحد',
+    arabicText: 'قُلْ هُوَ اللَّهُ أَحَدٌ',
+    meaningTr: 'İhlas Suresi — Allah birdir, her şeyden müstağnidir',
+    meaningEn: 'Al-Ikhlas — Say: He is Allah, the One',
+    targetCount: 1000,
+    keywords: [
+      'kulhuvallahu ahad', 'kulhuvallah', 'kulhuvallahu',
+      'külhüvallahu', 'külhüvallah', 'kulhüvallah',
+      'kulhu allahu', 'kulhu allah',
+      'külhü', 'kulhü', 'kulhu',
+      'kulh',
+    ],
+  ),
+  Dhikr(
     id: 21,
     nameTr: 'Bismillahillezi', nameEn: 'Bismillahillezi',
     nameAr: 'بسم الله الذي لا يضر',
