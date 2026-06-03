@@ -22,7 +22,7 @@ on:
 env:
   BUNDLE_ID:  com.sesliTesbih.app
   TEAM_ID:    HJ55A5P4J8
-  KEY_ID:     A89KB92H94
+  KEY_ID:     ZN79BQ3PP4
   ISSUER_ID:  c62db938-88be-40a4-94d5-0542ba1512ff
   APP_ORG:    com.sesliTesbih
   APP_PROJ:   sesli_tesbih
