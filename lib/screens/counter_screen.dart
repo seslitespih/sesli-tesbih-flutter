@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,6 +12,24 @@ import '../data/dhikr_data.dart';
 import '../services/custom_dhikr_manager.dart';
 import '../services/locale_service.dart';
 
+// ═══════════════════════════════════════════════════════════════════════════
+//  DUAL-ENGINE DHIKR COUNTER
+//
+//  Engine A — STT (speech-to-text keyword matching)
+//    • Accurate when it works; can miss words during fast speech
+//    • Runs as a continuous session (5-min listenFor, 8-s pauseFor)
+//
+//  Engine B — Audio-onset detector (mic level waveform)
+//    • Counts every "speech burst" using a local-floor onset algorithm
+//    • Does NOT depend on word recognition → works for any speed
+//    • Gate: only activates after Engine A confirms the correct dhikr
+//
+//  Reconciler (every 1.5 s)
+//    • Compares how many counts each engine added in the window
+//    • Credits MAX(sttWindow, audioWindow) to the total
+//    • Engine B can add at most 2 extra per window (noise cap)
+// ═══════════════════════════════════════════════════════════════════════════
+
 class CounterScreen extends StatefulWidget {
   final int dhikrId;
   const CounterScreen({super.key, required this.dhikrId});
@@ -21,42 +40,74 @@ class CounterScreen extends StatefulWidget {
 
 class _CounterScreenState extends State<CounterScreen>
     with TickerProviderStateMixin {
+  // ── Dhikr data ─────────────────────────────────────────────────────────
   late Dhikr _dhikr;
   bool _dhikrLoaded = false;
 
+  // ── UI state ────────────────────────────────────────────────────────────
+  int _count = 0;
+  int _targetCount = 33;
+  String _statusText = '';
+  String _lastRecognizedText = '';  // shows what STT heard (debug / UX)
+
+  // ── Animation controllers ────────────────────────────────────────────────
+  late AnimationController _pulseCtrl;
+  late Animation<double> _pulseAnim;
+  late AnimationController _ringCtrl;
+
+  // ───────────────────────────────────────────────────────────────────────
+  //  ENGINE A — STT
+  // ───────────────────────────────────────────────────────────────────────
   final SpeechToText _speech = SpeechToText();
   bool _speechAvailable = false;
   bool _isListening = false;
   double _micLevel = 0.5;
+  int _sessionPartialCount = 0;   // tracks running STT count within session
 
-  int _count = 0;
-  int _targetCount = 33;
-  int _sessionPartialCount = 0;
+  // ───────────────────────────────────────────────────────────────────────
+  //  ENGINE B — Audio-onset detector
+  // ───────────────────────────────────────────────────────────────────────
+  // Circular level buffer used to compute a local noise floor.
+  // onSoundLevelChange fires ≈ every 100 ms → 20 frames ≈ 2 s of history.
+  final List<double> _lvlBuf = List.filled(20, 0.0);
+  int _lvlBufIdx = 0;
 
-  // ── Audio-onset backup counter ─────────────────────────────────────────────
-  // Counts speech bursts via mic level. When STT misses an utterance
-  // completely, the audio counter adds 1 after a short STT-processing delay.
-  bool _audioInSpeech = false;
-  int _audioSpeechFrames = 0;
-  int _audioSilenceFrames = 0;
-  int _countAtSpeechStart = 0;
+  // Onset state machine
+  bool _audioAbove = false;      // currently inside a speech burst
+  int _framesAboveNow = 0;       // consecutive frames above threshold
+  int _framesSinceOnset = 0;     // frames elapsed since last confirmed onset
 
-  static const double _kAudioOnset = 0.26;  // normalized level → speech started
-  static const double _kAudioOffset = 0.08; // normalized level → silence
-  static const int _kMinSpeechFrames = 4;   // ≥4 frames (~400 ms) = real utterance
-  static const int _kSilenceToEnd = 4;      // 4 frames (~400 ms) silence = utterance done
+  // Gate: Engine B only fires after Engine A has confirmed the dhikr once.
+  // This prevents background noise being counted before the user starts.
+  bool _dhikrConfirmed = false;
 
-  // Debug: last words the STT heard (shown in UI so user can tune keywords)
-  String _lastRecognizedText = '';
+  // Onset tuning constants
+  static const double _kOnsetRise = 0.16;   // must rise this much above floor
+  static const int _kConfirmFrames = 2;     // frames above threshold to confirm onset
+  static const int _kNoiseCapPerWindow = 2; // max audio-only adds per window
 
-  late AnimationController _pulseCtrl;
-  late Animation<double> _pulseAnim;
+  // ───────────────────────────────────────────────────────────────────────
+  //  RECONCILER
+  // ───────────────────────────────────────────────────────────────────────
+  int _audioOnsetWindow = 0;   // Engine B onsets in current window
+  int _sttDeltaWindow = 0;     // Engine A deltas applied in current window
+  Timer? _windowTimer;
+  static const int _kWindowMs = 1500; // reconcile every 1.5 s
 
-  late AnimationController _ringCtrl;
+  // ───────────────────────────────────────────────────────────────────────
+  //  Adaptive onset minimum (long dhikr = longer gap required)
+  // ───────────────────────────────────────────────────────────────────────
+  int get _minFramesBetweenOnsets {
+    if (!_dhikrLoaded) return 5;
+    final len = _dhikr.arabicText.length;
+    if (len > 60) return 22; // very long dhikr (Tefrice/Münciye): ≥2.2 s
+    if (len > 25) return 11; // medium (Kulhuvallah): ≥1.1 s
+    return 3;                // short (Subhanallah etc.): ≥300 ms
+  }
 
-  String _statusText = '';
-
-  // ── init ──────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════
+  //  INIT / DISPOSE
+  // ═══════════════════════════════════════════════════════════════════════
 
   @override
   void initState() {
@@ -68,14 +119,26 @@ class _CounterScreenState extends State<CounterScreen>
     _pulseAnim = Tween<double>(begin: 1.0, end: 1.18).animate(
       CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeOut),
     );
-
     _ringCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1600),
     )..repeat();
-
     _loadDhikrAndPrefs();
   }
+
+  @override
+  void dispose() {
+    _isListening = false;
+    _speech.stop();
+    _windowTimer?.cancel();
+    _pulseCtrl.dispose();
+    _ringCtrl.dispose();
+    super.dispose();
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════
+  //  LOADING
+  // ═══════════════════════════════════════════════════════════════════════
 
   Future<void> _loadDhikrAndPrefs() async {
     final custom = await CustomDhikrManager.load();
@@ -84,11 +147,9 @@ class _CounterScreenState extends State<CounterScreen>
       (d) => d.id == widget.dhikrId,
       orElse: () => all.first,
     );
-
     final prefs = await SharedPreferences.getInstance();
     final savedCount = prefs.getInt('count_${dhikr.id}') ?? 0;
-    final savedTarget =
-        prefs.getInt('target_${dhikr.id}') ?? dhikr.targetCount;
+    final savedTarget = prefs.getInt('target_${dhikr.id}') ?? dhikr.targetCount;
 
     if (mounted) {
       setState(() {
@@ -102,25 +163,73 @@ class _CounterScreenState extends State<CounterScreen>
     }
   }
 
+  // ═══════════════════════════════════════════════════════════════════════
+  //  ENGINE A — STT
+  // ═══════════════════════════════════════════════════════════════════════
+
   Future<void> _initSpeech() async {
     _speechAvailable = await _speech.initialize(
       onStatus: _onStatus,
       onError: _onError,
     );
     if (!_speechAvailable && mounted) {
-      setState(() {
-        _statusText = _s(
-          'Ses tanıma desteklenmiyor',
-          'Speech recognition not available',
-          'التعرف على الصوت غير متاح',
-        );
-      });
+      setState(() => _statusText = _s(
+            'Ses tanıma desteklenmiyor',
+            'Speech recognition not available',
+            'التعرف على الصوت غير متاح',
+          ));
       return;
     }
     if (mounted) _startListening();
   }
 
-  // ── STT callbacks ─────────────────────────────────────────────────────────
+  Future<void> _startListening() async {
+    if (!_speechAvailable || !mounted) return;
+
+    // Reset per-session STT counter; keep _dhikrConfirmed (still same dhikr)
+    _sessionPartialCount = 0;
+    _audioAbove = false;
+    _framesAboveNow = 0;
+    _framesSinceOnset = 0;
+
+    // Locale detection
+    final lang = LocaleService.instance.language;
+    final prefix = lang == 'ar' ? 'ar' : (lang == 'en' ? 'en' : 'tr');
+    String localeId = '';
+    try {
+      final locales = await _speech.locales();
+      final match = locales
+          .where((l) => l.localeId.startsWith(prefix))
+          .map((l) => l.localeId)
+          .firstOrNull;
+      if (match != null) localeId = match;
+    } catch (_) {}
+
+    // Start STT session
+    await _speech.listen(
+      onResult: _onResult,
+      onSoundLevelChange: (raw) {
+        final normalized = ((raw + 2.0) / 12.0).clamp(0.0, 1.0);
+        if (mounted) setState(() => _micLevel = normalized.clamp(0.1, 1.0));
+        _onMicLevel(normalized); // feed Engine B
+      },
+      listenOptions: SpeechListenOptions(
+        partialResults: true,
+        cancelOnError: false,
+        listenMode: ListenMode.dictation,
+        localeId: localeId,
+        listenFor: const Duration(minutes: 5),
+        pauseFor: const Duration(seconds: 8),
+      ),
+    );
+
+    // Start reconciler timer when session begins
+    _windowTimer?.cancel();
+    _windowTimer = Timer.periodic(
+      Duration(milliseconds: _kWindowMs),
+      (_) => _reconcileWindow(),
+    );
+  }
 
   void _onStatus(String status) {
     if (!mounted) return;
@@ -131,9 +240,10 @@ class _CounterScreenState extends State<CounterScreen>
       });
     } else if (status == SpeechToText.notListeningStatus ||
         status == SpeechToText.doneStatus) {
-      // Do NOT reset _sessionPartialCount here — final result may arrive after
-      // this status. _startListening() resets it at the correct time.
+      // Do NOT reset _sessionPartialCount here — the final result may
+      // arrive AFTER this status callback, causing double-counting.
       if (_isListening) {
+        // Restart immediately (no delay) so no speech is missed.
         Future.delayed(Duration.zero, () {
           if (_isListening && mounted) _startListening();
         });
@@ -149,141 +259,138 @@ class _CounterScreenState extends State<CounterScreen>
     });
   }
 
-  Future<void> _startListening() async {
-    if (!_speechAvailable || !mounted) return;
-    _sessionPartialCount = 0;
-    _audioInSpeech = false;
-    _audioSpeechFrames = 0;
-    _audioSilenceFrames = 0;
-
-    final selectedLang = LocaleService.instance.language;
-    final preferredPrefix = selectedLang == 'ar'
-        ? 'ar'
-        : (selectedLang == 'en' ? 'en' : 'tr');
-    String localeId = '';
-    try {
-      final locales = await _speech.locales();
-      final match = locales
-          .where((l) => l.localeId.startsWith(preferredPrefix))
-          .map((l) => l.localeId)
-          .firstOrNull;
-      if (match != null) localeId = match;
-    } catch (_) {}
-
-    await _speech.listen(
-      onResult: _onResult,
-      onSoundLevelChange: (level) {
-        final normalized = ((level + 2.0) / 12.0).clamp(0.0, 1.0);
-        if (mounted) setState(() => _micLevel = normalized.clamp(0.1, 1.0));
-        _onMicLevel(normalized);
-      },
-      listenOptions: SpeechListenOptions(
-        partialResults: true,
-        cancelOnError: false,
-        listenMode: ListenMode.dictation,
-        localeId: localeId.isNotEmpty ? localeId : '',
-        listenFor: const Duration(minutes: 5),  // keep session alive for 5 min
-        pauseFor: const Duration(seconds: 8),   // 8 s silence = session end
-      ),
-    );
-  }
-
   void _onResult(SpeechRecognitionResult result) {
     final text = result.recognizedWords;
     if (text.isEmpty) return;
 
-    // Show what STT heard so the user can tune custom keywords if needed
+    // Update debug display
     if (mounted) {
       setState(() {
         _lastRecognizedText =
-            text.length > 55 ? '…${text.substring(text.length - 55)}' : text;
+            text.length > 60 ? '…${text.substring(text.length - 60)}' : text;
       });
     }
 
-    final rawOcc = _countOccurrences(text);
-    final delta = (rawOcc - _sessionPartialCount).clamp(0, 99);
+    final count = _countOccurrences(text);
+
+    // Gate: once Engine A finds the keyword, unlock Engine B.
+    if (count > 0) _dhikrConfirmed = true;
+
+    // Increment only the NEW occurrences since the last partial update.
+    final delta = (count - _sessionPartialCount).clamp(0, 99);
 
     if (result.finalResult) {
       _sessionPartialCount = 0;
-    } else if (rawOcc > _sessionPartialCount) {
-      // Only advance upward — STT sometimes revises down mid-stream,
-      // which would falsely re-trigger a delta on the next partial.
-      _sessionPartialCount = rawOcc;
+    } else if (count > _sessionPartialCount) {
+      // Only advance upward — STT sometimes revises its text downward.
+      _sessionPartialCount = count;
     }
 
-    if (delta > 0 && mounted) _incrementCount(delta);
+    if (delta > 0 && mounted) _incrementCount(delta, fromStt: true);
   }
 
-  // ── Audio-onset backup counting ────────────────────────────────────────────
-  // Called on every mic-level update (~100 ms interval).
-  // Detects speech onset/offset and, after giving STT 600 ms to respond,
-  // adds 1 if STT completely missed the utterance.
+  // ═══════════════════════════════════════════════════════════════════════
+  //  ENGINE B — Audio-onset detector
+  // ═══════════════════════════════════════════════════════════════════════
+  //
+  //  Algorithm:
+  //   1. Maintain a circular buffer of recent mic levels.
+  //   2. Compute local noise floor = average of the quietest 25 % of frames.
+  //   3. An "onset" = level rises > floor + _kOnsetRise for ≥ _kConfirmFrames
+  //      consecutive frames AND ≥ _minFramesBetweenOnsets have elapsed since
+  //      the previous onset.
+  //   4. Count onset → _audioOnsetWindow++ (if _dhikrConfirmed).
+  //
+  //  The adaptive minimum gap prevents a single long dhikr (Kulhuvallah)
+  //  from being counted multiple times within one recitation.
+
   void _onMicLevel(double level) {
     if (!_isListening) return;
 
-    if (!_audioInSpeech) {
-      if (level > _kAudioOnset) {
-        _audioInSpeech = true;
-        _audioSpeechFrames = 1;
-        _audioSilenceFrames = 0;
-        _countAtSpeechStart = _count;
-      }
-    } else {
-      if (level > _kAudioOffset) {
-        _audioSpeechFrames++;
-        _audioSilenceFrames = 0;
-      } else {
-        _audioSilenceFrames++;
-        if (_audioSilenceFrames >= _kSilenceToEnd) {
-          final frames = _audioSpeechFrames;
-          final cStart = _countAtSpeechStart;
-          _audioInSpeech = false;
-          _audioSpeechFrames = 0;
-          _audioSilenceFrames = 0;
+    // Update circular buffer
+    _lvlBuf[_lvlBufIdx] = level;
+    _lvlBufIdx = (_lvlBufIdx + 1) % _lvlBuf.length;
+    _framesSinceOnset++;
 
-          if (frames >= _kMinSpeechFrames) {
-            // Give STT 600 ms to process this utterance first.
-            // If the count is still the same afterward, STT missed it → add 1.
-            Future.delayed(const Duration(milliseconds: 600), () {
-              if (mounted && _isListening && _count == cStart) {
-                _incrementCount(1);
-              }
-            });
-          }
-        }
+    // Local noise floor: mean of the 5 quietest recent frames
+    final sorted = List<double>.from(_lvlBuf)..sort();
+    final floor = sorted.take(5).fold(0.0, (a, b) => a + b) / 5;
+
+    final isAbove = level > floor + _kOnsetRise;
+
+    if (isAbove) {
+      _framesAboveNow++;
+    } else {
+      _framesAboveNow = 0;
+      _audioAbove = false; // allow next onset to be detected
+    }
+
+    // Confirmed onset: not already in a burst, above for enough frames,
+    // and enough time has elapsed since the previous onset.
+    if (_framesAboveNow >= _kConfirmFrames &&
+        !_audioAbove &&
+        _framesSinceOnset >= _minFramesBetweenOnsets) {
+      _audioAbove = true;
+      _framesSinceOnset = 0;
+      if (_dhikrConfirmed) {
+        _audioOnsetWindow++;
       }
     }
   }
 
-  // ── Counting logic ────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════
+  //  RECONCILER — fires every 1.5 s
+  // ═══════════════════════════════════════════════════════════════════════
+  //
+  //  STT already called _incrementCount(sttDelta) in real-time.
+  //  Audio onsets were counted in _audioOnsetWindow.
+  //
+  //  If audio detected MORE than STT, add the excess (capped at
+  //  _kNoiseCapPerWindow to prevent noise runaway).
 
+  void _reconcileWindow() {
+    if (!mounted || !_isListening || !_dhikrConfirmed) {
+      _audioOnsetWindow = 0;
+      _sttDeltaWindow = 0;
+      return;
+    }
+
+    final audioN = _audioOnsetWindow;
+    final sttN = _sttDeltaWindow;
+    final excess = (audioN - sttN).clamp(0, _kNoiseCapPerWindow);
+
+    if (excess > 0) {
+      _incrementCount(excess, fromStt: false);
+    }
+
+    _audioOnsetWindow = 0;
+    _sttDeltaWindow = 0;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════
+  //  COUNTING HELPERS
+  // ═══════════════════════════════════════════════════════════════════════
+
+  /// Normalise a string: collapse Turkic/Arabic diacritics → ASCII letters only.
   String _normalize(String s) {
     return s
         .toLowerCase()
-        .replaceAll('â', 'a')
-        .replaceAll('î', 'i')
-        .replaceAll('û', 'u')
-        .replaceAll('ê', 'e')
-        .replaceAll('ā', 'a')
-        .replaceAll('ī', 'i')
-        .replaceAll('ū', 'u')
-        .replaceAll('ğ', 'g')
-        .replaceAll('ı', 'i')
-        .replaceAll('ü', 'u')
-        .replaceAll('ö', 'o')
-        .replaceAll('ş', 's')
+        .replaceAll('â', 'a').replaceAll('î', 'i').replaceAll('û', 'u')
+        .replaceAll('ê', 'e').replaceAll('ā', 'a').replaceAll('ī', 'i')
+        .replaceAll('ū', 'u').replaceAll('ğ', 'g').replaceAll('ı', 'i')
+        .replaceAll('ü', 'u').replaceAll('ö', 'o').replaceAll('ş', 's')
         .replaceAll('ç', 'c')
         .replaceAllMapped(RegExp(r'[^a-z]'), (_) => '');
   }
 
+  /// Count occurrences: try all keywords, return the maximum found.
   int _countOccurrences(String rawText) {
     final text = _normalize(rawText);
     int maxCount = 0;
     for (final keyword in _dhikr.keywords) {
       final kw = _normalize(keyword);
       if (kw.isEmpty) continue;
-      var n = 0;
-      var pos = 0;
+      var n = 0, pos = 0;
       while (true) {
         final found = text.indexOf(kw, pos);
         if (found == -1) break;
@@ -295,7 +402,11 @@ class _CounterScreenState extends State<CounterScreen>
     return maxCount;
   }
 
-  void _incrementCount(int by) {
+  /// Central increment — tracks whether the delta came from STT or audio.
+  void _incrementCount(int by, {bool fromStt = false}) {
+    if (by <= 0) return;
+    if (fromStt) _sttDeltaWindow += by;
+
     setState(() {
       _count += by;
       if (_count % _targetCount == 0 && _count > 0) {
@@ -323,9 +434,19 @@ class _CounterScreenState extends State<CounterScreen>
     await prefs.setInt('target_${_dhikr.id}', _targetCount);
   }
 
+  // ═══════════════════════════════════════════════════════════════════════
+  //  CONTROLS
+  // ═══════════════════════════════════════════════════════════════════════
+
   void _stopListening() {
     _isListening = false;
     _speech.stop();
+    _windowTimer?.cancel();
+    _windowTimer = null;
+    _audioOnsetWindow = 0;
+    _sttDeltaWindow = 0;
+    _audioAbove = false;
+    _framesAboveNow = 0;
     setState(() {
       _statusText = _s('Duraklatıldı', 'Paused', 'متوقف');
       _micLevel = 0.0;
@@ -348,6 +469,9 @@ class _CounterScreenState extends State<CounterScreen>
     setState(() {
       _count = 0;
       _sessionPartialCount = 0;
+      _audioOnsetWindow = 0;
+      _sttDeltaWindow = 0;
+      _dhikrConfirmed = false;  // need fresh STT confirmation after reset
       if (_isListening) {
         _statusText = _s('Dinleniyor...', 'Listening...', 'يستمع...');
       }
@@ -393,7 +517,9 @@ class _CounterScreenState extends State<CounterScreen>
     );
   }
 
-  // ── Computed values ───────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════
+  //  COMPUTED PROPERTIES
+  // ═══════════════════════════════════════════════════════════════════════
 
   int get _cycleCount => _count % _targetCount;
   double get _progress =>
@@ -405,7 +531,9 @@ class _CounterScreenState extends State<CounterScreen>
   String _s(String tr, String en, String ar) =>
       LocaleService.instance.tr(tr, en, ar);
 
-  // ── Build ─────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════
+  //  BUILD
+  // ═══════════════════════════════════════════════════════════════════════
 
   @override
   Widget build(BuildContext context) {
@@ -425,8 +553,7 @@ class _CounterScreenState extends State<CounterScreen>
             _buildTopBar(lang),
             Expanded(
               child: SingleChildScrollView(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 child: Column(
                   children: [
                     if (_dhikr.arabicText.isNotEmpty) _buildArabicCard(),
@@ -446,24 +573,18 @@ class _CounterScreenState extends State<CounterScreen>
                     const SizedBox(height: 12),
                     Text(
                       _remaining == 0 && _count > 0
-                          ? _s(
-                              '✓ Hedefe ulaşıldı!',
-                              '✓ Target reached!',
-                              '✓ تم الوصول للهدف!',
-                            )
-                          : _s(
-                              'Kalan: $_remaining',
-                              'Remaining: $_remaining',
-                              'المتبقي: $_remaining',
-                            ),
+                          ? _s('✓ Hedefe ulaşıldı!', '✓ Target reached!',
+                              '✓ تم الوصول للهدف!')
+                          : _s('Kalan: $_remaining', 'Remaining: $_remaining',
+                              'المتبقي: $_remaining'),
                       style: TextStyle(
                         fontSize: 13,
-                        color: (_remaining == 0 && _count > 0)
-                            ? AppColors.greenAccent
-                            : AppColors.textSecondary,
                         fontWeight: (_remaining == 0 && _count > 0)
                             ? FontWeight.bold
                             : FontWeight.normal,
+                        color: (_remaining == 0 && _count > 0)
+                            ? AppColors.greenAccent
+                            : AppColors.textSecondary,
                       ),
                     ),
                     const SizedBox(height: 28),
@@ -472,19 +593,18 @@ class _CounterScreenState extends State<CounterScreen>
                     Text(
                       _statusText,
                       style: const TextStyle(
-                        fontSize: 13,
-                        color: AppColors.textSecondary,
-                      ),
+                          fontSize: 13, color: AppColors.textSecondary),
                     ),
+                    // Show what STT heard — helps user diagnose if keywords need tuning
                     if (_lastRecognizedText.isNotEmpty) ...[
                       const SizedBox(height: 4),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Text(
                           '"$_lastRecognizedText"',
                           style: TextStyle(
                             fontSize: 10,
-                            color: AppColors.textSecondary.withValues(alpha: 0.65),
+                            color: AppColors.textSecondary.withValues(alpha: 0.6),
                             fontStyle: FontStyle.italic,
                           ),
                           textAlign: TextAlign.center,
@@ -507,6 +627,8 @@ class _CounterScreenState extends State<CounterScreen>
       ),
     );
   }
+
+  // ── Top bar ────────────────────────────────────────────────────────────
 
   Widget _buildTopBar(String lang) {
     return Container(
@@ -531,10 +653,9 @@ class _CounterScreenState extends State<CounterScreen>
             child: Text(
               _dhikr.localizedName(lang),
               style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
           ),
@@ -543,6 +664,8 @@ class _CounterScreenState extends State<CounterScreen>
       ),
     );
   }
+
+  // ── Arabic text card ───────────────────────────────────────────────────
 
   Widget _buildArabicCard() {
     return Container(
@@ -555,7 +678,8 @@ class _CounterScreenState extends State<CounterScreen>
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.greenAccent.withValues(alpha: 0.4)),
+        border:
+            Border.all(color: AppColors.greenAccent.withValues(alpha: 0.4)),
         boxShadow: [
           BoxShadow(
             color: AppColors.greenMid.withValues(alpha: 0.1),
@@ -578,11 +702,12 @@ class _CounterScreenState extends State<CounterScreen>
     );
   }
 
+  // ── Circular progress counter ──────────────────────────────────────────
+
   Widget _buildCircularCounter() {
     final isComplete = _remaining == 0 && _count > 0;
-    final arcColor = isComplete
-        ? const Color(0xFFFFCA28)
-        : AppColors.greenAccent;
+    final arcColor =
+        isComplete ? const Color(0xFFFFCA28) : AppColors.greenAccent;
 
     return SizedBox(
       width: 230,
@@ -590,7 +715,7 @@ class _CounterScreenState extends State<CounterScreen>
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Outer glow ring
+          // Glow
           Container(
             width: 230,
             height: 230,
@@ -605,16 +730,14 @@ class _CounterScreenState extends State<CounterScreen>
               ],
             ),
           ),
-          // White background circle
+          // White background
           Container(
             width: 218,
             height: 218,
             decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white,
-            ),
+                shape: BoxShape.circle, color: Colors.white),
           ),
-          // Arc progress
+          // Arc
           CustomPaint(
             size: const Size(218, 218),
             painter: _ArcPainter(
@@ -644,9 +767,7 @@ class _CounterScreenState extends State<CounterScreen>
                 Text(
                   '/ $_targetCount',
                   style: const TextStyle(
-                    fontSize: 18,
-                    color: AppColors.textSecondary,
-                  ),
+                      fontSize: 18, color: AppColors.textSecondary),
                 ),
                 if (_roundCount > 0) ...[
                   const SizedBox(height: 6),
@@ -655,8 +776,7 @@ class _CounterScreenState extends State<CounterScreen>
                         horizontal: 12, vertical: 4),
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
-                        colors: [Color(0xFF1B5E20), Color(0xFF388E3C)],
-                      ),
+                          colors: [Color(0xFF1B5E20), Color(0xFF388E3C)]),
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
@@ -669,10 +789,9 @@ class _CounterScreenState extends State<CounterScreen>
                     child: Text(
                       '$_roundCount. ${_s("tur", "round", "جولة")}',
                       style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
@@ -683,6 +802,8 @@ class _CounterScreenState extends State<CounterScreen>
       ),
     );
   }
+
+  // ── Mic / audio visualiser ─────────────────────────────────────────────
 
   Widget _buildMicSection() {
     return SizedBox(
@@ -695,7 +816,6 @@ class _CounterScreenState extends State<CounterScreen>
             return Stack(
               alignment: Alignment.center,
               children: [
-                // Outer ring
                 Opacity(
                   opacity: ((1 - t) * 0.35 * _micLevel).clamp(0.0, 1.0),
                   child: Container(
@@ -704,13 +824,10 @@ class _CounterScreenState extends State<CounterScreen>
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: AppColors.greenAccent,
-                        width: 2,
-                      ),
+                          color: AppColors.greenAccent, width: 2),
                     ),
                   ),
                 ),
-                // Middle ring
                 Opacity(
                   opacity:
                       ((1 - ((t + 0.4) % 1.0)) * 0.5 * _micLevel)
@@ -721,13 +838,10 @@ class _CounterScreenState extends State<CounterScreen>
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: AppColors.greenAccent,
-                        width: 1.5,
-                      ),
+                          color: AppColors.greenAccent, width: 1.5),
                     ),
                   ),
                 ),
-                // Mic icon core
                 Container(
                   width: 50,
                   height: 50,
@@ -746,7 +860,8 @@ class _CounterScreenState extends State<CounterScreen>
                       ),
                     ],
                   ),
-                  child: const Icon(Icons.mic, color: Colors.white, size: 26),
+                  child:
+                      const Icon(Icons.mic, color: Colors.white, size: 26),
                 ),
               ],
             );
@@ -755,9 +870,7 @@ class _CounterScreenState extends State<CounterScreen>
               width: 50,
               height: 50,
               decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                shape: BoxShape.circle,
-              ),
+                  color: Colors.grey.shade200, shape: BoxShape.circle),
               child: const Icon(Icons.mic_off,
                   color: AppColors.textSecondary, size: 26),
             );
@@ -766,6 +879,8 @@ class _CounterScreenState extends State<CounterScreen>
       ),
     );
   }
+
+  // ── Tap button ─────────────────────────────────────────────────────────
 
   Widget _buildTapButton() {
     return GestureDetector(
@@ -798,16 +913,17 @@ class _CounterScreenState extends State<CounterScreen>
             Text(
               _s('Dokun', 'Tap', 'لمس'),
               style: const TextStyle(
-                color: AppColors.greenDark,
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-              ),
+                  color: AppColors.greenDark,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14),
             ),
           ],
         ),
       ),
     );
   }
+
+  // ── Action buttons ─────────────────────────────────────────────────────
 
   Widget _buildActionButtons() {
     return Row(
@@ -819,41 +935,31 @@ class _CounterScreenState extends State<CounterScreen>
               : _s('Başlat', 'Start', 'ابدأ'),
           icon: _isListening ? Icons.pause_circle : Icons.play_circle,
           gradient: const LinearGradient(
-            colors: [Color(0xFF1B5E20), Color(0xFF388E3C)],
-          ),
+              colors: [Color(0xFF1B5E20), Color(0xFF388E3C)]),
           onTap: _toggleListening,
         ),
         _ActionButton(
           label: _s('Sıfırla', 'Reset', 'إعادة'),
           icon: Icons.refresh_rounded,
           gradient: const LinearGradient(
-            colors: [Color(0xFFE65100), Color(0xFFF57C00)],
-          ),
+              colors: [Color(0xFFE65100), Color(0xFFF57C00)]),
           onTap: _reset,
         ),
         _ActionButton(
           label: _s('Hedef', 'Target', 'الهدف'),
           icon: Icons.flag_rounded,
           gradient: const LinearGradient(
-            colors: [Color(0xFF1565C0), Color(0xFF1976D2)],
-          ),
+              colors: [Color(0xFF1565C0), Color(0xFF1976D2)]),
           onTap: _showTargetDialog,
         ),
       ],
     );
   }
-
-  @override
-  void dispose() {
-    _isListening = false;
-    _speech.stop();
-    _pulseCtrl.dispose();
-    _ringCtrl.dispose();
-    super.dispose();
-  }
 }
 
-// ─── Arc Painter ─────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+//  ARC PAINTER
+// ═══════════════════════════════════════════════════════════════════════════
 
 class _ArcPainter extends CustomPainter {
   final double progress;
@@ -873,7 +979,6 @@ class _ArcPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = (size.width - strokeWidth) / 2;
 
-    // Background ring
     canvas.drawCircle(
       center,
       radius,
@@ -883,7 +988,6 @@ class _ArcPainter extends CustomPainter {
         ..style = PaintingStyle.stroke,
     );
 
-    // Progress arc
     if (progress > 0) {
       canvas.drawArc(
         Rect.fromCircle(center: center, radius: radius),
@@ -904,7 +1008,9 @@ class _ArcPainter extends CustomPainter {
       progress != old.progress || fgColor != old.fgColor;
 }
 
-// ─── Action Button ────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+//  ACTION BUTTON
+// ═══════════════════════════════════════════════════════════════════════════
 
 class _ActionButton extends StatelessWidget {
   final String label;
