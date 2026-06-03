@@ -50,7 +50,6 @@ jobs:
             --platforms ios \
             --org "$APP_ORG" \
             --project-name "$APP_PROJ" \
-            --force \
             .
           echo "✅ iOS project created"
           ls ios/Runner/
