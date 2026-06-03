@@ -60,7 +60,10 @@ jobs:
 
       # ── 4. App icons (must come after ios/ exists) ─────────────────
       - name: Generate app icons
-        run: dart run flutter_launcher_icons
+        run: |
+          # flutter create sometimes skips AppIcon.appiconset for existing projects
+          mkdir -p ios/Runner/Assets.xcassets/AppIcon.appiconset
+          dart run flutter_launcher_icons
 
       # ── 5. CocoaPods (cached for speed) ───────────────────────────
       - name: Cache CocoaPods
