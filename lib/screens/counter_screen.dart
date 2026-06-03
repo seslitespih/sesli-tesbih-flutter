@@ -33,6 +33,22 @@ class _CounterScreenState extends State<CounterScreen>
   int _targetCount = 33;
   int _sessionPartialCount = 0;
 
+  // ── Audio-onset backup counter ─────────────────────────────────────────────
+  // Counts speech bursts via mic level. When STT misses an utterance
+  // completely, the audio counter adds 1 after a short STT-processing delay.
+  bool _audioInSpeech = false;
+  int _audioSpeechFrames = 0;
+  int _audioSilenceFrames = 0;
+  int _countAtSpeechStart = 0;
+
+  static const double _kAudioOnset = 0.26;  // normalized level → speech started
+  static const double _kAudioOffset = 0.08; // normalized level → silence
+  static const int _kMinSpeechFrames = 4;   // ≥4 frames (~400 ms) = real utterance
+  static const int _kSilenceToEnd = 4;      // 4 frames (~400 ms) silence = utterance done
+
+  // Debug: last words the STT heard (shown in UI so user can tune keywords)
+  String _lastRecognizedText = '';
+
   late AnimationController _pulseCtrl;
   late Animation<double> _pulseAnim;
 
@@ -115,9 +131,10 @@ class _CounterScreenState extends State<CounterScreen>
       });
     } else if (status == SpeechToText.notListeningStatus ||
         status == SpeechToText.doneStatus) {
-      _sessionPartialCount = 0;
+      // Do NOT reset _sessionPartialCount here — final result may arrive after
+      // this status. _startListening() resets it at the correct time.
       if (_isListening) {
-        Future.delayed(const Duration(milliseconds: 80), () {
+        Future.delayed(Duration.zero, () {
           if (_isListening && mounted) _startListening();
         });
       }
@@ -126,18 +143,18 @@ class _CounterScreenState extends State<CounterScreen>
 
   void _onError(SpeechRecognitionError error) {
     if (!mounted || !_isListening) return;
-    final delay = error.errorMsg.contains('busy') ? 400 : 150;
+    final delay = error.errorMsg.contains('busy') ? 500 : 50;
     Future.delayed(Duration(milliseconds: delay), () {
-      if (_isListening && mounted) {
-        _sessionPartialCount = 0;
-        _startListening();
-      }
+      if (_isListening && mounted) _startListening();
     });
   }
 
   Future<void> _startListening() async {
     if (!_speechAvailable || !mounted) return;
     _sessionPartialCount = 0;
+    _audioInSpeech = false;
+    _audioSpeechFrames = 0;
+    _audioSilenceFrames = 0;
 
     final selectedLang = LocaleService.instance.language;
     final preferredPrefix = selectedLang == 'ar'
@@ -156,17 +173,17 @@ class _CounterScreenState extends State<CounterScreen>
     await _speech.listen(
       onResult: _onResult,
       onSoundLevelChange: (level) {
-        if (mounted) {
-          setState(() {
-            _micLevel = ((level + 2.0) / 12.0).clamp(0.1, 1.0);
-          });
-        }
+        final normalized = ((level + 2.0) / 12.0).clamp(0.0, 1.0);
+        if (mounted) setState(() => _micLevel = normalized.clamp(0.1, 1.0));
+        _onMicLevel(normalized);
       },
       listenOptions: SpeechListenOptions(
         partialResults: true,
         cancelOnError: false,
         listenMode: ListenMode.dictation,
         localeId: localeId.isNotEmpty ? localeId : '',
+        listenFor: const Duration(minutes: 5),  // keep session alive for 5 min
+        pauseFor: const Duration(seconds: 8),   // 8 s silence = session end
       ),
     );
   }
@@ -175,16 +192,67 @@ class _CounterScreenState extends State<CounterScreen>
     final text = result.recognizedWords;
     if (text.isEmpty) return;
 
+    // Show what STT heard so the user can tune custom keywords if needed
+    if (mounted) {
+      setState(() {
+        _lastRecognizedText =
+            text.length > 55 ? '…${text.substring(text.length - 55)}' : text;
+      });
+    }
+
     final rawOcc = _countOccurrences(text);
     final delta = (rawOcc - _sessionPartialCount).clamp(0, 99);
 
     if (result.finalResult) {
       _sessionPartialCount = 0;
-    } else {
+    } else if (rawOcc > _sessionPartialCount) {
+      // Only advance upward — STT sometimes revises down mid-stream,
+      // which would falsely re-trigger a delta on the next partial.
       _sessionPartialCount = rawOcc;
     }
 
     if (delta > 0 && mounted) _incrementCount(delta);
+  }
+
+  // ── Audio-onset backup counting ────────────────────────────────────────────
+  // Called on every mic-level update (~100 ms interval).
+  // Detects speech onset/offset and, after giving STT 600 ms to respond,
+  // adds 1 if STT completely missed the utterance.
+  void _onMicLevel(double level) {
+    if (!_isListening) return;
+
+    if (!_audioInSpeech) {
+      if (level > _kAudioOnset) {
+        _audioInSpeech = true;
+        _audioSpeechFrames = 1;
+        _audioSilenceFrames = 0;
+        _countAtSpeechStart = _count;
+      }
+    } else {
+      if (level > _kAudioOffset) {
+        _audioSpeechFrames++;
+        _audioSilenceFrames = 0;
+      } else {
+        _audioSilenceFrames++;
+        if (_audioSilenceFrames >= _kSilenceToEnd) {
+          final frames = _audioSpeechFrames;
+          final cStart = _countAtSpeechStart;
+          _audioInSpeech = false;
+          _audioSpeechFrames = 0;
+          _audioSilenceFrames = 0;
+
+          if (frames >= _kMinSpeechFrames) {
+            // Give STT 600 ms to process this utterance first.
+            // If the count is still the same afterward, STT missed it → add 1.
+            Future.delayed(const Duration(milliseconds: 600), () {
+              if (mounted && _isListening && _count == cStart) {
+                _incrementCount(1);
+              }
+            });
+          }
+        }
+      }
+    }
   }
 
   // ── Counting logic ────────────────────────────────────────────────────────
@@ -408,6 +476,23 @@ class _CounterScreenState extends State<CounterScreen>
                         color: AppColors.textSecondary,
                       ),
                     ),
+                    if (_lastRecognizedText.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Text(
+                          '"$_lastRecognizedText"',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: AppColors.textSecondary.withValues(alpha: 0.65),
+                            fontStyle: FontStyle.italic,
+                          ),
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 24),
                     _buildTapButton(),
                     const SizedBox(height: 28),

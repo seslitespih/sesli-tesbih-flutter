@@ -10,8 +10,10 @@ const List<Dhikr> kDhikrList = [
     targetCount: 33,
     keywords: [
       'sübhanallah', 'subhanallah', 'süphanallah', 'suphanallah',
+      'siphanallah', 'sifanallah', 'zuphanallah',
       'sübhan', 'subhan', 'süphan', 'suphan',
-      'nallah', 'bhan', 'ubhan', 'sub',
+      'siphan', 'sifan', 'sipan',
+      'nallah', 'bhan', 'ubhan', 'sub', 'sub han',
     ],
   ),
   Dhikr(
@@ -36,8 +38,9 @@ const List<Dhikr> kDhikrList = [
     targetCount: 34,
     keywords: [
       'allahu ekber', 'allahu akbar', 'allahüekber',
-      'ekber', 'akbar', 'akber',
-      'llahu', 'kber', 'akb',
+      'allah ekber', 'allah akbar', 'allah hu ekber',
+      'ekber', 'akbar', 'akber', 'ekber',
+      'llahu', 'kber', 'akb', 'ekb',
     ],
   ),
   Dhikr(
@@ -86,7 +89,7 @@ const List<Dhikr> kDhikrList = [
     arabicText: 'اللَّهُ',
     meaningTr: 'Allah', meaningEn: 'Allah',
     targetCount: 1000,
-    keywords: ['allah', 'allahu', 'alloh'],
+    keywords: ['allah', 'allahu', 'alloh', 'alla', 'ala'],
   ),
   Dhikr(
     id: 8,
@@ -285,9 +288,10 @@ const List<Dhikr> kDhikrList = [
     keywords: [
       'kulhuvallahu ahad', 'kulhuvallah', 'kulhuvallahu',
       'külhüvallahu', 'külhüvallah', 'kulhüvallah',
+      'gulhuvallahu', 'gulhuvallah', 'gulhü', 'gulhu',
       'kulhu allahu', 'kulhu allah',
       'külhü', 'kulhü', 'kulhu',
-      'kulh',
+      'kulh', 'kul hu', 'kul hü',
     ],
   ),
   Dhikr(
