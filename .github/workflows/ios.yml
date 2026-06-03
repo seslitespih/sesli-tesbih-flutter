@@ -267,30 +267,29 @@ jobs:
           	RUBY
 
       # ── 12. ExportOptions.plist ───────────────────────────────────────
-      # No leading spaces — heredoc content starts at column 0.
       - name: Write ExportOptions.plist
         run: |
           EXPORT_PLIST="$RUNNER_TEMP/ExportOptions.plist"
-          cat > "$EXPORT_PLIST" << EOF
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-  <key>method</key>             <string>app-store</string>
-  <key>teamID</key>             <string>$TEAM_ID</string>
-  <key>signingStyle</key>       <string>manual</string>
-  <key>signingCertificate</key> <string>Apple Distribution</string>
-  <key>provisioningProfiles</key>
-  <dict>
-    <key>$BUNDLE_ID</key><string>$PROFILE_UUID</string>
-  </dict>
-  <key>uploadBitcode</key>                  <false/>
-  <key>uploadSymbols</key>                  <true/>
-  <key>compileBitcode</key>                 <false/>
-  <key>manageAppVersionAndBuildNumber</key> <false/>
-</dict>
-</plist>
-EOF
+          cat > "$EXPORT_PLIST" <<-EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>             <string>app-store</string>
+            <key>teamID</key>             <string>$TEAM_ID</string>
+            <key>signingStyle</key>       <string>manual</string>
+            <key>signingCertificate</key> <string>Apple Distribution</string>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>$BUNDLE_ID</key><string>$PROFILE_UUID</string>
+            </dict>
+            <key>uploadBitcode</key>                  <false/>
+            <key>uploadSymbols</key>                  <true/>
+            <key>compileBitcode</key>                 <false/>
+            <key>manageAppVersionAndBuildNumber</key> <false/>
+          </dict>
+          </plist>
+          	EOF
           echo "EXPORT_PLIST=$EXPORT_PLIST" >> "$GITHUB_ENV"
           echo "--- ExportOptions.plist ---"
           cat "$EXPORT_PLIST"
