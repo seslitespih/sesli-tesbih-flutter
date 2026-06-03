@@ -22,7 +22,7 @@ env:
 jobs:
   build-upload:
     name: Build IPA → TestFlight
-    runs-on: macos-14
+    runs-on: macos-15
     timeout-minutes: 60
 
     steps:
@@ -30,6 +30,17 @@ jobs:
       # ── 1. Source ────────────────────────────────────────────────────
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Select Xcode 26
+        run: |
+          XCODE=$(ls /Applications | grep "^Xcode_26" | sort -V | tail -1)
+          if [ -n "$XCODE" ]; then
+            sudo xcode-select -s "/Applications/$XCODE/Contents/Developer"
+            echo "✅ Selected: $XCODE"
+          else
+            echo "⚠️ Xcode 26 not found — using default: $(xcode-select -p)"
+          fi
+          xcodebuild -version
 
       # ── 2. Flutter ───────────────────────────────────────────────────
       - name: Setup Flutter
