@@ -54,13 +54,8 @@ jobs:
         run: flutter pub get
 
       # ─────────────────────────────────────────────────────────────
-      # 3. App icons
-      # ─────────────────────────────────────────────────────────────
-      - name: Generate app icons
-        run: dart run flutter_launcher_icons
-
-      # ─────────────────────────────────────────────────────────────
-      # 4. Create iOS project (fresh every run — ios/ not committed)
+      # 3. Create iOS project (fresh every run — ios/ not committed)
+      #    Must run BEFORE flutter_launcher_icons so the xcassets exist
       # ─────────────────────────────────────────────────────────────
       - name: Create iOS project
         run: |
@@ -69,6 +64,12 @@ jobs:
             --org "$APP_ORG" \
             --project-name "$APP_PROJ" \
             .
+
+      # ─────────────────────────────────────────────────────────────
+      # 4. App icons (after iOS project exists)
+      # ─────────────────────────────────────────────────────────────
+      - name: Generate app icons
+        run: dart run flutter_launcher_icons
 
       # ─────────────────────────────────────────────────────────────
       # 5. CocoaPods
