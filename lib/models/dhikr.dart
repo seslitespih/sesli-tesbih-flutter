@@ -9,6 +9,10 @@ class Dhikr {
   final int targetCount;
   final List<String> keywords;
 
+  /// Source citation (Quran verse / hadith reference) shown instead of
+  /// the meaning text.
+  final String source;
+
   const Dhikr({
     required this.id,
     required this.nameTr,
@@ -19,6 +23,7 @@ class Dhikr {
     required this.meaningEn,
     required this.targetCount,
     required this.keywords,
+    this.source = '',
   });
 
   String localizedName(String lang) {
@@ -42,6 +47,7 @@ class Dhikr {
     String? meaningEn,
     int? targetCount,
     List<String>? keywords,
+    String? source,
   }) {
     return Dhikr(
       id: id ?? this.id,
@@ -53,6 +59,7 @@ class Dhikr {
       meaningEn: meaningEn ?? this.meaningEn,
       targetCount: targetCount ?? this.targetCount,
       keywords: keywords ?? this.keywords,
+      source: source ?? this.source,
     );
   }
 }

@@ -15,6 +15,7 @@ const List<Dhikr> kDhikrList = [
       'siphan', 'sifan', 'sipan',
       'nallah', 'bhan', 'ubhan', 'sub', 'sub han',
     ],
+    source: 'Müslim, Mesâcid 146',
   ),
   Dhikr(
     id: 2,
@@ -28,6 +29,7 @@ const List<Dhikr> kDhikrList = [
       'elhamdu', 'elhamd', 'alhamdu',
       'lillah', 'hamdu', 'hamdü', 'hamd',
     ],
+    source: 'Müslim, Mesâcid 146',
   ),
   Dhikr(
     id: 3,
@@ -42,6 +44,7 @@ const List<Dhikr> kDhikrList = [
       'ekber', 'akbar', 'akber', 'ekber',
       'llahu', 'kber', 'akb', 'ekb',
     ],
+    source: 'Müslim, Mesâcid 146',
   ),
   Dhikr(
     id: 4,
@@ -55,6 +58,7 @@ const List<Dhikr> kDhikrList = [
       'lailah', 'laila', 'la ilahe',
       'illallah', 'llallah', 'lailahei',
     ],
+    source: 'Tirmizî, Deavât 9',
   ),
   Dhikr(
     id: 5,
@@ -68,6 +72,7 @@ const List<Dhikr> kDhikrList = [
       'estağfir', 'estağfur', 'estag',
       'rullah', 'firullah', 'furullah', 'estaf',
     ],
+    source: 'Müslim, Zikir 41',
   ),
   Dhikr(
     id: 6,
@@ -82,6 +87,7 @@ const List<Dhikr> kDhikrList = [
       'allahümme salli', 'sallallahu aleyhi',
       'salli', 'seyyidina', 'muhammed',
     ],
+    source: 'Ahzâb Suresi 56; Müslim, Salât 70',
   ),
   Dhikr(
     id: 7,
@@ -90,6 +96,7 @@ const List<Dhikr> kDhikrList = [
     meaningTr: 'Allah', meaningEn: 'Allah',
     targetCount: 1000,
     keywords: ['allah', 'allahu', 'alloh', 'alla', 'ala'],
+    source: 'Ahzâb Suresi 41',
   ),
   Dhikr(
     id: 8,
@@ -103,6 +110,7 @@ const List<Dhikr> kDhikrList = [
       'hasbünal', 'hasbunal', 'hasbün', 'hasbun',
       'nallah', 'hasb',
     ],
+    source: 'Âl-i İmrân Suresi 173',
   ),
   Dhikr(
     id: 9,
@@ -118,6 +126,7 @@ const List<Dhikr> kDhikrList = [
       'rabbiy', 'rabbi', 'rabi',
       'azim', 'azım',
     ],
+    source: 'Müslim, Salât 42',
   ),
   Dhikr(
     id: 10,
@@ -133,6 +142,7 @@ const List<Dhikr> kDhikrList = [
       'rabbiy', 'rabbi', 'rabi',
       'lala', 'yela', 'elala',
     ],
+    source: 'Müslim, Salât 42',
   ),
   Dhikr(
     id: 11,
@@ -146,6 +156,7 @@ const List<Dhikr> kDhikrList = [
       'bismi', 'bismil',
       'illah', 'smillah',
     ],
+    source: 'Neml Suresi 30',
   ),
   Dhikr(
     id: 12,
@@ -160,6 +171,7 @@ const List<Dhikr> kDhikrList = [
       'havle', 'kuvvete', 'kuvvet',
       'illabillah', 'illallah',
     ],
+    source: 'Buhârî, Deavât 50; Müslim, Zikir 44',
   ),
   Dhikr(
     id: 13,
@@ -175,6 +187,7 @@ const List<Dhikr> kDhikrList = [
       'tasbih', 'tesbih',
       'subhan', 'lillah', 'ekber',
     ],
+    source: 'Buhârî, Deavât 11; Müslim, Zikir 80',
   ),
   Dhikr(
     id: 14,
@@ -188,6 +201,7 @@ const List<Dhikr> kDhikrList = [
       'hasbiya', 'hasbi',
       'hasbiy', 'tevekkelt',
     ],
+    source: 'Tevbe Suresi 129',
   ),
   Dhikr(
     id: 15,
@@ -202,6 +216,7 @@ const List<Dhikr> kDhikrList = [
       'letif', 'leytif',
       'lati', 'leti',
     ],
+    source: 'Şûrâ Suresi 19 (Esmâ-i Hüsnâ)',
   ),
   Dhikr(
     id: 16,
@@ -217,6 +232,7 @@ const List<Dhikr> kDhikrList = [
       'rahman', 'rahim',
       'rahm',
     ],
+    source: 'İsrâ Suresi 110',
   ),
   Dhikr(
     id: 17,
@@ -230,6 +246,7 @@ const List<Dhikr> kDhikrList = [
       'tövbe', 'tevbe', 'etübü',
       'tovbe', 'tevb', 'etub',
     ],
+    source: 'Buhârî, Deavât 3',
   ),
   Dhikr(
     id: 18,
@@ -246,6 +263,7 @@ const List<Dhikr> kDhikrList = [
       'bihamdihi', 've bihamdihi', 'bihamdi',
       'vebih', 'bihamde',
     ],
+    source: 'Buhârî, Deavât 65; Müslim, Zikir 28',
   ),
   Dhikr(
     id: 19,
@@ -262,6 +280,7 @@ const List<Dhikr> kDhikrList = [
       'tefrice', 'nariye',
       'tenfer', 'tenha', 'kamil',
     ],
+    source: 'Salavat mecmuaları (temel hadis kaynaklarında yer almaz)',
   ),
   Dhikr(
     id: 20,
@@ -277,6 +296,7 @@ const List<Dhikr> kDhikrList = [
       'tütahhiruna', 'tutahhiruna',
       'münciye', 'munciye',
     ],
+    source: 'Salavat mecmuaları (temel hadis kaynaklarında yer almaz)',
   ),
   Dhikr(
     id: 22,
@@ -293,6 +313,7 @@ const List<Dhikr> kDhikrList = [
       'külhü', 'kulhü', 'kulhu',
       'kulh', 'kul hu', 'kul hü',
     ],
+    source: 'İhlâs Suresi 1',
   ),
   Dhikr(
     id: 21,
@@ -311,5 +332,6 @@ const List<Dhikr> kDhikrList = [
       'yedurru', 'yadurru', 'yedurr',
       'durru', 'fissema', 'semiul',
     ],
+    source: 'Ebû Dâvûd, Edeb 101; Tirmizî, Deavât 13',
   ),
 ];

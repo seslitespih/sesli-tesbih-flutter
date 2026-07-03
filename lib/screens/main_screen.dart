@@ -154,6 +154,16 @@ class _MainScreenState extends State<MainScreen> {
           Expanded(
             child: _NavTab(
               label: _lang == 'en'
+                  ? 'Asma ul-Husna'
+                  : (_lang == 'ar' ? 'الأسماء الحسنى' : 'Esmaül Hüsna'),
+              icon: Icons.auto_awesome_outlined,
+              onTap: () => Navigator.pushNamed(context, '/esma'),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: _NavTab(
+              label: _lang == 'en'
                   ? 'Qibla'
                   : (_lang == 'ar' ? 'القبلة' : 'Kıble'),
               icon: Icons.explore_outlined,

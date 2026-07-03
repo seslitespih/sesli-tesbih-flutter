@@ -9,25 +9,37 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../main.dart';
 import '../models/dhikr.dart';
 import '../data/dhikr_data.dart';
+import '../services/burst_segmenter.dart';
 import '../services/custom_dhikr_manager.dart';
+import '../services/dhikr_matcher.dart';
 import '../services/locale_service.dart';
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  DUAL-ENGINE DHIKR COUNTER
+//  DUAL-ENGINE DHIKR COUNTER  (v2 — fast-speech fix)
 //
 //  Engine A — STT (speech-to-text keyword matching)
-//    • Accurate when it works; can miss words during fast speech
+//    • Accurate when it works; collapses repeated words during fast speech
 //    • Runs as a continuous session (5-min listenFor, 8-s pauseFor)
 //
-//  Engine B — Audio-onset detector (mic level waveform)
-//    • Counts every "speech burst" using a local-floor onset algorithm
-//    • Does NOT depend on word recognition → works for any speed
-//    • Gate: only activates after Engine A confirms the correct dhikr
+//  Engine B — Audio burst segmenter (mic level envelope)
+//    • Auto-ranging level normalisation: iOS reports dB ≈ −60..0 while
+//      Android reports RMS ≈ −2..10 — the old fixed formula made the level
+//      permanently 0 on iOS, disabling this engine entirely.
+//    • Hysteresis peak/dip segmentation: a new rep is detected when the
+//      level dips below (peak − delta) and rises again, even if it never
+//      returns to the noise floor — this is what segments fast chained
+//      speech like "allahallahallah".
+//    • Wall-clock (ms) gaps instead of frame counts — frame rates differ
+//      wildly between platforms (iOS ≈ 25-50 fps, Android ≈ 10 fps).
+//    • Sustained-burst splitting: continuous loud speech with no
+//      measurable dip is credited every _splitMs (adaptive to user pace).
+//    • Gate: counts only while STT has matched the dhikr within the last
+//      20 s (rolling confirmation — blocks TV/noise when user stops).
 //
-//  Reconciler (every 1.5 s)
-//    • Compares how many counts each engine added in the window
+//  Reconciler (every 1 s)
 //    • Credits MAX(sttWindow, audioWindow) to the total
-//    • Engine B can add at most 2 extra per window (noise cap)
+//    • Engine B may add at most N extra per window (N adaptive: 3 for
+//      short dhikr, 2 medium, 1 long) — allows real fast paces through
 // ═══════════════════════════════════════════════════════════════════════════
 
 class CounterScreen extends StatefulWidget {
@@ -65,26 +77,21 @@ class _CounterScreenState extends State<CounterScreen>
   int _sessionPartialCount = 0;   // tracks running STT count within session
 
   // ───────────────────────────────────────────────────────────────────────
-  //  ENGINE B — Audio-onset detector
+  //  ENGINE B — Audio burst segmenter (core logic in BurstSegmenter,
+  //  unit-tested with synthetic waveforms in test/burst_segmenter_test.dart)
   // ───────────────────────────────────────────────────────────────────────
-  // Circular level buffer used to compute a local noise floor.
-  // onSoundLevelChange fires ≈ every 100 ms → 20 frames ≈ 2 s of history.
-  final List<double> _lvlBuf = List.filled(20, 0.0);
-  int _lvlBufIdx = 0;
+  late final BurstSegmenter _segmenter = BurstSegmenter(
+    onRep: (nowMs) {
+      // Rolling STT gate: Engine B counts only while STT matched recently.
+      if (_everConfirmed && (nowMs - _lastSttMatchMs) <= _kSttConfirmValidMs) {
+        _audioOnsetWindow++;
+      }
+    },
+  );
 
-  // Onset state machine
-  bool _audioAbove = false;      // currently inside a speech burst
-  int _framesAboveNow = 0;       // consecutive frames above threshold
-  int _framesSinceOnset = 0;     // frames elapsed since last confirmed onset
-
-  // Gate: Engine B only fires after Engine A has confirmed the dhikr once.
-  // This prevents background noise being counted before the user starts.
-  bool _dhikrConfirmed = false;
-
-  // Onset tuning constants
-  static const double _kOnsetRise = 0.16;   // must rise this much above floor
-  static const int _kConfirmFrames = 2;     // frames above threshold to confirm onset
-  static const int _kNoiseCapPerWindow = 2; // max audio-only adds per window
+  bool _everConfirmed = false;
+  int _lastSttMatchMs = 0;
+  static const int _kSttConfirmValidMs = 20000;
 
   // ───────────────────────────────────────────────────────────────────────
   //  RECONCILER
@@ -92,17 +99,26 @@ class _CounterScreenState extends State<CounterScreen>
   int _audioOnsetWindow = 0;   // Engine B onsets in current window
   int _sttDeltaWindow = 0;     // Engine A deltas applied in current window
   Timer? _windowTimer;
-  static const int _kWindowMs = 1500; // reconcile every 1.5 s
+  static const int _kWindowMs = 1000; // reconcile every 1 s
 
   // ───────────────────────────────────────────────────────────────────────
-  //  Adaptive onset minimum (long dhikr = longer gap required)
+  //  Adaptive per-dhikr timing (0 = short, 1 = medium, 2 = long)
   // ───────────────────────────────────────────────────────────────────────
-  int get _minFramesBetweenOnsets {
-    if (!_dhikrLoaded) return 5;
+  int get _lenClass {
+    if (!_dhikrLoaded) return 1;
     final len = _dhikr.arabicText.length;
-    if (len > 60) return 22; // very long dhikr (Tefrice/Münciye): ≥2.2 s
-    if (len > 25) return 11; // medium (Kulhuvallah): ≥1.1 s
-    return 3;                // short (Subhanallah etc.): ≥300 ms
+    if (len > 60) return 2; // very long (Tefrice/Münciye)
+    if (len > 25) return 1; // medium (Kulhuvallah, Bismillahillezi)
+    return 0;               // short (Subhanallah, Allah, ...)
+  }
+
+  /// Max audio-only additions the reconciler may credit per 1-s window.
+  int get _capPerWindow => const [3, 2, 1][_lenClass];
+
+  /// Configures the segmenter's timing for the loaded dhikr.
+  void _configureSegmenter() {
+    _segmenter.minGapMs = const [260, 900, 2000][_lenClass];
+    _segmenter.maxSplitMs = const [1000, 2000, 3500][_lenClass];
   }
 
   // ═══════════════════════════════════════════════════════════════════════
@@ -159,6 +175,7 @@ class _CounterScreenState extends State<CounterScreen>
         _dhikrLoaded = true;
         _statusText = _s('Başlatılıyor...', 'Starting...', 'جارٍ التحميل...');
       });
+      _configureSegmenter();
       await _initSpeech();
     }
   }
@@ -186,11 +203,9 @@ class _CounterScreenState extends State<CounterScreen>
   Future<void> _startListening() async {
     if (!_speechAvailable || !mounted) return;
 
-    // Reset per-session STT counter; keep _dhikrConfirmed (still same dhikr)
+    // Reset per-session STT counter; keep the rolling STT gate (same dhikr)
     _sessionPartialCount = 0;
-    _audioAbove = false;
-    _framesAboveNow = 0;
-    _framesSinceOnset = 0;
+    _segmenter.resetBurstState();
 
     // Locale detection
     final lang = LocaleService.instance.language;
@@ -208,11 +223,7 @@ class _CounterScreenState extends State<CounterScreen>
     // Start STT session
     await _speech.listen(
       onResult: _onResult,
-      onSoundLevelChange: (raw) {
-        final normalized = ((raw + 2.0) / 12.0).clamp(0.0, 1.0);
-        if (mounted) setState(() => _micLevel = normalized.clamp(0.1, 1.0));
-        _onMicLevel(normalized); // feed Engine B
-      },
+      onSoundLevelChange: _onMicLevel, // feed Engine B (raw platform units)
       listenOptions: SpeechListenOptions(
         partialResults: true,
         cancelOnError: false,
@@ -226,7 +237,7 @@ class _CounterScreenState extends State<CounterScreen>
     // Start reconciler timer when session begins
     _windowTimer?.cancel();
     _windowTimer = Timer.periodic(
-      Duration(milliseconds: _kWindowMs),
+      const Duration(milliseconds: _kWindowMs),
       (_) => _reconcileWindow(),
     );
   }
@@ -273,8 +284,11 @@ class _CounterScreenState extends State<CounterScreen>
 
     final count = _countOccurrences(text);
 
-    // Gate: once Engine A finds the keyword, unlock Engine B.
-    if (count > 0) _dhikrConfirmed = true;
+    // Rolling gate: an STT match keeps Engine B unlocked for the next 20 s.
+    if (count > 0) {
+      _everConfirmed = true;
+      _lastSttMatchMs = DateTime.now().millisecondsSinceEpoch;
+    }
 
     // Increment only the NEW occurrences since the last partial update.
     final delta = (count - _sessionPartialCount).clamp(0, 99);
@@ -290,52 +304,15 @@ class _CounterScreenState extends State<CounterScreen>
   }
 
   // ═══════════════════════════════════════════════════════════════════════
-  //  ENGINE B — Audio-onset detector
+  //  ENGINE B — feeds raw mic levels into the BurstSegmenter
+  //  (algorithm lives in lib/services/burst_segmenter.dart)
   // ═══════════════════════════════════════════════════════════════════════
-  //
-  //  Algorithm:
-  //   1. Maintain a circular buffer of recent mic levels.
-  //   2. Compute local noise floor = average of the quietest 25 % of frames.
-  //   3. An "onset" = level rises > floor + _kOnsetRise for ≥ _kConfirmFrames
-  //      consecutive frames AND ≥ _minFramesBetweenOnsets have elapsed since
-  //      the previous onset.
-  //   4. Count onset → _audioOnsetWindow++ (if _dhikrConfirmed).
-  //
-  //  The adaptive minimum gap prevents a single long dhikr (Kulhuvallah)
-  //  from being counted multiple times within one recitation.
 
-  void _onMicLevel(double level) {
+  void _onMicLevel(double raw) {
     if (!_isListening) return;
-
-    // Update circular buffer
-    _lvlBuf[_lvlBufIdx] = level;
-    _lvlBufIdx = (_lvlBufIdx + 1) % _lvlBuf.length;
-    _framesSinceOnset++;
-
-    // Local noise floor: mean of the 5 quietest recent frames
-    final sorted = List<double>.from(_lvlBuf)..sort();
-    final floor = sorted.take(5).fold(0.0, (a, b) => a + b) / 5;
-
-    final isAbove = level > floor + _kOnsetRise;
-
-    if (isAbove) {
-      _framesAboveNow++;
-    } else {
-      _framesAboveNow = 0;
-      _audioAbove = false; // allow next onset to be detected
-    }
-
-    // Confirmed onset: not already in a burst, above for enough frames,
-    // and enough time has elapsed since the previous onset.
-    if (_framesAboveNow >= _kConfirmFrames &&
-        !_audioAbove &&
-        _framesSinceOnset >= _minFramesBetweenOnsets) {
-      _audioAbove = true;
-      _framesSinceOnset = 0;
-      if (_dhikrConfirmed) {
-        _audioOnsetWindow++;
-      }
-    }
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final level = _segmenter.process(raw, now);
+    if (mounted) setState(() => _micLevel = level.clamp(0.1, 1.0));
   }
 
   // ═══════════════════════════════════════════════════════════════════════
@@ -349,7 +326,7 @@ class _CounterScreenState extends State<CounterScreen>
   //  _kNoiseCapPerWindow to prevent noise runaway).
 
   void _reconcileWindow() {
-    if (!mounted || !_isListening || !_dhikrConfirmed) {
+    if (!mounted || !_isListening || !_everConfirmed) {
       _audioOnsetWindow = 0;
       _sttDeltaWindow = 0;
       return;
@@ -357,7 +334,7 @@ class _CounterScreenState extends State<CounterScreen>
 
     final audioN = _audioOnsetWindow;
     final sttN = _sttDeltaWindow;
-    final excess = (audioN - sttN).clamp(0, _kNoiseCapPerWindow);
+    final excess = (audioN - sttN).clamp(0, _capPerWindow);
 
     if (excess > 0) {
       _incrementCount(excess, fromStt: false);
@@ -371,36 +348,9 @@ class _CounterScreenState extends State<CounterScreen>
   //  COUNTING HELPERS
   // ═══════════════════════════════════════════════════════════════════════
 
-  /// Normalise a string: collapse Turkic/Arabic diacritics → ASCII letters only.
-  String _normalize(String s) {
-    return s
-        .toLowerCase()
-        .replaceAll('â', 'a').replaceAll('î', 'i').replaceAll('û', 'u')
-        .replaceAll('ê', 'e').replaceAll('ā', 'a').replaceAll('ī', 'i')
-        .replaceAll('ū', 'u').replaceAll('ğ', 'g').replaceAll('ı', 'i')
-        .replaceAll('ü', 'u').replaceAll('ö', 'o').replaceAll('ş', 's')
-        .replaceAll('ç', 'c')
-        .replaceAllMapped(RegExp(r'[^a-z]'), (_) => '');
-  }
-
-  /// Count occurrences: try all keywords, return the maximum found.
-  int _countOccurrences(String rawText) {
-    final text = _normalize(rawText);
-    int maxCount = 0;
-    for (final keyword in _dhikr.keywords) {
-      final kw = _normalize(keyword);
-      if (kw.isEmpty) continue;
-      var n = 0, pos = 0;
-      while (true) {
-        final found = text.indexOf(kw, pos);
-        if (found == -1) break;
-        n++;
-        pos = found + kw.length;
-      }
-      if (n > maxCount) maxCount = n;
-    }
-    return maxCount;
-  }
+  /// Count occurrences via the shared, unit-tested matcher.
+  int _countOccurrences(String rawText) =>
+      countDhikrOccurrences(rawText, _dhikr.keywords);
 
   /// Central increment — tracks whether the delta came from STT or audio.
   void _incrementCount(int by, {bool fromStt = false}) {
@@ -445,8 +395,7 @@ class _CounterScreenState extends State<CounterScreen>
     _windowTimer = null;
     _audioOnsetWindow = 0;
     _sttDeltaWindow = 0;
-    _audioAbove = false;
-    _framesAboveNow = 0;
+    _segmenter.resetBurstState();
     setState(() {
       _statusText = _s('Duraklatıldı', 'Paused', 'متوقف');
       _micLevel = 0.0;
@@ -471,7 +420,9 @@ class _CounterScreenState extends State<CounterScreen>
       _sessionPartialCount = 0;
       _audioOnsetWindow = 0;
       _sttDeltaWindow = 0;
-      _dhikrConfirmed = false;  // need fresh STT confirmation after reset
+      _segmenter.resetBurstState();
+      _everConfirmed = false;   // need fresh STT confirmation after reset
+      _lastSttMatchMs = 0;
       if (_isListening) {
         _statusText = _s('Dinleniyor...', 'Listening...', 'يستمع...');
       }
@@ -557,17 +508,19 @@ class _CounterScreenState extends State<CounterScreen>
                 child: Column(
                   children: [
                     if (_dhikr.arabicText.isNotEmpty) _buildArabicCard(),
-                    const SizedBox(height: 10),
-                    Text(
-                      _dhikr.localizedMeaning(lang),
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColors.textSecondary,
-                        fontStyle: FontStyle.italic,
-                        height: 1.5,
+                    if (_dhikr.source.isNotEmpty) ...[
+                      const SizedBox(height: 10),
+                      Text(
+                        '${_s("Kaynak", "Source", "المصدر")}: ${_dhikr.source}',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: AppColors.textSecondary,
+                          fontStyle: FontStyle.italic,
+                          height: 1.5,
+                        ),
                       ),
-                    ),
+                    ],
                     const SizedBox(height: 28),
                     _buildCircularCounter(),
                     const SizedBox(height: 12),

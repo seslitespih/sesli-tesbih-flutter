@@ -1,0 +1,122 @@
+/// Esmaül Hüsna — Allah'ın 99 güzel ismi.
+///
+/// Kaynak: A'râf Suresi 180 ("En güzel isimler Allah'ındır; O'na o
+/// isimlerle dua edin"); Buhârî, Deavât 68; Müslim, Zikir 5-6;
+/// isim listesi: Tirmizî, Deavât 82.
+class EsmaName {
+  final int number;
+  final String arabic;
+  final String name;      // Latin transliteration (TR)
+  final String meaningTr;
+  final String meaningEn;
+
+  const EsmaName(
+      this.number, this.arabic, this.name, this.meaningTr, this.meaningEn);
+}
+
+const String kEsmaSourceTr =
+    "Kaynak: A'râf Suresi 180; Buhârî, Deavât 68; Tirmizî, Deavât 82.";
+const String kEsmaSourceEn =
+    "Source: Surah Al-A'raf 180; Bukhari, Da'awat 68; Tirmidhi, Da'awat 82.";
+
+const List<EsmaName> kEsmaList = [
+  EsmaName(1, 'الرَّحْمَنُ', 'er-Rahmân', 'Rahmeti bütün yaratılmışları kuşatan', 'The Most Gracious'),
+  EsmaName(2, 'الرَّحِيمُ', 'er-Rahîm', 'Müminlere karşı çok merhametli', 'The Most Merciful'),
+  EsmaName(3, 'الْمَلِكُ', 'el-Melik', 'Bütün varlığın gerçek sahibi ve hükümdarı', 'The King, the Sovereign'),
+  EsmaName(4, 'الْقُدُّوسُ', 'el-Kuddûs', 'Her türlü eksiklikten uzak, tertemiz', 'The Most Holy'),
+  EsmaName(5, 'السَّلَامُ', 'es-Selâm', 'Esenlik veren, her kusurdan salim', 'The Source of Peace'),
+  EsmaName(6, 'الْمُؤْمِنُ', "el-Mü'min", 'Güven veren, vaadine güvenilen', 'The Giver of Faith and Security'),
+  EsmaName(7, 'الْمُهَيْمِنُ', 'el-Müheymin', 'Her şeyi gözetip koruyan', 'The Guardian, the Overseer'),
+  EsmaName(8, 'الْعَزِيزُ', 'el-Azîz', 'Üstün ve galip olan', 'The Almighty'),
+  EsmaName(9, 'الْجَبَّارُ', 'el-Cebbâr', 'İradesini her durumda yürüten, eksikleri tamamlayan', 'The Compeller'),
+  EsmaName(10, 'الْمُتَكَبِّرُ', 'el-Mütekebbir', 'Büyüklük kendisine ait olan', 'The Supreme, the Majestic'),
+  EsmaName(11, 'الْخَالِقُ', 'el-Hâlık', 'Her şeyi yaratan', 'The Creator'),
+  EsmaName(12, 'الْبَارِئُ', 'el-Bârî', 'Her şeyi kusursuz ve uyumlu yaratan', 'The Maker'),
+  EsmaName(13, 'الْمُصَوِّرُ', 'el-Musavvir', 'Her varlığa şekil ve suret veren', 'The Fashioner'),
+  EsmaName(14, 'الْغَفَّارُ', 'el-Gaffâr', 'Günahları tekrar tekrar bağışlayan', 'The Ever-Forgiving'),
+  EsmaName(15, 'الْقَهَّارُ', 'el-Kahhâr', 'Her şeye galip gelen', 'The Subduer'),
+  EsmaName(16, 'الْوَهَّابُ', 'el-Vehhâb', 'Karşılıksız bolca veren', 'The Bestower'),
+  EsmaName(17, 'الرَّزَّاقُ', 'er-Rezzâk', 'Bütün canlıların rızkını veren', 'The Provider'),
+  EsmaName(18, 'الْفَتَّاحُ', 'el-Fettâh', 'Hayır kapılarını açan, hüküm veren', 'The Opener'),
+  EsmaName(19, 'الْعَلِيمُ', 'el-Alîm', 'Her şeyi hakkıyla bilen', 'The All-Knowing'),
+  EsmaName(20, 'الْقَابِضُ', 'el-Kâbıd', 'Dilediğine rızkı daraltan, ruhları kabzeden', 'The Withholder'),
+  EsmaName(21, 'الْبَاسِطُ', 'el-Bâsıt', 'Dilediğine rızkı genişleten', 'The Expander'),
+  EsmaName(22, 'الْخَافِضُ', 'el-Hâfıd', 'Alçaltan', 'The Abaser'),
+  EsmaName(23, 'الرَّافِعُ', "er-Râfi'", 'Yükselten', 'The Exalter'),
+  EsmaName(24, 'الْمُعِزُّ', 'el-Muizz', 'İzzet ve şeref veren', 'The Giver of Honor'),
+  EsmaName(25, 'الْمُذِلُّ', 'el-Müzill', 'Zillete düşüren', 'The Humiliator'),
+  EsmaName(26, 'السَّمِيعُ', "es-Semî'", 'Her şeyi işiten', 'The All-Hearing'),
+  EsmaName(27, 'الْبَصِيرُ', 'el-Basîr', 'Her şeyi gören', 'The All-Seeing'),
+  EsmaName(28, 'الْحَكَمُ', 'el-Hakem', 'Son hükmü veren', 'The Judge'),
+  EsmaName(29, 'الْعَدْلُ', 'el-Adl', 'Mutlak adalet sahibi', 'The Utterly Just'),
+  EsmaName(30, 'اللَّطِيفُ', 'el-Latîf', 'En ince işlerin inceliklerini bilen, lütufkâr', 'The Most Subtle and Kind'),
+  EsmaName(31, 'الْخَبِيرُ', 'el-Habîr', 'Her şeyin iç yüzünden haberdar olan', 'The All-Aware'),
+  EsmaName(32, 'الْحَلِيمُ', 'el-Halîm', 'Cezada acele etmeyen, yumuşak davranan', 'The Forbearing'),
+  EsmaName(33, 'الْعَظِيمُ', 'el-Azîm', 'Pek yüce, pek büyük', 'The Magnificent'),
+  EsmaName(34, 'الْغَفُورُ', 'el-Gafûr', 'Çok bağışlayan', 'The All-Forgiving'),
+  EsmaName(35, 'الشَّكُورُ', 'eş-Şekûr', 'Az amele çok mükâfat veren', 'The Most Appreciative'),
+  EsmaName(36, 'الْعَلِيُّ', 'el-Aliyy', 'Pek yüce olan', 'The Most High'),
+  EsmaName(37, 'الْكَبِيرُ', 'el-Kebîr', 'Pek büyük olan', 'The Most Great'),
+  EsmaName(38, 'الْحَفِيظُ', 'el-Hafîz', 'Koruyup gözeten', 'The Preserver'),
+  EsmaName(39, 'الْمُقِيتُ', 'el-Mukît', 'Her canlının gıdasını veren', 'The Sustainer'),
+  EsmaName(40, 'الْحَسِيبُ', 'el-Hasîb', 'Kullarına yeten, hesaba çeken', 'The Reckoner'),
+  EsmaName(41, 'الْجَلِيلُ', 'el-Celîl', 'Celâl ve azamet sahibi', 'The Majestic'),
+  EsmaName(42, 'الْكَرِيمُ', 'el-Kerîm', 'Cömertliği sonsuz olan', 'The Most Generous'),
+  EsmaName(43, 'الرَّقِيبُ', 'er-Rakîb', 'Her an gözetleyen', 'The Watchful'),
+  EsmaName(44, 'الْمُجِيبُ', 'el-Mücîb', 'Dualara karşılık veren', 'The Responsive'),
+  EsmaName(45, 'الْوَاسِعُ', "el-Vâsi'", 'İlmi ve rahmeti her şeyi kuşatan', 'The All-Encompassing'),
+  EsmaName(46, 'الْحَكِيمُ', 'el-Hakîm', 'Her işi hikmetli olan', 'The All-Wise'),
+  EsmaName(47, 'الْوَدُودُ', 'el-Vedûd', 'Kullarını çok seven, sevilmeye lâyık olan', 'The Most Loving'),
+  EsmaName(48, 'الْمَجِيدُ', 'el-Mecîd', 'Şanı yüce ve keremi bol olan', 'The Most Glorious'),
+  EsmaName(49, 'الْبَاعِثُ', 'el-Bâis', 'Ölüleri dirilten, peygamber gönderen', 'The Resurrector'),
+  EsmaName(50, 'الشَّهِيدُ', 'eş-Şehîd', 'Her şeye şahit olan', 'The Witness'),
+  EsmaName(51, 'الْحَقُّ', 'el-Hakk', 'Varlığı değişmeyen gerçek', 'The Truth'),
+  EsmaName(52, 'الْوَكِيلُ', 'el-Vekîl', 'Kendine güvenenlerin işini en iyi yürüten', 'The Trustee'),
+  EsmaName(53, 'الْقَوِيُّ', 'el-Kaviyy', 'Pek güçlü olan', 'The Most Strong'),
+  EsmaName(54, 'الْمَتِينُ', 'el-Metîn', 'Kudreti sarsılmayan', 'The Firm'),
+  EsmaName(55, 'الْوَلِيُّ', 'el-Veliyy', 'Müminlerin dostu ve yardımcısı', 'The Protecting Friend'),
+  EsmaName(56, 'الْحَمِيدُ', 'el-Hamîd', 'Her türlü övgüye lâyık olan', 'The Praiseworthy'),
+  EsmaName(57, 'الْمُحْصِي', 'el-Muhsî', 'Her şeyi tek tek sayıp bilen', 'The Accounter'),
+  EsmaName(58, 'الْمُبْدِئُ', 'el-Mübdî', 'Varlığı ilk kez yaratan', 'The Originator'),
+  EsmaName(59, 'الْمُعِيدُ', 'el-Muîd', 'Öldükten sonra yeniden dirilten', 'The Restorer'),
+  EsmaName(60, 'الْمُحْيِي', 'el-Muhyî', 'Hayat veren', 'The Giver of Life'),
+  EsmaName(61, 'الْمُمِيتُ', 'el-Mümît', 'Ölümü yaratan', 'The Bringer of Death'),
+  EsmaName(62, 'الْحَيُّ', 'el-Hayy', 'Ezelî ve ebedî diri olan', 'The Ever-Living'),
+  EsmaName(63, 'الْقَيُّومُ', 'el-Kayyûm', 'Her şeyi ayakta tutan', 'The Self-Subsisting Sustainer'),
+  EsmaName(64, 'الْوَاجِدُ', 'el-Vâcid', 'Dilediğini dilediği anda bulan', 'The Finder'),
+  EsmaName(65, 'الْمَاجِدُ', 'el-Mâcid', 'Şanı ve keremi yüce olan', 'The Noble'),
+  EsmaName(66, 'الْوَاحِدُ', 'el-Vâhid', 'Bir ve tek olan', 'The One'),
+  EsmaName(67, 'الصَّمَدُ', 'es-Samed', 'Her şey kendisine muhtaç, O hiçbir şeye muhtaç değil', 'The Eternal Refuge'),
+  EsmaName(68, 'الْقَادِرُ', 'el-Kâdir', 'Her şeye gücü yeten', 'The All-Powerful'),
+  EsmaName(69, 'الْمُقْتَدِرُ', 'el-Muktedir', 'Kudreti her şeyi kuşatan', 'The Omnipotent'),
+  EsmaName(70, 'الْمُقَدِّمُ', 'el-Mukaddim', 'Dilediğini öne alan', 'The Expediter'),
+  EsmaName(71, 'الْمُؤَخِّرُ', 'el-Muahhir', 'Dilediğini geriye bırakan', 'The Delayer'),
+  EsmaName(72, 'الْأَوَّلُ', 'el-Evvel', 'Başlangıcı olmayan ilk', 'The First'),
+  EsmaName(73, 'الْآخِرُ', 'el-Âhir', 'Sonu olmayan son', 'The Last'),
+  EsmaName(74, 'الظَّاهِرُ', 'ez-Zâhir', 'Varlığı delillerle apaçık olan', 'The Manifest'),
+  EsmaName(75, 'الْبَاطِنُ', 'el-Bâtın', 'Zâtı gizli olan, her şeyin iç yüzünü bilen', 'The Hidden'),
+  EsmaName(76, 'الْوَالِي', 'el-Vâlî', 'Bütün işleri yöneten', 'The Governor'),
+  EsmaName(77, 'الْمُتَعَالِي', 'el-Müteâlî', 'Yüceler yücesi', 'The Most Exalted'),
+  EsmaName(78, 'الْبَرُّ', 'el-Berr', 'İyiliği bol olan', 'The Source of Goodness'),
+  EsmaName(79, 'التَّوَّابُ', 'et-Tevvâb', 'Tevbeleri çokça kabul eden', 'The Acceptor of Repentance'),
+  EsmaName(80, 'الْمُنْتَقِمُ', 'el-Müntakim', 'Suçluları adaletiyle cezalandıran', 'The Avenger'),
+  EsmaName(81, 'الْعَفُوُّ', 'el-Afüvv', 'Günahları silip affeden', 'The Pardoner'),
+  EsmaName(82, 'الرَّؤُوفُ', 'er-Raûf', 'Pek şefkatli olan', 'The Most Kind'),
+  EsmaName(83, 'مَالِكُ الْمُلْكِ', "Mâlikü'l-Mülk", 'Mülkün gerçek sahibi', 'The Owner of Sovereignty'),
+  EsmaName(84, 'ذُو الْجَلَالِ وَالْإِكْرَامِ', "Zü'l-Celâli ve'l-İkrâm", 'Azamet ve ikram sahibi', 'The Lord of Majesty and Generosity'),
+  EsmaName(85, 'الْمُقْسِطُ', 'el-Muksit', 'Adaletle hükmeden', 'The Equitable'),
+  EsmaName(86, 'الْجَامِعُ', "el-Câmi'", 'Dilediğini bir araya toplayan', 'The Gatherer'),
+  EsmaName(87, 'الْغَنِيُّ', 'el-Ganiyy', 'Hiçbir şeye muhtaç olmayan', 'The Self-Sufficient'),
+  EsmaName(88, 'الْمُغْنِي', 'el-Muğnî', 'Dilediğini zengin kılan', 'The Enricher'),
+  EsmaName(89, 'الْمَانِعُ', "el-Mâni'", 'Dilemediği şeye engel olan', 'The Preventer'),
+  EsmaName(90, 'الضَّارُّ', 'ed-Dârr', 'Hikmeti gereği zarar yaratan', 'The Creator of Harm'),
+  EsmaName(91, 'النَّافِعُ', "en-Nâfi'", 'Fayda veren', 'The Benefactor'),
+  EsmaName(92, 'النُّورُ', 'en-Nûr', 'Âlemleri nurlandıran', 'The Light'),
+  EsmaName(93, 'الْهَادِي', 'el-Hâdî', 'Doğru yola ileten', 'The Guide'),
+  EsmaName(94, 'الْبَدِيعُ', "el-Bedî'", 'Örneksiz yaratan', 'The Incomparable Originator'),
+  EsmaName(95, 'الْبَاقِي', 'el-Bâkî', 'Varlığı sonsuz olan', 'The Everlasting'),
+  EsmaName(96, 'الْوَارِثُ', 'el-Vâris', 'Her şeyin gerçek sahibi olarak kalan', 'The Inheritor'),
+  EsmaName(97, 'الرَّشِيدُ', 'er-Reşîd', 'Her işi isabetli olan, doğruya ulaştıran', 'The Guide to the Right Path'),
+  EsmaName(98, 'الصَّبُورُ', 'es-Sabûr', 'Cezada acele etmeyen, çok sabırlı', 'The Most Patient'),
+  EsmaName(99, 'اللَّهُ', 'Allah', "Varlığı zorunlu olan tek ilâhın özel ismi (Lafza-i Celâl)", 'Allah — the proper name of the One God'),
+];
