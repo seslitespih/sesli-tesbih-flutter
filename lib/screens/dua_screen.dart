@@ -40,7 +40,7 @@ class DuaScreen extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF1A5C1E), Color(0xFF2E7D32), Color(0xFF43A047)],
+          colors: [Color(0xFF0A1735), Color(0xFF16305F), Color(0xFF1E3A6E)],
         ),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
@@ -71,11 +71,11 @@ class DuaScreen extends StatelessWidget {
 // ─── Category accent colors ───────────────────────────────────────────────────
 
 const _kDuaAccents = [
-  Color(0xFF2E7D32),
-  Color(0xFF00838F),
-  Color(0xFF6A1B9A),
-  Color(0xFF1565C0),
-  Color(0xFF4E342E),
+  Color(0xFF16305F),
+  Color(0xFF2C4A7C),
+  Color(0xFF8C6D1F),
+  Color(0xFF16305F),
+  Color(0xFF44608E),
 ];
 
 class _DuaCard extends StatefulWidget {

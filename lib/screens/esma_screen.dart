@@ -41,7 +41,7 @@ class EsmaScreen extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF1A5C1E), Color(0xFF2E7D32), Color(0xFF43A047)],
+          colors: [Color(0xFF0A1735), Color(0xFF16305F), Color(0xFF1E3A6E)],
         ),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
@@ -106,11 +106,11 @@ class _EsmaCard extends StatelessWidget {
   const _EsmaCard({required this.esma, required this.lang});
 
   static const _accents = [
-    Color(0xFF2E7D32),
-    Color(0xFF00838F),
-    Color(0xFF6A1B9A),
-    Color(0xFF1565C0),
-    Color(0xFF4E342E),
+    Color(0xFF16305F),
+    Color(0xFF2C4A7C),
+    Color(0xFF8C6D1F),
+    Color(0xFF16305F),
+    Color(0xFF44608E),
   ];
 
   Color get _accent => _accents[(esma.number - 1) % _accents.length];
@@ -119,7 +119,10 @@ class _EsmaCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final meaning = lang == 'en' ? esma.meaningEn : esma.meaningTr;
 
-    return Container(
+    return GestureDetector(
+      onTap: () => Navigator.pushNamed(context, '/counter',
+          arguments: 2000 + esma.number),
+      child: Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
@@ -190,7 +193,11 @@ class _EsmaCard extends StatelessWidget {
               height: 1.6,
             ),
           ),
+          const SizedBox(width: 8),
+          Icon(Icons.mic_none_rounded,
+              size: 16, color: _accent.withValues(alpha: 0.55)),
         ],
+      ),
       ),
     );
   }

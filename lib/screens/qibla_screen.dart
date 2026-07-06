@@ -147,7 +147,7 @@ class _QiblaScreenState extends State<QiblaScreen>
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF1A5C1E), Color(0xFF2E7D32), Color(0xFF43A047)],
+          colors: [Color(0xFF0A1735), Color(0xFF16305F), Color(0xFF1E3A6E)],
         ),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
@@ -327,12 +327,12 @@ class _QiblaScreenState extends State<QiblaScreen>
                                 end: Alignment.bottomCenter,
                                 colors: _aligned
                                     ? [
-                                        const Color(0xFF4CAF50),
-                                        const Color(0xFF2E7D32),
+                                        const Color(0xFFD4AF37),
+                                        const Color(0xFF16305F),
                                       ]
                                     : [
-                                        const Color(0xFF2E7D32),
-                                        const Color(0xFF1B5E20),
+                                        const Color(0xFF16305F),
+                                        const Color(0xFF10234C),
                                       ],
                               ),
                               borderRadius: const BorderRadius.vertical(
@@ -357,8 +357,8 @@ class _QiblaScreenState extends State<QiblaScreen>
                             decoration: const BoxDecoration(
                               gradient: RadialGradient(
                                 colors: [
-                                  Color(0xFF4CAF50),
-                                  Color(0xFF1B5E20),
+                                  Color(0xFFD4AF37),
+                                  Color(0xFF10234C),
                                 ],
                               ),
                               shape: BoxShape.circle,

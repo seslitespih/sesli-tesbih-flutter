@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../main.dart';
 import '../models/dhikr.dart';
 import '../data/dhikr_data.dart';
+import '../data/esma_data.dart';
 import '../services/burst_segmenter.dart';
 import '../services/custom_dhikr_manager.dart';
 import '../services/dhikr_matcher.dart';
@@ -60,7 +61,6 @@ class _CounterScreenState extends State<CounterScreen>
   int _count = 0;
   int _targetCount = 33;
   String _statusText = '';
-  String _lastRecognizedText = '';  // shows what STT heard (debug / UX)
 
   // ── Animation controllers ────────────────────────────────────────────────
   late AnimationController _pulseCtrl;
@@ -84,7 +84,8 @@ class _CounterScreenState extends State<CounterScreen>
     onRep: (nowMs) {
       // Rolling STT gate: Engine B counts only while STT matched recently.
       if (_everConfirmed && (nowMs - _lastSttMatchMs) <= _kSttConfirmValidMs) {
-        _audioOnsetWindow++;
+        _audioTotal++;
+        _reconcileEngines();
       }
     },
   );
@@ -94,12 +95,16 @@ class _CounterScreenState extends State<CounterScreen>
   static const int _kSttConfirmValidMs = 20000;
 
   // ───────────────────────────────────────────────────────────────────────
-  //  RECONCILER
+  //  RECONCILER — cumulative MAX of the two engines.
+  //  Each engine keeps a running total since the last reset; the UI count
+  //  is always max(stt, audio). STT latency can no longer double-count:
+  //  a rep detected first by audio and later by STT raises both totals,
+  //  but the max only moves once.
   // ───────────────────────────────────────────────────────────────────────
-  int _audioOnsetWindow = 0;   // Engine B onsets in current window
-  int _sttDeltaWindow = 0;     // Engine A deltas applied in current window
-  Timer? _windowTimer;
-  static const int _kWindowMs = 1000; // reconcile every 1 s
+  int _sttTotal = 0;
+  int _audioTotal = 0;
+  int _creditedTotal = 0;
+  static const int _kMaxAudioLead = 15; // audio may lead STT by at most this
 
   // ───────────────────────────────────────────────────────────────────────
   //  Adaptive per-dhikr timing (0 = short, 1 = medium, 2 = long)
@@ -111,9 +116,6 @@ class _CounterScreenState extends State<CounterScreen>
     if (len > 25) return 1; // medium (Kulhuvallah, Bismillahillezi)
     return 0;               // short (Subhanallah, Allah, ...)
   }
-
-  /// Max audio-only additions the reconciler may credit per 1-s window.
-  int get _capPerWindow => const [3, 2, 1][_lenClass];
 
   /// Configures the segmenter's timing for the loaded dhikr.
   void _configureSegmenter() {
@@ -146,7 +148,6 @@ class _CounterScreenState extends State<CounterScreen>
   void dispose() {
     _isListening = false;
     _speech.stop();
-    _windowTimer?.cancel();
     _pulseCtrl.dispose();
     _ringCtrl.dispose();
     super.dispose();
@@ -156,21 +157,49 @@ class _CounterScreenState extends State<CounterScreen>
   //  LOADING
   // ═══════════════════════════════════════════════════════════════════════
 
-  Future<void> _loadDhikrAndPrefs() async {
-    final custom = await CustomDhikrManager.load();
-    final all = [...kDhikrList, ...custom];
-    final dhikr = all.firstWhere(
-      (d) => d.id == widget.dhikrId,
-      orElse: () => all.first,
+  /// Esmaül Hüsna girişinden gelen id'ler 2000 + isim numarasıdır;
+  /// isimden geçici bir zikir tanımı üretilir ("Yâ Latîf" gibi).
+  Dhikr _dhikrFromEsma(EsmaName e) {
+    final stripped = e.name.replaceFirst(
+        RegExp(r'^(el|er|es|eş|ed|en|et|ez)-', caseSensitive: false), '');
+    final isAllah = e.name == 'Allah';
+    return Dhikr(
+      id: 2000 + e.number,
+      nameTr: isAllah ? 'Allah' : 'Yâ $stripped',
+      nameEn: isAllah ? 'Allah' : 'Ya $stripped',
+      nameAr: isAllah ? e.arabic : 'يَا ${e.arabic}',
+      arabicText: e.arabic,
+      meaningTr: '',
+      meaningEn: '',
+      targetCount: 33,
+      keywords: [stripped, 'ya $stripped'],
+      source: 'Tirmizî, Deavât 82 (Esmâ-i Hüsnâ)',
     );
+  }
+
+  Future<void> _loadDhikrAndPrefs() async {
+    late final Dhikr dhikr;
+    if (widget.dhikrId >= 2000) {
+      final esma = kEsmaList.firstWhere(
+        (e) => e.number == widget.dhikrId - 2000,
+        orElse: () => kEsmaList.first,
+      );
+      dhikr = _dhikrFromEsma(esma);
+    } else {
+      final custom = await CustomDhikrManager.load();
+      final all = [...kDhikrList, ...custom];
+      dhikr = all.firstWhere(
+        (d) => d.id == widget.dhikrId,
+        orElse: () => all.first,
+      );
+    }
     final prefs = await SharedPreferences.getInstance();
-    final savedCount = prefs.getInt('count_${dhikr.id}') ?? 0;
     final savedTarget = prefs.getInt('target_${dhikr.id}') ?? dhikr.targetCount;
 
     if (mounted) {
       setState(() {
         _dhikr = dhikr;
-        _count = savedCount;
+        _count = 0; // her açılışta sıfırdan başla
         _targetCount = savedTarget;
         _dhikrLoaded = true;
         _statusText = _s('Başlatılıyor...', 'Starting...', 'جارٍ التحميل...');
@@ -207,9 +236,10 @@ class _CounterScreenState extends State<CounterScreen>
     _sessionPartialCount = 0;
     _segmenter.resetBurstState();
 
-    // Locale detection
-    final lang = LocaleService.instance.language;
-    final prefix = lang == 'ar' ? 'ar' : (lang == 'en' ? 'en' : 'tr');
+    // STT her zaman Türkçe modelde çalışır: zikir kelimelerini fonetik
+    // olarak en iyi TR tanıyıcı yakalıyor (EN tanıyıcı "i like it" gibi
+    // saçmalıyor, AR tanıyıcı Arap harfli çıktı verip eşleşmiyor).
+    const prefix = 'tr';
     String localeId = '';
     try {
       final locales = await _speech.locales();
@@ -224,6 +254,7 @@ class _CounterScreenState extends State<CounterScreen>
     await _speech.listen(
       onResult: _onResult,
       onSoundLevelChange: _onMicLevel, // feed Engine B (raw platform units)
+      // NOT: pencere zamanlayıcısı kaldırıldı — uzlaştırma artık olay anında
       listenOptions: SpeechListenOptions(
         partialResults: true,
         cancelOnError: false,
@@ -234,12 +265,6 @@ class _CounterScreenState extends State<CounterScreen>
       ),
     );
 
-    // Start reconciler timer when session begins
-    _windowTimer?.cancel();
-    _windowTimer = Timer.periodic(
-      const Duration(milliseconds: _kWindowMs),
-      (_) => _reconcileWindow(),
-    );
   }
 
   void _onStatus(String status) {
@@ -274,14 +299,6 @@ class _CounterScreenState extends State<CounterScreen>
     final text = result.recognizedWords;
     if (text.isEmpty) return;
 
-    // Update debug display
-    if (mounted) {
-      setState(() {
-        _lastRecognizedText =
-            text.length > 60 ? '…${text.substring(text.length - 60)}' : text;
-      });
-    }
-
     final count = _countOccurrences(text);
 
     // Rolling gate: an STT match keeps Engine B unlocked for the next 20 s.
@@ -300,7 +317,10 @@ class _CounterScreenState extends State<CounterScreen>
       _sessionPartialCount = count;
     }
 
-    if (delta > 0 && mounted) _incrementCount(delta, fromStt: true);
+    if (delta > 0 && mounted) {
+      _sttTotal += delta;
+      _reconcileEngines();
+    }
   }
 
   // ═══════════════════════════════════════════════════════════════════════
@@ -316,32 +336,20 @@ class _CounterScreenState extends State<CounterScreen>
   }
 
   // ═══════════════════════════════════════════════════════════════════════
-  //  RECONCILER — fires every 1.5 s
+  //  RECONCILER — cumulative max, runs on every engine event
   // ═══════════════════════════════════════════════════════════════════════
-  //
-  //  STT already called _incrementCount(sttDelta) in real-time.
-  //  Audio onsets were counted in _audioOnsetWindow.
-  //
-  //  If audio detected MORE than STT, add the excess (capped at
-  //  _kNoiseCapPerWindow to prevent noise runaway).
 
-  void _reconcileWindow() {
-    if (!mounted || !_isListening || !_everConfirmed) {
-      _audioOnsetWindow = 0;
-      _sttDeltaWindow = 0;
-      return;
+  void _reconcileEngines() {
+    if (!mounted || !_isListening) return;
+    // Noise guard: audio may lead STT by a bounded amount only.
+    if (_audioTotal > _sttTotal + _kMaxAudioLead) {
+      _audioTotal = _sttTotal + _kMaxAudioLead;
     }
-
-    final audioN = _audioOnsetWindow;
-    final sttN = _sttDeltaWindow;
-    final excess = (audioN - sttN).clamp(0, _capPerWindow);
-
-    if (excess > 0) {
-      _incrementCount(excess, fromStt: false);
+    final t = math.max(_sttTotal, _audioTotal);
+    if (t > _creditedTotal) {
+      _incrementCount(t - _creditedTotal);
+      _creditedTotal = t;
     }
-
-    _audioOnsetWindow = 0;
-    _sttDeltaWindow = 0;
   }
 
   // ═══════════════════════════════════════════════════════════════════════
@@ -352,10 +360,8 @@ class _CounterScreenState extends State<CounterScreen>
   int _countOccurrences(String rawText) =>
       countDhikrOccurrences(rawText, _dhikr.keywords);
 
-  /// Central increment — tracks whether the delta came from STT or audio.
-  void _incrementCount(int by, {bool fromStt = false}) {
+  void _incrementCount(int by) {
     if (by <= 0) return;
-    if (fromStt) _sttDeltaWindow += by;
 
     setState(() {
       _count += by;
@@ -391,10 +397,6 @@ class _CounterScreenState extends State<CounterScreen>
   void _stopListening() {
     _isListening = false;
     _speech.stop();
-    _windowTimer?.cancel();
-    _windowTimer = null;
-    _audioOnsetWindow = 0;
-    _sttDeltaWindow = 0;
     _segmenter.resetBurstState();
     setState(() {
       _statusText = _s('Duraklatıldı', 'Paused', 'متوقف');
@@ -418,8 +420,9 @@ class _CounterScreenState extends State<CounterScreen>
     setState(() {
       _count = 0;
       _sessionPartialCount = 0;
-      _audioOnsetWindow = 0;
-      _sttDeltaWindow = 0;
+      _sttTotal = 0;
+      _audioTotal = 0;
+      _creditedTotal = 0;
       _segmenter.resetBurstState();
       _everConfirmed = false;   // need fresh STT confirmation after reset
       _lastSttMatchMs = 0;
@@ -548,24 +551,6 @@ class _CounterScreenState extends State<CounterScreen>
                       style: const TextStyle(
                           fontSize: 13, color: AppColors.textSecondary),
                     ),
-                    // Show what STT heard — helps user diagnose if keywords need tuning
-                    if (_lastRecognizedText.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Text(
-                          '"$_lastRecognizedText"',
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: AppColors.textSecondary.withValues(alpha: 0.6),
-                            fontStyle: FontStyle.italic,
-                          ),
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
                     const SizedBox(height: 24),
                     _buildTapButton(),
                     const SizedBox(height: 28),
@@ -589,7 +574,7 @@ class _CounterScreenState extends State<CounterScreen>
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF1A5C1E), Color(0xFF2E7D32), Color(0xFF43A047)],
+          colors: [Color(0xFF0A1735), Color(0xFF16305F), Color(0xFF1E3A6E)],
         ),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
@@ -626,7 +611,7 @@ class _CounterScreenState extends State<CounterScreen>
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFFE8F5E9), Color(0xFFC8E6C9)],
+          colors: [Color(0xFFFDFBF3), Color(0xFFF1E8CF)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -659,8 +644,7 @@ class _CounterScreenState extends State<CounterScreen>
 
   Widget _buildCircularCounter() {
     final isComplete = _remaining == 0 && _count > 0;
-    final arcColor =
-        isComplete ? const Color(0xFFFFCA28) : AppColors.greenAccent;
+    final arcColor = isComplete ? AppColors.gold : AppColors.greenMid;
 
     return SizedBox(
       width: 230,
@@ -712,7 +696,7 @@ class _CounterScreenState extends State<CounterScreen>
                     fontSize: 78,
                     fontWeight: FontWeight.bold,
                     color: isComplete
-                        ? const Color(0xFFFFCA28)
+                        ? const Color(0xFFC9A227)
                         : AppColors.greenDark,
                     height: 1.0,
                   ),
@@ -729,7 +713,7 @@ class _CounterScreenState extends State<CounterScreen>
                         horizontal: 12, vertical: 4),
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
-                          colors: [Color(0xFF1B5E20), Color(0xFF388E3C)]),
+                          colors: [Color(0xFF10234C), Color(0xFF1E3A6E)]),
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
@@ -802,7 +786,7 @@ class _CounterScreenState extends State<CounterScreen>
                     gradient: const LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: [Color(0xFF4CAF50), Color(0xFF2E7D32)],
+                      colors: [Color(0xFFD4AF37), Color(0xFF16305F)],
                     ),
                     shape: BoxShape.circle,
                     boxShadow: [
@@ -846,7 +830,7 @@ class _CounterScreenState extends State<CounterScreen>
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFFE8F5E9), Color(0xFFC8E6C9)],
+            colors: [Color(0xFFFDFBF3), Color(0xFFF1E8CF)],
           ),
           border: Border.all(color: AppColors.greenAccent, width: 2.5),
           boxShadow: [
@@ -888,21 +872,21 @@ class _CounterScreenState extends State<CounterScreen>
               : _s('Başlat', 'Start', 'ابدأ'),
           icon: _isListening ? Icons.pause_circle : Icons.play_circle,
           gradient: const LinearGradient(
-              colors: [Color(0xFF1B5E20), Color(0xFF388E3C)]),
+              colors: [Color(0xFF10234C), Color(0xFF1E3A6E)]),
           onTap: _toggleListening,
         ),
         _ActionButton(
           label: _s('Sıfırla', 'Reset', 'إعادة'),
           icon: Icons.refresh_rounded,
           gradient: const LinearGradient(
-              colors: [Color(0xFFE65100), Color(0xFFF57C00)]),
+              colors: [Color(0xFFA8861D), Color(0xFFC9A227)]),
           onTap: _reset,
         ),
         _ActionButton(
           label: _s('Hedef', 'Target', 'الهدف'),
           icon: Icons.flag_rounded,
           gradient: const LinearGradient(
-              colors: [Color(0xFF1565C0), Color(0xFF1976D2)]),
+              colors: [Color(0xFF16305F), Color(0xFF2C4A7C)]),
           onTap: _showTargetDialog,
         ),
       ],

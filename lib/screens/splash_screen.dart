@@ -62,9 +62,9 @@ class _SplashScreenState extends State<SplashScreen>
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFF1B5E20),
-              Color(0xFF2E7D32),
-              Color(0xFF388E3C),
+              Color(0xFF10234C),
+              Color(0xFF16305F),
+              Color(0xFF1E3A6E),
             ],
             stops: [0.0, 0.55, 1.0],
           ),
@@ -80,12 +80,12 @@ class _SplashScreenState extends State<SplashScreen>
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Islamic 8-pointed star
+                      // Altın hilal
                       SizedBox(
-                        width: 96,
-                        height: 96,
+                        width: 104,
+                        height: 104,
                         child: CustomPaint(
-                          painter: _IslamicStarPainter(
+                          painter: _CrescentPainter(
                             progress: _starAnim.value,
                           ),
                         ),
@@ -95,7 +95,7 @@ class _SplashScreenState extends State<SplashScreen>
                       const Text(
                         'سبحان الله',
                         style: TextStyle(
-                          color: Color(0xFFFFCA28),
+                          color: Color(0xFFC9A227),
                           fontSize: 26,
                           fontWeight: FontWeight.w400,
                           letterSpacing: 2.0,
@@ -152,61 +152,58 @@ class _SplashScreenState extends State<SplashScreen>
   }
 }
 
-class _IslamicStarPainter extends CustomPainter {
+/// Zarif altın hilal: iki dairenin farkından oluşur, hafif ışıltılı.
+class _CrescentPainter extends CustomPainter {
   final double progress;
-  const _IslamicStarPainter({this.progress = 1.0});
+  const _CrescentPainter({this.progress = 1.0});
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final outerR = size.width / 2;
-    final innerR = outerR * 0.42;
-    const points = 8;
+    final r = size.width / 2 - 4;
 
-    final path = Path();
-    for (var i = 0; i < points * 2; i++) {
-      final r = i.isEven ? outerR : innerR;
-      final angle = (i * math.pi / points) - math.pi / 2;
-      final x = center.dx + r * math.cos(angle);
-      final y = center.dy + r * math.sin(angle);
-      if (i == 0) {
-        path.moveTo(x, y);
-      } else {
-        path.lineTo(x, y);
-      }
-    }
-    path.close();
+    final crescent = Path()
+      ..addOval(Rect.fromCircle(center: center, radius: r))
+      ..addOval(Rect.fromCircle(
+        center: center.translate(r * 0.42, -r * 0.10),
+        radius: r * 0.82,
+      ))
+      ..fillType = PathFillType.evenOdd;
 
     // Glow
     canvas.drawPath(
-      path,
+      crescent,
       Paint()
-        ..color = const Color(0xFFFFCA28).withValues(alpha: 0.3 * progress)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 14),
+        ..color = const Color(0xFFC9A227).withValues(alpha: 0.35 * progress)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 16),
     );
 
-    // Fill
+    // Altın degrade dolgu
     canvas.drawPath(
-      path,
+      crescent,
       Paint()
-        ..color = Color.lerp(
-          const Color(0xFFFFCA28).withValues(alpha: 0.0),
-          const Color(0xFFFFCA28),
-          progress,
-        )!
-        ..style = PaintingStyle.fill,
+        ..shader = LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color.lerp(const Color(0x00E5C96B), const Color(0xFFE5C96B),
+                progress)!,
+            Color.lerp(const Color(0x00A8861D), const Color(0xFFA8861D),
+                progress)!,
+          ],
+        ).createShader(Rect.fromCircle(center: center, radius: r)),
     );
 
-    // Outline
-    canvas.drawPath(
-      path,
-      Paint()
-        ..color = Colors.white.withValues(alpha: 0.3 * progress)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.5,
+    // Hilalin ucunda minik yıldız noktası
+    final dot = center.translate(r * 0.78 * math.cos(-math.pi / 3.2),
+        r * 0.78 * math.sin(-math.pi / 3.2));
+    canvas.drawCircle(
+      dot,
+      3.2 * progress,
+      Paint()..color = Colors.white.withValues(alpha: 0.9 * progress),
     );
   }
 
   @override
-  bool shouldRepaint(_IslamicStarPainter old) => progress != old.progress;
+  bool shouldRepaint(_CrescentPainter old) => progress != old.progress;
 }

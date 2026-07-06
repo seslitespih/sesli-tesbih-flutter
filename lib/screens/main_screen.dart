@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../main.dart';
 import '../models/dhikr.dart';
@@ -63,18 +62,25 @@ class _MainScreenState extends State<MainScreen> {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF1A5C1E), Color(0xFF2E7D32), Color(0xFF43A047)],
+          colors: [Color(0xFF0A1735), Color(0xFF16305F), Color(0xFF1E3A6E)],
         ),
       ),
       child: Row(
         children: [
-          // Mini Islamic star
-          SizedBox(
-            width: 36,
-            height: 36,
-            child: CustomPaint(painter: _MiniStarPainter()),
+          // İnce altın aksan çizgisi — sade ve şık
+          Container(
+            width: 3.5,
+            height: 34,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [AppColors.goldLight, AppColors.gold],
+              ),
+              borderRadius: BorderRadius.circular(2),
+            ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -85,7 +91,7 @@ class _MainScreenState extends State<MainScreen> {
                     color: Colors.white,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    letterSpacing: 0.5,
+                    letterSpacing: 0.8,
                   ),
                 ),
                 Text(
@@ -120,7 +126,7 @@ class _MainScreenState extends State<MainScreen> {
 
   Widget _buildLangBar() {
     return Container(
-      color: const Color(0xFF256029),
+      color: const Color(0xFF14294F),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -137,7 +143,7 @@ class _MainScreenState extends State<MainScreen> {
 
   Widget _buildNavTabs() {
     return Container(
-      color: const Color(0xFF256029),
+      color: const Color(0xFF14294F),
       padding: const EdgeInsets.only(bottom: 10, left: 12, right: 12),
       child: Row(
         children: [
@@ -345,51 +351,14 @@ class _MainScreenState extends State<MainScreen> {
   }
 }
 
-// ─── Mini Star Painter ────────────────────────────────────────────────────────
-
-class _MiniStarPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final outerR = size.width / 2;
-    final innerR = outerR * 0.42;
-    const pts = 8;
-
-    final path = Path();
-    for (var i = 0; i < pts * 2; i++) {
-      final r = i.isEven ? outerR : innerR;
-      final angle = (i * math.pi / pts) - math.pi / 2;
-      final x = center.dx + r * math.cos(angle);
-      final y = center.dy + r * math.sin(angle);
-      if (i == 0) {
-        path.moveTo(x, y);
-      } else {
-        path.lineTo(x, y);
-      }
-    }
-    path.close();
-
-    canvas.drawPath(
-      path,
-      Paint()
-        ..color = const Color(0xFFFFCA28).withValues(alpha: 0.25)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
-    );
-    canvas.drawPath(path, Paint()..color = const Color(0xFFFFCA28));
-  }
-
-  @override
-  bool shouldRepaint(_MiniStarPainter old) => false;
-}
-
 // ─── Card accent colors ───────────────────────────────────────────────────────
 
 const _kAccentColors = [
-  Color(0xFF2E7D32), // green
-  Color(0xFF00838F), // teal
-  Color(0xFF1565C0), // blue
-  Color(0xFF6A1B9A), // purple
-  Color(0xFF4E342E), // brown
+  Color(0xFF16305F), // green
+  Color(0xFF2C4A7C), // teal
+  Color(0xFF16305F), // blue
+  Color(0xFF8C6D1F), // purple
+  Color(0xFF44608E), // brown
 ];
 
 // ─── Language Button ──────────────────────────────────────────────────────────
@@ -416,16 +385,16 @@ class _LangButton extends StatelessWidget {
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 5),
         decoration: BoxDecoration(
-          color: isActive ? const Color(0xFFFFCA28) : Colors.white.withValues(alpha: 0.15),
+          color: isActive ? const Color(0xFFC9A227) : Colors.white.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isActive ? const Color(0xFFFFCA28) : Colors.white.withValues(alpha: 0.3),
+            color: isActive ? const Color(0xFFC9A227) : Colors.white.withValues(alpha: 0.3),
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: isActive ? const Color(0xFF1B5E20) : Colors.white,
+            color: isActive ? const Color(0xFF10234C) : Colors.white,
             fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
             fontSize: 13,
           ),

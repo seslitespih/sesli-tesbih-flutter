@@ -1,7 +1,7 @@
 name: sesli_tesbih
 description: Vocal Tasbeeh - Vocal Islamic Dhikr Counter
 publish_to: 'none'
-version: 1.4.0+26
+version: 1.4.1+27
 
 environment:
   sdk: '>=3.2.0 <4.0.0'

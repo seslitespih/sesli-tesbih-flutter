@@ -10,10 +10,10 @@ const List<Dua> kDuaList = [
     transliteration:
         "Ellezîne âmenû ve tatmainnu kulûbuhum bi-zikrillâh. E lâ bi-zikrillâhi tatmainnu'l-kulûb.",
     turkish:
-        "Onlar, iman eden ve kalpleri Allah'ı zikretmekle huzura kavuşan kimselerdir. Biliniz ki kalpler ancak Allah'ı zikretmekle huzur bulur.",
+        "Onlar, inananlar ve kalpleri Allah'ı anmakla huzura kavuşanlardır. Biliniz ki, kalpler ancak Allah'ı anmakla huzur bulur.",
     english:
         "Those who have believed and whose hearts find rest in the remembrance of Allah. Verily, in the remembrance of Allah do hearts find rest.",
-    info: "Kaynak: Ra'd Suresi, 28. ayet.",
+    info: "Kaynak: Ra'd Suresi, 28. ayet · Meal: Diyanet İşleri Başkanlığı.",
     infoEn: "Source: Surah Ar-Ra'd, verse 28.",
   ),
   Dua(
@@ -22,10 +22,10 @@ const List<Dua> kDuaList = [
     arabicText: 'فَاذْكُرُونِٓي اَذْكُرْكُمْ وَاشْكُرُوا لِي وَلَا تَكْفُرُونِ',
     transliteration: "Fezkurûnî ezkurkum, veşkurû lî ve lâ tekfurûn.",
     turkish:
-        "Öyleyse beni zikredin ki ben de sizi anayım. Bana şükredin, nankörlük etmeyin.",
+        "Öyleyse yalnız beni anın ki ben de sizi anayım. Bana şükredin, sakın nankörlük etmeyin.",
     english:
         "So remember Me; I will remember you. And be grateful to Me and do not deny Me.",
-    info: 'Kaynak: Bakara Suresi, 152. ayet.',
+    info: 'Kaynak: Bakara Suresi, 152. ayet · Meal: Diyanet İşleri Başkanlığı.',
     infoEn: 'Source: Surah Al-Baqarah, verse 152.',
   ),
   Dua(
@@ -36,10 +36,10 @@ const List<Dua> kDuaList = [
     transliteration:
         "Yâ eyyuhellezîne âmenüzkürullâhe zikran kesîrâ. Ve sebbihûhu bukraten ve asîlâ.",
     turkish:
-        "Ey iman edenler! Allah'ı çokça zikredin ve O'nu sabah akşam tesbih edin.",
+        "Ey iman edenler! Allah'ı çokça zikredin. O'nu sabah akşam tespih edin.",
     english:
         "O you who have believed, remember Allah with much remembrance, and exalt Him morning and afternoon.",
-    info: 'Kaynak: Ahzâb Suresi, 41-42. ayetler.',
+    info: 'Kaynak: Ahzâb Suresi, 41-42. ayetler · Meal: Diyanet İşleri Başkanlığı.',
     infoEn: 'Source: Surah Al-Ahzab, verses 41-42.',
   ),
   Dua(
@@ -50,10 +50,10 @@ const List<Dua> kDuaList = [
     transliteration:
         "Vezkur rabbeke fî nefsike tedarruan ve hîfeten ve dûne'l-cehri mine'l-kavli bi'l-guduvvi ve'l-âsâli ve lâ tekun mine'l-gâfilîn.",
     turkish:
-        "Rabbini, içinden yalvararak ve O'ndan korkarak, yüksek olmayan bir sesle sabah akşam zikret ve gafillerden olma.",
+        "Rabbini, içinden yalvararak ve korkarak, yüksek olmayan bir sesle sabah-akşam zikret ve gafillerden olma.",
     english:
         "And remember your Lord within yourself in humility and in fear, without being loud in speech, in the mornings and the evenings; and do not be among the heedless.",
-    info: "Kaynak: A'râf Suresi, 205. ayet.",
+    info: "Kaynak: A'râf Suresi, 205. ayet · Meal: Diyanet İşleri Başkanlığı.",
     infoEn: "Source: Surah Al-A'raf, verse 205.",
   ),
   Dua(
@@ -63,10 +63,10 @@ const List<Dua> kDuaList = [
     transliteration:
         "Ve lezikrullâhi ekber. Vallâhu ya'lemu mâ tasneûn.",
     turkish:
-        "Allah'ı zikretmek elbette en büyük ibadettir. Allah yaptıklarınızı bilir.",
+        "Allah'ı anmak (olan namaz) elbette en büyük ibadettir. Allah, yaptıklarınızı biliyor.",
     english:
         "And the remembrance of Allah is greater. And Allah knows that which you do.",
-    info: 'Kaynak: Ankebût Suresi, 45. ayet.',
+    info: 'Kaynak: Ankebût Suresi, 45. ayet · Meal: Diyanet İşleri Başkanlığı.',
     infoEn: 'Source: Surah Al-Ankabut, verse 45.',
   ),
   // ── Dualar ve sureler ─────────────────────────────────────────────────────
@@ -78,10 +78,10 @@ const List<Dua> kDuaList = [
     transliteration:
         "Allahu laa ilaaha illaa huw-al-Hayyul-Qayyuum. Laa ta'khudhuhu sinatuw-wa laa nawm. Lahuu maa fis-samaawaati wa maa fil-ard. Man dhal-ladhii yashfa'u 'indahuu illaa bi-idhnih. Ya'lamu maa bayna aydiihim wa maa khalfahum. Wa laa yuhiituuna bi-shay'im-min 'ilmihii illaa bimaa shaa'. Wasi'a kursiyyuhus-samaawaati wal-ard. Wa laa ya'uduhu hifzuhumaa. Wa huwal-'Aliyyul-'Aziim.",
     turkish:
-        "Allah, O'ndan başka hiçbir ilah olmayandır. Diridir, kâinatı ayakta tutandır. O'nu ne uyuklama ne de uyku tutar. Göklerdeki ve yerdeki her şey O'nundur. İzni olmadan O'nun katında kim şefaat edebilir? O, kulların önlerinde ve arkalarında ne varsa hepsini bilir. Onlar ise O'nun ilminden, dilediği kadarından başka bir şeyi kavrayamazlar. O'nun kürsüsü gökleri ve yeri kaplamıştır. Gökleri ve yeri koruyup gözetmek O'na güç gelmez. O, çok yücedir, çok büyüktür.",
+        "Allah, kendisinden başka hiçbir ilah olmayandır. Diridir, kayyumdur. O'nu ne bir uyuklama tutabilir, ne de bir uyku. Göklerdeki her şey, yerdeki her şey O'nundur. İzni olmaksızın O'nun katında şefaatte bulunacak kimdir? O, kulların önlerindekileri ve arkalarındakileri (yaptıklarını ve yapacaklarını) bilir. Onlar O'nun ilminden, kendisinin dilediği kadarından başka bir şey kavrayamazlar. O'nun kürsüsü, bütün gökleri ve yeri kaplayıp kuşatmıştır. (O, göklere, yere, bütün evrene hükmetmektedir.) Gökleri ve yeri koruyup gözetmek O'na güç gelmez. O, yücedir, büyüktür.",
     english:
         "Allah — there is no deity except Him, the Ever-Living, the Sustainer of existence. Neither drowsiness overtakes Him nor sleep. To Him belongs whatever is in the heavens and whatever is on the earth. Who is it that can intercede with Him except by His permission? He knows what is before them and what will be after them, and they encompass not a thing of His knowledge except for what He wills. His Kursi extends over the heavens and the earth, and their preservation tires Him not. And He is the Most High, the Most Great.",
-    info: 'Kaynak: Bakara Suresi, 255. ayet.',
+    info: 'Kaynak: Bakara Suresi, 255. ayet · Meal: Diyanet İşleri Başkanlığı.',
     infoEn: 'Source: Surah Al-Baqarah, verse 255.',
   ),
   Dua(
@@ -92,10 +92,10 @@ const List<Dua> kDuaList = [
     transliteration:
         "Bismillaahir-Rahmaanir-Rahiim. Alhamdulillaahi Rabbil-'aalamiin. Ar-Rahmaanir-Rahiim. Maaliki Yawmid-Diin. Iyyaaka na'budu wa iyyaaka nasta'iin. Ihdinas-Siraatal-Mustaqiim. Siraatalladhiina an'amta 'alayhim, ghayril-maghdhuubi 'alayhim wa lad-daalliin.",
     turkish:
-        "Rahman ve Rahim olan Allah'ın adıyla. Hamd, âlemlerin Rabbi olan Allah'adır. O, Rahman'dır, Rahim'dir. Din gününün sahibidir. Yalnız sana ibadet eder, yalnız senden yardım dileriz. Bizi doğru yola ilet. Kendilerine nimet verdiklerinin yoluna; gazaba uğrayanların ve sapkınların yoluna değil.",
+        "Bismillahirrahmanirrahim. Hamd, âlemlerin Rabbi, Rahmân, Rahîm, hesap ve ceza gününün (ahiret gününün) mâliki Allah'a mahsustur. (Allah'ım!) Yalnız sana ibadet ederiz ve yalnız senden yardım dileriz. Bizi doğru yola, kendilerine nimet verdiklerinin yoluna ilet; gazaba uğrayanlarınkine ve sapıklarınkine değil.",
     english:
         "In the name of Allah, the Entirely Merciful, the Especially Merciful. Praise be to Allah, Lord of the worlds — the Entirely Merciful, the Especially Merciful — Sovereign of the Day of Recompense. It is You we worship and You we ask for help. Guide us to the straight path: the path of those upon whom You have bestowed favor, not of those who have earned anger or of those who are astray.",
-    info: "Kaynak: Kur'an-ı Kerim, 1. sure (Fâtiha).",
+    info: "Kaynak: Kur'an-ı Kerim, 1. sure (Fâtiha) · Meal: Diyanet İşleri Başkanlığı.",
     infoEn: 'Source: The Quran, Surah 1 (Al-Fatiha).',
   ),
   Dua(
@@ -106,10 +106,10 @@ const List<Dua> kDuaList = [
     transliteration:
         "Bismillaahir-Rahmaanir-Rahiim. Qul Huwallahu Ahad. Allahus-Samad. Lam yalid wa lam yuulad. Wa lam yakul-lahuu kufuwan ahad.",
     turkish:
-        "De ki: O Allah birdir. Allah Samed'dir. O doğurmamış ve doğmamıştır. O'nun hiçbir dengi yoktur.",
+        "De ki: \"O, Allah'tır, bir tektir. Allah Samed'dir. (Her şey O'na muhtaçtır; O, hiçbir şeye muhtaç değildir.) O'ndan çocuk olmamıştır, kendisi de doğmamıştır. Hiçbir şey O'na denk ve benzer değildir.\"",
     english:
         "Say: He is Allah, the One. Allah, the Eternal Refuge. He neither begets nor is born. Nor is there to Him any equivalent.",
-    info: "Kaynak: Kur'an-ı Kerim, 112. sure (İhlâs).",
+    info: "Kaynak: Kur'an-ı Kerim, 112. sure (İhlâs) · Meal: Diyanet İşleri Başkanlığı.",
     infoEn: 'Source: The Quran, Surah 112 (Al-Ikhlas).',
   ),
   Dua(
@@ -120,10 +120,10 @@ const List<Dua> kDuaList = [
     transliteration:
         "Bismillaahir-Rahmaanir-Rahiim. Qul a'uudhu bi-Rabbil-falaq. Min sharri maa khalaq. Wa min sharri ghaasiqin idhaa waqab. Wa min sharrin-naffaathaati fil-'uqad. Wa min sharri haasidin idhaa hasad.",
     turkish:
-        "De ki: Sığınırım şafağın Rabbine. Yarattığı şeylerin şerrinden. Karardığında gecenin şerrinden. Düğümlere üfleyenlerin şerrinden. Kıskandığında kıskanç kişinin şerrinden.",
+        "De ki: \"Yarattığı şeylerin kötülüğünden, karanlığı çöktüğü zaman gecenin kötülüğünden, düğümlere üfleyenlerin kötülüğünden, haset ettiği zaman hasetçinin kötülüğünden, sabah aydınlığının Rabbine sığınırım.\"",
     english:
         "Say: I seek refuge in the Lord of daybreak — from the evil of that which He created, from the evil of darkness when it settles, from the evil of those who blow on knots, and from the evil of an envier when he envies.",
-    info: "Kaynak: Kur'an-ı Kerim, 113. sure (Felak).",
+    info: "Kaynak: Kur'an-ı Kerim, 113. sure (Felak) · Meal: Diyanet İşleri Başkanlığı.",
     infoEn: 'Source: The Quran, Surah 113 (Al-Falaq).',
   ),
   Dua(
@@ -134,10 +134,10 @@ const List<Dua> kDuaList = [
     transliteration:
         "Bismillaahir-Rahmaanir-Rahiim. Qul a'uudhu bi-Rabbin-naas. Malikin-naas. Ilaahin-naas. Min sharril-waswaasil-khannaas. Alladhii yuwaswisu fii suduurin-naas. Minal-jinnati wan-naas.",
     turkish:
-        "De ki: Sığınırım insanların Rabbine. İnsanların hükümdarına. İnsanların ilahına. Sinsi vesvesecinin şerrinden. O ki insanların göğüslerine vesvese verir. Gerek cinlerden gerek insanlardan.",
+        "De ki: \"Cinlerden ve insanlardan; insanların kalplerine vesvese veren sinsi vesvesecinin kötülüğünden, insanların Rabbine, insanların Melik'ine, insanların İlah'ına sığınırım.\"",
     english:
         "Say: I seek refuge in the Lord of mankind, the Sovereign of mankind, the God of mankind — from the evil of the retreating whisperer who whispers into the breasts of mankind — from among the jinn and mankind.",
-    info: "Kaynak: Kur'an-ı Kerim, 114. sure (Nâs).",
+    info: "Kaynak: Kur'an-ı Kerim, 114. sure (Nâs) · Meal: Diyanet İşleri Başkanlığı.",
     infoEn: 'Source: The Quran, Surah 114 (An-Nas).',
   ),
   Dua(
@@ -246,10 +246,10 @@ const List<Dua> kDuaList = [
     transliteration:
         "Rabbanaa aatinaa fid-dunyaa hasanatan wa fil-aakhirati hasanatan wa qinaa 'adhaaban-naar.",
     turkish:
-        "Rabbimiz! Bize dünyada iyilik ver, ahirette de iyilik ver ve bizi ateş azabından koru.",
+        "Rabbimiz! Bize dünyada da iyilik ver, ahirette de iyilik ver ve bizi ateş azabından koru.",
     english:
         "Our Lord, give us good in this world and good in the Hereafter, and protect us from the punishment of the Fire.",
-    info: 'Kaynak: Bakara Suresi, 201. ayet.',
+    info: 'Kaynak: Bakara Suresi, 201. ayet · Meal: Diyanet İşleri Başkanlığı.',
     infoEn: 'Source: Surah Al-Baqarah, verse 201.',
   ),
   Dua(
@@ -356,10 +356,10 @@ const List<Dua> kDuaList = [
     transliteration:
         "Laa ilaaha illaa Anta subhaanaka innii kuntu minaz-zaalimiin.",
     turkish:
-        "Senden başka ilah yoktur. Seni tenzih ederim. Ben gerçekten zalimlerden oldum.",
+        "Senden başka hiçbir ilah yoktur. Seni eksikliklerden uzak tutarım. Ben gerçekten (nefsine) zulmedenlerden oldum.",
     english:
         "There is no deity except You; exalted are You. Indeed, I have been of the wrongdoers.",
-    info: 'Kaynak: Enbiyâ Suresi, 87. ayet; Tirmizî, Deavât 81.',
+    info: 'Kaynak: Enbiyâ Suresi, 87. ayet; Tirmizî, Deavât 81 · Meal: Diyanet İşleri Başkanlığı.',
     infoEn: "Source: Surah Al-Anbiya, verse 87; Tirmidhi, Da'awat 81.",
   ),
   Dua(
@@ -382,10 +382,10 @@ const List<Dua> kDuaList = [
     arabicText: 'رَبِّ اِنِّي ظَلَمْتُ نَفْسِي فَاغْفِرْ لِي',
     transliteration: "Rabbi innii zalamtu nafsii faghfir lii.",
     turkish:
-        "Rabbim! Şüphesiz ben kendime zulmettim. Beni bağışla.",
+        "Rabbim! Şüphesiz ben nefsime zulmettim. Beni affet.",
     english:
         "My Lord, indeed I have wronged myself, so forgive me.",
-    info: 'Kaynak: Kasas Suresi, 16. ayet.',
+    info: 'Kaynak: Kasas Suresi, 16. ayet · Meal: Diyanet İşleri Başkanlığı.',
     infoEn: 'Source: Surah Al-Qasas, verse 16.',
   ),
   Dua(

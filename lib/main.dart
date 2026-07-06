@@ -55,14 +55,14 @@ class SesliTesbihApp extends StatelessWidget {
     return ThemeData(
       useMaterial3: true,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: const Color(0xFF2E7D32),
-        primary: const Color(0xFF2E7D32),
-        secondary: const Color(0xFF66BB6A),
+        seedColor: const Color(0xFF16305F),
+        primary: const Color(0xFF16305F),
+        secondary: const Color(0xFFC9A227),
         surface: Colors.white,
       ),
-      scaffoldBackgroundColor: const Color(0xFFF1F8E9),
+      scaffoldBackgroundColor: const Color(0xFFF7F5EF),
       appBarTheme: const AppBarTheme(
-        backgroundColor: Color(0xFF2E7D32),
+        backgroundColor: Color(0xFF16305F),
         foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
@@ -74,7 +74,7 @@ class SesliTesbihApp extends StatelessWidget {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF2E7D32),
+          backgroundColor: const Color(0xFF16305F),
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
@@ -84,14 +84,22 @@ class SesliTesbihApp extends StatelessWidget {
   }
 }
 
-// App-wide color constants
+// App-wide color constants — lacivert (navy) + koyu altın (dark gold) tema.
+// Not: isimler tarihsel ("green*"); değerler lacivert/altın paletidir.
 class AppColors {
-  static const Color greenDark = Color(0xFF1B5E20);
-  static const Color greenMid = Color(0xFF2E7D32);
-  static const Color greenAccent = Color(0xFF4CAF50);
-  static const Color greenLight = Color(0xFFE8F5E9);
+  static const Color greenDark = Color(0xFF0E1F45);   // koyu lacivert
+  static const Color greenMid = Color(0xFF16305F);    // lacivert
+  static const Color greenAccent = Color(0xFFC9A227); // koyu altın
+  static const Color greenLight = Color(0xFFEDE7D4);  // fildişi-altın zemin
   static const Color cardBg = Colors.white;
-  static const Color textPrimary = Color(0xFF1A1A1A);
-  static const Color textSecondary = Color(0xFF757575);
-  static const Color background = Color(0xFFF1F8E9);
+  static const Color textPrimary = Color(0xFF1B2437);
+  static const Color textSecondary = Color(0xFF6E7486);
+  static const Color background = Color(0xFFF7F5EF);  // sıcak fildişi
+
+  static const Color gold = Color(0xFFC9A227);
+  static const Color goldDeep = Color(0xFFA8861D);
+  static const Color goldLight = Color(0xFFE5C96B);
+  static const List<Color> navyGradient = [
+    Color(0xFF0A1735), Color(0xFF14294F), Color(0xFF1E3A6E),
+  ];
 }
