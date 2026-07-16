@@ -11,6 +11,7 @@ import '../models/dhikr.dart';
 import '../data/dhikr_data.dart';
 import '../data/esma_data.dart';
 import '../services/burst_segmenter.dart';
+import '../services/count_reconciler.dart';
 import '../services/custom_dhikr_manager.dart';
 import '../services/dhikr_matcher.dart';
 import '../services/locale_service.dart';
@@ -37,10 +38,14 @@ import '../services/locale_service.dart';
 //    • Gate: counts only while STT has matched the dhikr within the last
 //      20 s (rolling confirmation — blocks TV/noise when user stops).
 //
-//  Reconciler (every 1 s)
-//    • Credits MAX(sttWindow, audioWindow) to the total
-//    • Engine B may add at most N extra per window (N adaptive: 3 for
-//      short dhikr, 2 medium, 1 long) — allows real fast paces through
+//  Reconciler (event-driven — logic in lib/services/count_reconciler.dart,
+//  scenario-tested in test/count_reconciler_test.dart)
+//    • Credits MAX(sttTotal, audioTotal) to the total
+//    • v3 overcount fix: Engine B's lead over STT is EARNED — while the
+//      user speaks at a normal pace (or once), STT is authoritative and
+//      the lead is 0, so syllable dips ("süb-ha-nal-lah") and post-speech
+//      noise can never inflate the count. Only when STT itself registers
+//      a fast chanting pace may Engine B run ahead (max 5).
 // ═══════════════════════════════════════════════════════════════════════════
 
 class CounterScreen extends StatefulWidget {
@@ -82,29 +87,16 @@ class _CounterScreenState extends State<CounterScreen>
   // ───────────────────────────────────────────────────────────────────────
   late final BurstSegmenter _segmenter = BurstSegmenter(
     onRep: (nowMs) {
-      // Rolling STT gate: Engine B counts only while STT matched recently.
-      if (_everConfirmed && (nowMs - _lastSttMatchMs) <= _kSttConfirmValidMs) {
-        _audioTotal++;
-        _reconcileEngines();
-      }
+      if (!_isListening || !mounted) return;
+      final credit = _reconciler.onAudioRep(nowMs);
+      if (credit > 0) _incrementCount(credit);
     },
   );
 
-  bool _everConfirmed = false;
-  int _lastSttMatchMs = 0;
-  static const int _kSttConfirmValidMs = 20000;
-
   // ───────────────────────────────────────────────────────────────────────
-  //  RECONCILER — cumulative MAX of the two engines.
-  //  Each engine keeps a running total since the last reset; the UI count
-  //  is always max(stt, audio). STT latency can no longer double-count:
-  //  a rep detected first by audio and later by STT raises both totals,
-  //  but the max only moves once.
+  //  RECONCILER — merges the two engines; see lib/services/count_reconciler
   // ───────────────────────────────────────────────────────────────────────
-  int _sttTotal = 0;
-  int _audioTotal = 0;
-  int _creditedTotal = 0;
-  static const int _kMaxAudioLead = 15; // audio may lead STT by at most this
+  final CountReconciler _reconciler = CountReconciler();
 
   // ───────────────────────────────────────────────────────────────────────
   //  Adaptive per-dhikr timing (0 = short, 1 = medium, 2 = long)
@@ -118,8 +110,10 @@ class _CounterScreenState extends State<CounterScreen>
   }
 
   /// Configures the segmenter's timing for the loaded dhikr.
+  /// Short-class min gap raised 260 → 420 ms: even a fast "sübhanallah"
+  /// takes ~500 ms to say, and 260 ms let its own syllables count as reps.
   void _configureSegmenter() {
-    _segmenter.minGapMs = const [260, 900, 2000][_lenClass];
+    _segmenter.minGapMs = const [420, 900, 2000][_lenClass];
     _segmenter.maxSplitMs = const [1000, 2000, 3500][_lenClass];
   }
 
@@ -226,7 +220,13 @@ class _CounterScreenState extends State<CounterScreen>
           ));
       return;
     }
-    if (mounted) _startListening();
+    if (mounted) {
+      // Auto-start counts from the first spoken dhikr: previously the mic
+      // session opened here but _isListening stayed false, so the UI showed
+      // "Başlat" while the mic was already recording and nothing counted.
+      setState(() => _isListening = true);
+      _startListening();
+    }
   }
 
   Future<void> _startListening() async {
@@ -300,12 +300,10 @@ class _CounterScreenState extends State<CounterScreen>
     if (text.isEmpty) return;
 
     final count = _countOccurrences(text);
+    final nowMs = DateTime.now().millisecondsSinceEpoch;
 
-    // Rolling gate: an STT match keeps Engine B unlocked for the next 20 s.
-    if (count > 0) {
-      _everConfirmed = true;
-      _lastSttMatchMs = DateTime.now().millisecondsSinceEpoch;
-    }
+    // Rolling gate: an STT match keeps Engine B unlocked for a few seconds.
+    if (count > 0) _reconciler.noteSttMatch(nowMs);
 
     // Increment only the NEW occurrences since the last partial update.
     final delta = (count - _sessionPartialCount).clamp(0, 99);
@@ -317,9 +315,9 @@ class _CounterScreenState extends State<CounterScreen>
       _sessionPartialCount = count;
     }
 
-    if (delta > 0 && mounted) {
-      _sttTotal += delta;
-      _reconcileEngines();
+    if (delta > 0 && mounted && _isListening) {
+      final credit = _reconciler.onSttDelta(delta, nowMs);
+      if (credit > 0) _incrementCount(credit);
     }
   }
 
@@ -333,23 +331,6 @@ class _CounterScreenState extends State<CounterScreen>
     final now = DateTime.now().millisecondsSinceEpoch;
     final level = _segmenter.process(raw, now);
     if (mounted) setState(() => _micLevel = level.clamp(0.1, 1.0));
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════
-  //  RECONCILER — cumulative max, runs on every engine event
-  // ═══════════════════════════════════════════════════════════════════════
-
-  void _reconcileEngines() {
-    if (!mounted || !_isListening) return;
-    // Noise guard: audio may lead STT by a bounded amount only.
-    if (_audioTotal > _sttTotal + _kMaxAudioLead) {
-      _audioTotal = _sttTotal + _kMaxAudioLead;
-    }
-    final t = math.max(_sttTotal, _audioTotal);
-    if (t > _creditedTotal) {
-      _incrementCount(t - _creditedTotal);
-      _creditedTotal = t;
-    }
   }
 
   // ═══════════════════════════════════════════════════════════════════════
@@ -420,12 +401,8 @@ class _CounterScreenState extends State<CounterScreen>
     setState(() {
       _count = 0;
       _sessionPartialCount = 0;
-      _sttTotal = 0;
-      _audioTotal = 0;
-      _creditedTotal = 0;
+      _reconciler.reset(); // need fresh STT confirmation after reset
       _segmenter.resetBurstState();
-      _everConfirmed = false;   // need fresh STT confirmation after reset
-      _lastSttMatchMs = 0;
       if (_isListening) {
         _statusText = _s('Dinleniyor...', 'Listening...', 'يستمع...');
       }
