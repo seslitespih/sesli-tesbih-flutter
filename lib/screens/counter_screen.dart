@@ -232,8 +232,10 @@ class _CounterScreenState extends State<CounterScreen>
   Future<void> _startListening() async {
     if (!_speechAvailable || !mounted) return;
 
-    // Reset per-session STT counter; keep the rolling STT gate (same dhikr)
-    _sessionPartialCount = 0;
+    // NOTE: _sessionPartialCount is deliberately NOT reset here — the old
+    // session's final result may still arrive after the restart and would
+    // then be counted a second time (delta measured against 0). It is
+    // reset in _onStatus when the NEW session actually reports listening.
     _segmenter.resetBurstState();
 
     // STT her zaman Türkçe modelde çalışır: zikir kelimelerini fonetik
@@ -270,17 +272,21 @@ class _CounterScreenState extends State<CounterScreen>
   void _onStatus(String status) {
     if (!mounted) return;
     if (status == SpeechToText.listeningStatus) {
+      // A NEW session is live: only now is it safe to start the per-session
+      // occurrence counter from zero (any late final of the old session has
+      // had its chance to arrive and was measured against the old counter).
+      _sessionPartialCount = 0;
       setState(() {
         _statusText = _s('Dinleniyor...', 'Listening...', 'يستمع...');
         _micLevel = 0.5;
       });
     } else if (status == SpeechToText.notListeningStatus ||
         status == SpeechToText.doneStatus) {
-      // Do NOT reset _sessionPartialCount here — the final result may
-      // arrive AFTER this status callback, causing double-counting.
       if (_isListening) {
-        // Restart immediately (no delay) so no speech is missed.
-        Future.delayed(Duration.zero, () {
+        // Small delay: lets the old session's final result land BEFORE the
+        // new session resets the counter — otherwise that final re-counts
+        // the whole session ("opens and counts by itself" reports).
+        Future.delayed(const Duration(milliseconds: 250), () {
           if (_isListening && mounted) _startListening();
         });
       }
@@ -305,15 +311,13 @@ class _CounterScreenState extends State<CounterScreen>
     // Rolling gate: an STT match keeps Engine B unlocked for a few seconds.
     if (count > 0) _reconciler.noteSttMatch(nowMs);
 
-    // Increment only the NEW occurrences since the last partial update.
+    // Increment only the NEW occurrences since the last (partial or final)
+    // update. The counter only advances upward and is NOT reset on a final
+    // result: iOS/Android sometimes deliver the same final twice, and the
+    // old "reset on final" made the duplicate re-count the whole session.
+    // The reset happens in _onStatus when the next session starts.
     final delta = (count - _sessionPartialCount).clamp(0, 99);
-
-    if (result.finalResult) {
-      _sessionPartialCount = 0;
-    } else if (count > _sessionPartialCount) {
-      // Only advance upward — STT sometimes revises its text downward.
-      _sessionPartialCount = count;
-    }
+    if (count > _sessionPartialCount) _sessionPartialCount = count;
 
     if (delta > 0 && mounted && _isListening) {
       final credit = _reconciler.onSttDelta(delta, nowMs);
