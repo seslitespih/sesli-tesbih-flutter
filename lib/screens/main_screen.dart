@@ -95,11 +95,8 @@ class _MainScreenState extends State<MainScreen> {
                   ),
                 ),
                 Text(
-                  _lang == 'ar'
-                      ? 'مسبحة صوتية إسلامية'
-                      : _lang == 'en'
-                          ? 'Islamic Voice Dhikr Counter'
-                          : 'Sesli İslami Zikir Sayacı',
+                  _ls('Sesli İslami Zikir Sayacı', 'Islamic Voice Dhikr Counter',
+                      'مسبحة صوتية إسلامية'),
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.72),
                     fontSize: 11,
@@ -132,10 +129,16 @@ class _MainScreenState extends State<MainScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           _LangButton(label: 'TR', lang: 'tr', current: _lang, onTap: _setLang),
-          const SizedBox(width: 10),
+          const SizedBox(width: 8),
           _LangButton(label: 'EN', lang: 'en', current: _lang, onTap: _setLang),
-          const SizedBox(width: 10),
+          const SizedBox(width: 8),
           _LangButton(label: 'AR', lang: 'ar', current: _lang, onTap: _setLang),
+          const SizedBox(width: 8),
+          _LangButton(label: 'ID', lang: 'id', current: _lang, onTap: _setLang),
+          const SizedBox(width: 8),
+          _LangButton(label: 'UR', lang: 'ur', current: _lang, onTap: _setLang),
+          const SizedBox(width: 8),
+          _LangButton(label: 'FR', lang: 'fr', current: _lang, onTap: _setLang),
         ],
       ),
     );
@@ -149,9 +152,7 @@ class _MainScreenState extends State<MainScreen> {
         children: [
           Expanded(
             child: _NavTab(
-              label: _lang == 'en'
-                  ? 'Prayers'
-                  : (_lang == 'ar' ? 'الأدعية' : 'Dualar'),
+              label: _ls('Dualar', 'Prayers', 'الأدعية'),
               icon: Icons.menu_book_outlined,
               onTap: () => Navigator.pushNamed(context, '/dua'),
             ),
@@ -159,9 +160,7 @@ class _MainScreenState extends State<MainScreen> {
           const SizedBox(width: 10),
           Expanded(
             child: _NavTab(
-              label: _lang == 'en'
-                  ? 'Asma ul-Husna'
-                  : (_lang == 'ar' ? 'الأسماء الحسنى' : 'Esmaül Hüsna'),
+              label: _ls('Esmaül Hüsna', 'Asma ul-Husna', 'الأسماء الحسنى'),
               icon: Icons.auto_awesome_outlined,
               onTap: () => Navigator.pushNamed(context, '/esma'),
             ),
@@ -169,9 +168,7 @@ class _MainScreenState extends State<MainScreen> {
           const SizedBox(width: 10),
           Expanded(
             child: _NavTab(
-              label: _lang == 'en'
-                  ? 'Qibla'
-                  : (_lang == 'ar' ? 'القبلة' : 'Kıble'),
+              label: _ls('Kıble', 'Qibla', 'القبلة'),
               icon: Icons.explore_outlined,
               onTap: () => Navigator.pushNamed(context, '/qibla'),
             ),
@@ -216,11 +213,8 @@ class _MainScreenState extends State<MainScreen> {
     setState(() {});
   }
 
-  String _ls(String tr, String en, String ar) {
-    if (_lang == 'en') return en;
-    if (_lang == 'ar') return ar;
-    return tr;
-  }
+  String _ls(String tr, String en, String ar) =>
+      LocaleService.instance.tr(tr, en, ar);
 
   void _confirmDelete(Dhikr dhikr) {
     showDialog(
@@ -383,7 +377,8 @@ class _LangButton extends StatelessWidget {
       onTap: () => onTap(lang),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 5),
+        // 6 language chips must fit a 360 dp screen — keep padding tight
+        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
         decoration: BoxDecoration(
           color: isActive ? const Color(0xFFC9A227) : Colors.white.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(20),

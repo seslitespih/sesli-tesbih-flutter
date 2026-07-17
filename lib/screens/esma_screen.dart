@@ -10,9 +10,8 @@ class EsmaScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final lang = LocaleService.instance.language;
-    final title = lang == 'en'
-        ? 'Asma ul-Husna'
-        : (lang == 'ar' ? 'الأسماء الحسنى' : 'Esmaül Hüsna');
+    final title = LocaleService.instance
+        .tr('Esmaül Hüsna', 'Asma ul-Husna', 'الأسماء الحسنى');
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -85,7 +84,7 @@ class EsmaScreen extends StatelessWidget {
           const SizedBox(width: 6),
           Expanded(
             child: Text(
-              lang == 'en' ? kEsmaSourceEn : kEsmaSourceTr,
+              lang == 'tr' ? kEsmaSourceTr : kEsmaSourceEn,
               style: TextStyle(
                 fontSize: 11,
                 color: Colors.orange.shade800,
@@ -117,7 +116,7 @@ class _EsmaCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final meaning = lang == 'en' ? esma.meaningEn : esma.meaningTr;
+    final meaning = lang == 'tr' ? esma.meaningTr : esma.meaningEn;
 
     return GestureDetector(
       onTap: () => Navigator.pushNamed(context, '/counter',

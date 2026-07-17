@@ -5,11 +5,8 @@ import '../services/locale_service.dart';
 class PrivacyScreen extends StatelessWidget {
   const PrivacyScreen({super.key});
 
-  String _ls(String lang, String tr, String en, String ar) {
-    if (lang == 'en') return en;
-    if (lang == 'ar') return ar;
-    return tr;
-  }
+  String _ls(String lang, String tr, String en, String ar) =>
+      LocaleService.instance.tr(tr, en, ar);
 
   @override
   Widget build(BuildContext context) {

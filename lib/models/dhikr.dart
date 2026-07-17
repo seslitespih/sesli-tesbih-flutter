@@ -28,13 +28,13 @@ class Dhikr {
 
   String localizedName(String lang) {
     if (lang == 'ar') return nameAr;
-    if (lang == 'en') return nameEn;
-    return nameTr;
+    if (lang == 'tr') return nameTr;
+    return nameEn;
   }
 
   String localizedMeaning(String lang) {
-    if (lang == 'en' || lang == 'ar') return meaningEn;
-    return meaningTr;
+    if (lang == 'tr') return meaningTr;
+    return meaningEn;
   }
 
   Dhikr copyWith({

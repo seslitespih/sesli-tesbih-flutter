@@ -19,12 +19,14 @@ class Dua {
     required this.infoEn,
   });
 
+  // tr keeps its own text; ar shows the Arabic original alone;
+  // every other language falls back to English.
   String localizedTitle(String lang) =>
-      lang == 'en' ? titleEn : title;
+      lang == 'tr' ? title : titleEn;
 
   String localizedText(String lang) =>
-      lang == 'en' ? english : (lang == 'ar' ? '' : turkish);
+      lang == 'tr' ? turkish : (lang == 'ar' ? '' : english);
 
   String localizedInfo(String lang) =>
-      lang == 'en' ? infoEn : info;
+      lang == 'tr' ? info : infoEn;
 }

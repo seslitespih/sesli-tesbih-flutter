@@ -10,9 +10,8 @@ class DuaScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final lang = LocaleService.instance.language;
-    final title = lang == 'en'
-        ? 'Prayers & Verses'
-        : (lang == 'ar' ? 'الأدعية والآيات' : 'Dualar ve Ayetler');
+    final title = LocaleService.instance
+        .tr('Dualar ve Ayetler', 'Prayers & Verses', 'الأدعية والآيات');
 
     return Scaffold(
       backgroundColor: AppColors.background,
