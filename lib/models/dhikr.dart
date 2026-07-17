@@ -27,7 +27,8 @@ class Dhikr {
   });
 
   String localizedName(String lang) {
-    if (lang == 'ar') return nameAr;
+    // Urdu readers use the Arabic script — show the Arabic name for both.
+    if (lang == 'ar' || lang == 'ur') return nameAr;
     if (lang == 'tr') return nameTr;
     return nameEn;
   }

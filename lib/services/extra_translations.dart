@@ -61,6 +61,8 @@ const Map<String, Map<String, String>> kExtraTranslations = {
     'Qibla Direction': 'Arah Kiblat',
     'Qibla calculated based on your GPS location.':
         'Kiblat dihitung berdasarkan lokasi GPS-mu.',
+    "Source: Surah Al-A'raf 180; Bukhari, Da'awat 68; Tirmidhi, Da'awat 82.":
+        "Sumber: Surah Al-A'raf 180; Bukhari, Da'awat 68; Tirmidzi, Da'awat 82.",
   },
   'ur': {
     'Starting...': 'شروع ہو رہا ہے...',
@@ -115,6 +117,8 @@ const Map<String, Map<String, String>> kExtraTranslations = {
     'Qibla Direction': 'سمتِ قبلہ',
     'Qibla calculated based on your GPS location.':
         'قبلہ آپ کی GPS لوکیشن کی بنیاد پر معلوم کیا گیا ہے۔',
+    "Source: Surah Al-A'raf 180; Bukhari, Da'awat 68; Tirmidhi, Da'awat 82.":
+        'ماخذ: سورہ الاعراف 180؛ بخاری، دعوات 68؛ ترمذی، دعوات 82۔',
   },
   'fr': {
     'Starting...': 'Démarrage...',
@@ -169,5 +173,7 @@ const Map<String, Map<String, String>> kExtraTranslations = {
     'Qibla Direction': 'Direction de la Qibla',
     'Qibla calculated based on your GPS location.':
         "Qibla calculée d'après votre position GPS.",
+    "Source: Surah Al-A'raf 180; Bukhari, Da'awat 68; Tirmidhi, Da'awat 82.":
+        "Source : Sourate Al-A'raf 180 ; Boukhari, Da'awat 68 ; Tirmidhi, Da'awat 82.",
   },
 };

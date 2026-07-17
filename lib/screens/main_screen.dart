@@ -46,7 +46,6 @@ class _MainScreenState extends State<MainScreen> {
         child: Column(
           children: [
             _buildHeader(),
-            _buildLangBar(),
             _buildNavTabs(),
             Expanded(child: _buildGrid()),
           ],
@@ -107,6 +106,11 @@ class _MainScreenState extends State<MainScreen> {
             ),
           ),
           IconButton(
+            onPressed: _showLanguageDialog,
+            icon: const Icon(Icons.language, color: Colors.white, size: 24),
+            tooltip: 'Language',
+          ),
+          IconButton(
             onPressed: _showAddDhikrDialog,
             icon: const Icon(Icons.add_circle_outline, color: Colors.white, size: 26),
             tooltip: _ls('Özel Zikir Ekle', 'Add Custom Dhikr', 'إضافة ذكر مخصص'),
@@ -121,24 +125,50 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  Widget _buildLangBar() {
-    return Container(
-      color: const Color(0xFF14294F),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+  static const List<(String, String)> _languages = [
+    ('tr', 'Türkçe'),
+    ('en', 'English'),
+    ('ar', 'العربية'),
+    ('id', 'Bahasa Indonesia'),
+    ('ur', 'اردو'),
+    ('fr', 'Français'),
+  ];
+
+  void _showLanguageDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => SimpleDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Row(
+          children: [
+            Icon(Icons.language, color: AppColors.greenDark, size: 22),
+            SizedBox(width: 8),
+            Text('Language / Dil', style: TextStyle(fontSize: 17)),
+          ],
+        ),
         children: [
-          _LangButton(label: 'TR', lang: 'tr', current: _lang, onTap: _setLang),
-          const SizedBox(width: 8),
-          _LangButton(label: 'EN', lang: 'en', current: _lang, onTap: _setLang),
-          const SizedBox(width: 8),
-          _LangButton(label: 'AR', lang: 'ar', current: _lang, onTap: _setLang),
-          const SizedBox(width: 8),
-          _LangButton(label: 'ID', lang: 'id', current: _lang, onTap: _setLang),
-          const SizedBox(width: 8),
-          _LangButton(label: 'UR', lang: 'ur', current: _lang, onTap: _setLang),
-          const SizedBox(width: 8),
-          _LangButton(label: 'FR', lang: 'fr', current: _lang, onTap: _setLang),
+          for (final (code, name) in _languages)
+            SimpleDialogOption(
+              onPressed: () {
+                Navigator.pop(ctx);
+                _setLang(code);
+              },
+              child: Row(
+                children: [
+                  Icon(
+                    _lang == code
+                        ? Icons.radio_button_checked
+                        : Icons.radio_button_off,
+                    size: 20,
+                    color: _lang == code
+                        ? const Color(0xFFC9A227)
+                        : AppColors.textSecondary,
+                  ),
+                  const SizedBox(width: 10),
+                  Text(name, style: const TextStyle(fontSize: 15)),
+                ],
+              ),
+            ),
         ],
       ),
     );
@@ -357,47 +387,6 @@ const _kAccentColors = [
 
 // ─── Language Button ──────────────────────────────────────────────────────────
 
-class _LangButton extends StatelessWidget {
-  final String label;
-  final String lang;
-  final String current;
-  final ValueChanged<String> onTap;
-
-  const _LangButton({
-    required this.label,
-    required this.lang,
-    required this.current,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isActive = current == lang;
-    return GestureDetector(
-      onTap: () => onTap(lang),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        // 6 language chips must fit a 360 dp screen — keep padding tight
-        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
-        decoration: BoxDecoration(
-          color: isActive ? const Color(0xFFC9A227) : Colors.white.withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isActive ? const Color(0xFFC9A227) : Colors.white.withValues(alpha: 0.3),
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isActive ? const Color(0xFF10234C) : Colors.white,
-            fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-            fontSize: 13,
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 // ─── Nav Tab ──────────────────────────────────────────────────────────────────
 

@@ -1,3 +1,5 @@
+import '../data/dua_translations_extra.dart';
+
 class Dua {
   final String title;
   final String titleEn;
@@ -19,14 +21,23 @@ class Dua {
     required this.infoEn,
   });
 
-  // tr keeps its own text; ar shows the Arabic original alone;
-  // every other language falls back to English.
-  String localizedTitle(String lang) =>
-      lang == 'tr' ? title : titleEn;
+  // tr keeps its own text; ar shows the Arabic original alone; id/ur/fr
+  // use kDuaTranslationsExtra; anything else falls back to English.
+  DuaTr? _extra(String lang) => kDuaTranslationsExtra[lang]?[titleEn];
 
-  String localizedText(String lang) =>
-      lang == 'tr' ? turkish : (lang == 'ar' ? '' : english);
+  String localizedTitle(String lang) {
+    if (lang == 'tr') return title;
+    return _extra(lang)?.title ?? titleEn;
+  }
 
-  String localizedInfo(String lang) =>
-      lang == 'tr' ? info : infoEn;
+  String localizedText(String lang) {
+    if (lang == 'tr') return turkish;
+    if (lang == 'ar') return '';
+    return _extra(lang)?.text ?? english;
+  }
+
+  String localizedInfo(String lang) {
+    if (lang == 'tr') return info;
+    return _extra(lang)?.info ?? infoEn;
+  }
 }

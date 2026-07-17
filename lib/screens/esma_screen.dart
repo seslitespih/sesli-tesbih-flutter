@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../main.dart';
 import '../data/esma_data.dart';
+import '../data/esma_translations_extra.dart';
 import '../services/locale_service.dart';
 
 /// Esmaül Hüsna — Allah'ın 99 güzel ismi listesi.
@@ -84,7 +85,8 @@ class EsmaScreen extends StatelessWidget {
           const SizedBox(width: 6),
           Expanded(
             child: Text(
-              lang == 'tr' ? kEsmaSourceTr : kEsmaSourceEn,
+              LocaleService.instance
+                  .tr(kEsmaSourceTr, kEsmaSourceEn, kEsmaSourceEn),
               style: TextStyle(
                 fontSize: 11,
                 color: Colors.orange.shade800,
@@ -116,7 +118,9 @@ class _EsmaCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final meaning = lang == 'tr' ? esma.meaningTr : esma.meaningEn;
+    final meaning = lang == 'tr'
+        ? esma.meaningTr
+        : (kEsmaMeaningsExtra[lang]?[esma.number - 1] ?? esma.meaningEn);
 
     return GestureDetector(
       onTap: () => Navigator.pushNamed(context, '/counter',
