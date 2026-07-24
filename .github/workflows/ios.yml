@@ -92,13 +92,16 @@ jobs:
           pod install 2>&1 || pod install --repo-update 2>&1
           echo "✅ CocoaPods installed"
 
-      # ── 6. Localised app name (EN / TR / AR) ─────────────────────────
+      # ── 6. Localised app name (EN/TR/AR/ID/UR/FR) ────────────────────
       - name: Localise app name
         run: |
-          mkdir -p ios/Runner/en.lproj ios/Runner/tr.lproj ios/Runner/ar.lproj
+          mkdir -p ios/Runner/en.lproj ios/Runner/tr.lproj ios/Runner/ar.lproj ios/Runner/id.lproj ios/Runner/ur.lproj ios/Runner/fr.lproj
           printf 'CFBundleDisplayName = "Vocal Tasbeeh";\n' > ios/Runner/en.lproj/InfoPlist.strings
           printf 'CFBundleDisplayName = "Sesli Tespih";\n'  > ios/Runner/tr.lproj/InfoPlist.strings
           printf 'CFBundleDisplayName = "مسبحة صوتية";\n'  > ios/Runner/ar.lproj/InfoPlist.strings
+          printf 'CFBundleDisplayName = "Tasbih Suara";\n'  > ios/Runner/id.lproj/InfoPlist.strings
+          printf 'CFBundleDisplayName = "صوتی تسبیح";\n'   > ios/Runner/ur.lproj/InfoPlist.strings
+          printf 'CFBundleDisplayName = "Tasbih Vocal";\n'  > ios/Runner/fr.lproj/InfoPlist.strings
 
           # xcodeproj gem is bundled with CocoaPods on macOS runners
           gem list xcodeproj -i -q || gem install xcodeproj --no-document -q
@@ -109,7 +112,7 @@ jobs:
           target = proj.targets.find { |t| t.name == 'Runner' }
           grp    = proj.main_group.find_subpath('Runner', false)
 
-          %w[en tr ar].each { |l| proj.root_object.known_regions |= [l] }
+          %w[en tr ar id ur fr].each { |l| proj.root_object.known_regions |= [l] }
 
           vg = grp.children.find { |c|
             c.is_a?(Xcodeproj::Project::Object::PBXVariantGroup) && c.name == 'InfoPlist.strings'
@@ -121,7 +124,7 @@ jobs:
             target.resources_build_phase.add_file_reference(vg)
           end
 
-          %w[en tr ar].each do |lang|
+          %w[en tr ar id ur fr].each do |lang|
             next if vg.children.any? { |c| c.name == lang }
             ref = proj.new(Xcodeproj::Project::Object::PBXFileReference)
             ref.name = lang
