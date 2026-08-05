@@ -43,6 +43,7 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
+        top: false, // the navy header paints behind the status bar itself
         child: Column(
           children: [
             _buildHeader(),
@@ -56,7 +57,8 @@ class _MainScreenState extends State<MainScreen> {
 
   Widget _buildHeader() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 14, 8, 14),
+      padding: EdgeInsets.fromLTRB(
+          16, MediaQuery.paddingOf(context).top + 12, 8, 14),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -86,6 +88,8 @@ class _MainScreenState extends State<MainScreen> {
               children: [
                 const Text(
                   'Vocal Tasbeeh',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 20,
@@ -96,6 +100,8 @@ class _MainScreenState extends State<MainScreen> {
                 Text(
                   _ls('Sesli İslami Zikir Sayacı', 'Islamic Voice Dhikr Counter',
                       'مسبحة صوتية إسلامية'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.72),
                     fontSize: 11,
@@ -105,20 +111,31 @@ class _MainScreenState extends State<MainScreen> {
               ],
             ),
           ),
+          // Compact hit-boxes: three default 48 dp buttons left the title
+          // almost no room on 360 dp-wide Android phones.
           IconButton(
             onPressed: _showLanguageDialog,
             icon: const Icon(Icons.language, color: Colors.white, size: 24),
             tooltip: 'Language',
+            visualDensity: VisualDensity.compact,
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            constraints: const BoxConstraints(minWidth: 38, minHeight: 40),
           ),
           IconButton(
             onPressed: _showAddDhikrDialog,
             icon: const Icon(Icons.add_circle_outline, color: Colors.white, size: 26),
             tooltip: _ls('Özel Zikir Ekle', 'Add Custom Dhikr', 'إضافة ذكر مخصص'),
+            visualDensity: VisualDensity.compact,
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            constraints: const BoxConstraints(minWidth: 38, minHeight: 40),
           ),
           IconButton(
             onPressed: () => Navigator.pushNamed(context, '/privacy'),
             icon: Icon(Icons.info_outline,
                 color: Colors.white.withValues(alpha: 0.75), size: 22),
+            visualDensity: VisualDensity.compact,
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            constraints: const BoxConstraints(minWidth: 34, minHeight: 40),
           ),
         ],
       ),
@@ -408,17 +425,26 @@ class _NavTab extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
           border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
         ),
+        // Labels like "Esmaül Hüsna" / "Asma ul-Husna" are wider than a
+        // third of a 360 dp screen — shrink them instead of overflowing.
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, color: Colors.white, size: 17),
             const SizedBox(width: 5),
-            Text(
-              label,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
+            Flexible(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  softWrap: false,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ),
           ],

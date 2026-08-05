@@ -125,14 +125,24 @@ class _QiblaScreenState extends State<QiblaScreen>
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
+        top: false,
         child: Column(
           children: [
             _buildAppBar(title),
+            // The compass block is ~500 dp tall; on short Android phones it
+            // used to overflow the viewport instead of scrolling.
             Expanded(
-              child: Center(
-                child: _statusText.isNotEmpty && !_locationLoaded
-                    ? _buildLoading()
-                    : _buildCompass(),
+              child: SingleChildScrollView(
+                physics: const ClampingScrollPhysics(),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                      minHeight: MediaQuery.sizeOf(context).height * 0.55),
+                  child: Center(
+                    child: _statusText.isNotEmpty && !_locationLoaded
+                        ? _buildLoading()
+                        : _buildCompass(),
+                  ),
+                ),
               ),
             ),
           ],
@@ -150,7 +160,9 @@ class _QiblaScreenState extends State<QiblaScreen>
           colors: [Color(0xFF0A1735), Color(0xFF16305F), Color(0xFF1E3A6E)],
         ),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+      // Gradient runs behind the status bar (Android draws edge-to-edge).
+      padding: EdgeInsets.fromLTRB(
+          4, MediaQuery.paddingOf(context).top + 4, 4, 4),
       child: Row(
         children: [
           IconButton(

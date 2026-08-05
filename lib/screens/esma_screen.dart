@@ -17,6 +17,7 @@ class EsmaScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
+        top: false,
         child: Column(
           children: [
             _buildAppBar(context, title),
@@ -44,7 +45,9 @@ class EsmaScreen extends StatelessWidget {
           colors: [Color(0xFF0A1735), Color(0xFF16305F), Color(0xFF1E3A6E)],
         ),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+      // Gradient runs behind the status bar (Android draws edge-to-edge).
+      padding: EdgeInsets.fromLTRB(
+          4, MediaQuery.paddingOf(context).top + 4, 4, 4),
       child: Row(
         children: [
           IconButton(

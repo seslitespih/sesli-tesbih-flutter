@@ -12,6 +12,15 @@ import 'screens/privacy_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  // Every screen carries a navy header that now runs behind the status bar,
+  // so the system icons must be light on both platforms.
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    statusBarIconBrightness: Brightness.light,
+    statusBarBrightness: Brightness.dark,
+    systemNavigationBarColor: Color(0xFFF7F5EF),
+    systemNavigationBarIconBrightness: Brightness.dark,
+  ));
   await LocaleService.instance.load();
   runApp(const SesliTesbihApp());
 }
@@ -28,6 +37,14 @@ class SesliTesbihApp extends StatelessWidget {
           title: 'Vocal Tasbeeh',
           debugShowCheckedModeBanner: false,
           theme: _buildTheme(),
+          // Android's display-size / font-size settings go up to 2.0×, which
+          // tore the fixed-height cards and button rows apart. The layouts
+          // stay readable and intact up to 1.15×.
+          builder: (context, child) => MediaQuery.withClampedTextScaling(
+            minScaleFactor: 1.0,
+            maxScaleFactor: 1.15,
+            child: child ?? const SizedBox.shrink(),
+          ),
           initialRoute: '/splash',
           routes: {
             '/splash': (_) => const SplashScreen(),

@@ -16,6 +16,7 @@ class PrivacyScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
+        top: false,
         child: Column(
           children: [
             _buildAppBar(context, title),
@@ -109,7 +110,9 @@ class PrivacyScreen extends StatelessWidget {
   Widget _buildAppBar(BuildContext context, String title) {
     return Container(
       color: AppColors.greenDark,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      // Header paints behind the status bar (Android draws edge-to-edge).
+      padding: EdgeInsets.fromLTRB(
+          8, MediaQuery.paddingOf(context).top + 4, 8, 4),
       child: Row(
         children: [
           IconButton(

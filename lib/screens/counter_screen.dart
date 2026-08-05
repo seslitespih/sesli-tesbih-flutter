@@ -15,6 +15,7 @@ import '../services/count_reconciler.dart';
 import '../services/custom_dhikr_manager.dart';
 import '../services/dhikr_matcher.dart';
 import '../services/locale_service.dart';
+import '../services/stt_utterance_tracker.dart';
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  DUAL-ENGINE DHIKR COUNTER  (v2 — fast-speech fix)
@@ -79,7 +80,17 @@ class _CounterScreenState extends State<CounterScreen>
   bool _speechAvailable = false;
   bool _isListening = false;
   double _micLevel = 0.5;
-  int _sessionPartialCount = 0;   // tracks running STT count within session
+
+  /// Turns raw STT results into "how many NEW reps" — platform-independent,
+  /// unit-tested in test/stt_utterance_tracker_test.dart. Replaces the old
+  /// per-session counter that double-counted on Android (see the class doc).
+  final SttUtteranceTracker _utterances = SttUtteranceTracker();
+
+  /// Single-flight session restart: Android fires BOTH an error and a
+  /// status change for the same dropped session, and two overlapping
+  /// listen() calls leave the recogniser permanently busy.
+  Timer? _restartTimer;
+  bool _restartInFlight = false;
 
   // ───────────────────────────────────────────────────────────────────────
   //  ENGINE B — Audio burst segmenter (core logic in BurstSegmenter,
@@ -115,6 +126,9 @@ class _CounterScreenState extends State<CounterScreen>
   void _configureSegmenter() {
     _segmenter.minGapMs = const [420, 900, 2000][_lenClass];
     _segmenter.maxSplitMs = const [1000, 2000, 3500][_lenClass];
+    // Same physical limit for Engine A: the recogniser may not claim more
+    // reps per second than a human mouth can produce.
+    _utterances.minRepMs = _segmenter.minGapMs;
   }
 
   // ═══════════════════════════════════════════════════════════════════════
@@ -141,6 +155,7 @@ class _CounterScreenState extends State<CounterScreen>
   @override
   void dispose() {
     _isListening = false;
+    _restartTimer?.cancel();
     _speech.stop();
     _pulseCtrl.dispose();
     _ringCtrl.dispose();
@@ -229,13 +244,32 @@ class _CounterScreenState extends State<CounterScreen>
     }
   }
 
+  /// Restarts the recognition session ONCE, however many callbacks report
+  /// the same drop. Android delivers `error_no_match` + `notListening` +
+  /// `done` for a single ended session; firing listen() three times made the
+  /// recogniser return "busy" and stop counting altogether.
+  void _scheduleRestart(int delayMs) {
+    if (!_isListening || !mounted) return;
+    _restartTimer?.cancel();
+    _restartTimer = Timer(Duration(milliseconds: delayMs), () async {
+      if (!_isListening || !mounted || _restartInFlight) return;
+      if (_speech.isListening) return; // session recovered on its own
+      _restartInFlight = true;
+      try {
+        await _startListening();
+      } finally {
+        _restartInFlight = false;
+      }
+    });
+  }
+
   Future<void> _startListening() async {
     if (!_speechAvailable || !mounted) return;
 
-    // NOTE: _sessionPartialCount is deliberately NOT reset here — the old
-    // session's final result may still arrive after the restart and would
-    // then be counted a second time (delta measured against 0). It is
-    // reset in _onStatus when the NEW session actually reports listening.
+    // NOTE: the utterance tracker is deliberately NOT reset here. The old
+    // session's final result routinely arrives AFTER the new session has
+    // started (Android) and must still be recognised as a re-delivery of
+    // text we already credited — that is exactly what the tracker does.
     _segmenter.resetBurstState();
 
     // STT her zaman Türkçe modelde çalışır: zikir kelimelerini fonetik
@@ -252,74 +286,85 @@ class _CounterScreenState extends State<CounterScreen>
       if (match != null) localeId = match;
     } catch (_) {}
 
-    // Start STT session
-    await _speech.listen(
-      onResult: _onResult,
-      onSoundLevelChange: _onMicLevel, // feed Engine B (raw platform units)
-      // NOT: pencere zamanlayıcısı kaldırıldı — uzlaştırma artık olay anında
-      listenOptions: SpeechListenOptions(
-        partialResults: true,
-        cancelOnError: false,
-        listenMode: ListenMode.dictation,
-        localeId: localeId,
-        listenFor: const Duration(minutes: 5),
-        pauseFor: const Duration(seconds: 8),
-      ),
-    );
+    if (_speech.isListening || !_isListening || !mounted) return;
 
+    // Start STT session
+    try {
+      await _speech.listen(
+        onResult: _onResult,
+        onSoundLevelChange: _onMicLevel, // feed Engine B (raw platform units)
+        // NOT: pencere zamanlayıcısı kaldırıldı — uzlaştırma artık olay anında
+        listenOptions: SpeechListenOptions(
+          partialResults: true,
+          cancelOnError: false,
+          listenMode: ListenMode.dictation,
+          localeId: localeId,
+          listenFor: const Duration(minutes: 5),
+          pauseFor: const Duration(seconds: 8),
+        ),
+      );
+    } catch (_) {
+      // Android throws if the recogniser is still tearing the old session
+      // down — back off and try again instead of dying silently.
+      _scheduleRestart(600);
+    }
   }
 
   void _onStatus(String status) {
     if (!mounted) return;
     if (status == SpeechToText.listeningStatus) {
-      // A NEW session is live: only now is it safe to start the per-session
-      // occurrence counter from zero (any late final of the old session has
-      // had its chance to arrive and was measured against the old counter).
-      _sessionPartialCount = 0;
+      // NOTE: nothing is reset here. Android reports the new session as
+      // listening BEFORE the previous session's final result arrives, and
+      // resetting the occurrence counter at this point was what made every
+      // spoken dhikr count twice. Result bookkeeping is text-based now.
       setState(() {
         _statusText = _s('Dinleniyor...', 'Listening...', 'يستمع...');
         _micLevel = 0.5;
       });
     } else if (status == SpeechToText.notListeningStatus ||
         status == SpeechToText.doneStatus) {
-      if (_isListening) {
-        // Small delay: lets the old session's final result land BEFORE the
-        // new session resets the counter — otherwise that final re-counts
-        // the whole session ("opens and counts by itself" reports).
-        Future.delayed(const Duration(milliseconds: 250), () {
-          if (_isListening && mounted) _startListening();
-        });
-      }
+      // Android ends the session after every utterance; keep the mic alive.
+      // The delay also gives the pending final result time to land.
+      _scheduleRestart(350);
     }
   }
 
   void _onError(SpeechRecognitionError error) {
     if (!mounted || !_isListening) return;
-    final delay = error.errorMsg.contains('busy') ? 500 : 50;
-    Future.delayed(Duration(milliseconds: delay), () {
-      if (_isListening && mounted) _startListening();
-    });
+    // "busy" means the previous session is still shutting down — a longer
+    // back-off (and a cancel) is the only thing that clears it.
+    if (error.errorMsg.contains('busy')) {
+      _speech.cancel();
+      _scheduleRestart(800);
+    } else {
+      // no-match / speech-timeout are normal between reps.
+      _scheduleRestart(350);
+    }
   }
 
   void _onResult(SpeechRecognitionResult result) {
+    if (!mounted || !_isListening) return;
     final text = result.recognizedWords;
     if (text.isEmpty) return;
 
-    final count = _countOccurrences(text);
+    final normalized = normalizeDhikrText(text);
+    final count = countDhikrOccurrences(text, _dhikr.keywords);
     final nowMs = DateTime.now().millisecondsSinceEpoch;
 
     // Rolling gate: an STT match keeps Engine B unlocked for a few seconds.
     if (count > 0) _reconciler.noteSttMatch(nowMs);
 
-    // Increment only the NEW occurrences since the last (partial or final)
-    // update. The counter only advances upward and is NOT reset on a final
-    // result: iOS/Android sometimes deliver the same final twice, and the
-    // old "reset on final" made the duplicate re-count the whole session.
-    // The reset happens in _onStatus when the next session starts.
-    final delta = (count - _sessionPartialCount).clamp(0, 99);
-    if (count > _sessionPartialCount) _sessionPartialCount = count;
+    // How much of this text is genuinely new speech? Handles Android's
+    // duplicated/late finals and the recogniser echoing a word it heard
+    // once — see SttUtteranceTracker.
+    final delta = _utterances.onResult(
+      normText: normalized,
+      occurrences: count,
+      nowMs: nowMs,
+      isFinal: result.finalResult,
+    );
 
-    if (delta > 0 && mounted && _isListening) {
+    if (delta > 0) {
       final credit = _reconciler.onSttDelta(delta, nowMs);
       if (credit > 0) _incrementCount(credit);
     }
@@ -340,10 +385,6 @@ class _CounterScreenState extends State<CounterScreen>
   // ═══════════════════════════════════════════════════════════════════════
   //  COUNTING HELPERS
   // ═══════════════════════════════════════════════════════════════════════
-
-  /// Count occurrences via the shared, unit-tested matcher.
-  int _countOccurrences(String rawText) =>
-      countDhikrOccurrences(rawText, _dhikr.keywords);
 
   void _incrementCount(int by) {
     if (by <= 0) return;
@@ -381,6 +422,7 @@ class _CounterScreenState extends State<CounterScreen>
 
   void _stopListening() {
     _isListening = false;
+    _restartTimer?.cancel();
     _speech.stop();
     _segmenter.resetBurstState();
     setState(() {
@@ -393,6 +435,8 @@ class _CounterScreenState extends State<CounterScreen>
     if (_isListening) {
       _stopListening();
     } else {
+      // Resuming is a clean break: whatever text the recogniser had is gone.
+      _utterances.reset();
       setState(() {
         _isListening = true;
         _statusText = _s('Başlatılıyor...', 'Starting...', 'جارٍ البدء...');
@@ -404,7 +448,7 @@ class _CounterScreenState extends State<CounterScreen>
   void _reset() {
     setState(() {
       _count = 0;
-      _sessionPartialCount = 0;
+      _utterances.reset();
       _reconciler.reset(); // need fresh STT confirmation after reset
       _segmenter.resetBurstState();
       if (_isListening) {
@@ -483,31 +527,63 @@ class _CounterScreenState extends State<CounterScreen>
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
+        top: false,
         child: Column(
           children: [
             _buildTopBar(lang),
+            // Compact Android phones are ~150 dp shorter than the iPhone this
+            // screen was laid out on, which pushed the Start/Reset/Target row
+            // off-screen. Everything scales down to the space actually
+            // available (scrolling stays as the last-resort fallback).
             Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  _ui = (constraints.maxHeight / _kDesignHeight)
+                      .clamp(0.62, 1.0);
+                  return _buildBody();
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Vertical space the counter layout wants at full size (logical px).
+  static const double _kDesignHeight = 760;
+
+  /// Scale factor applied to every fixed dimension on this screen.
+  double _ui = 1.0;
+
+  double _sc(double v) => v * _ui;
+
+  Widget _buildBody() {
+    return SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
+              padding: EdgeInsets.symmetric(
+                  horizontal: 20, vertical: _sc(14)),
                 child: Column(
                   children: [
                     if (_dhikr.arabicText.isNotEmpty) _buildArabicCard(),
                     if (_dhikr.source.isNotEmpty) ...[
-                      const SizedBox(height: 10),
+                      SizedBox(height: _sc(10)),
                       Text(
                         '${_s("Kaynak", "Source", "المصدر")}: ${_dhikr.source}',
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 11,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: _sc(11),
                           color: AppColors.textSecondary,
                           fontStyle: FontStyle.italic,
                           height: 1.5,
                         ),
                       ),
                     ],
-                    const SizedBox(height: 28),
+                    SizedBox(height: _sc(24)),
                     _buildCircularCounter(),
-                    const SizedBox(height: 12),
+                    SizedBox(height: _sc(12)),
                     Text(
                       _remaining == 0 && _count > 0
                           ? _s('✓ Hedefe ulaşıldı!', '✓ Target reached!',
@@ -515,7 +591,7 @@ class _CounterScreenState extends State<CounterScreen>
                           : _s('Kalan: $_remaining', 'Remaining: $_remaining',
                               'المتبقي: $_remaining'),
                       style: TextStyle(
-                        fontSize: 13,
+                        fontSize: _sc(13),
                         fontWeight: (_remaining == 0 && _count > 0)
                             ? FontWeight.bold
                             : FontWeight.normal,
@@ -524,26 +600,24 @@ class _CounterScreenState extends State<CounterScreen>
                             : AppColors.textSecondary,
                       ),
                     ),
-                    const SizedBox(height: 28),
+                    SizedBox(height: _sc(22)),
                     _buildMicSection(),
-                    const SizedBox(height: 6),
+                    SizedBox(height: _sc(6)),
                     Text(
                       _statusText,
-                      style: const TextStyle(
-                          fontSize: 13, color: AppColors.textSecondary),
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                          fontSize: _sc(13), color: AppColors.textSecondary),
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: _sc(20)),
                     _buildTapButton(),
-                    const SizedBox(height: 28),
+                    SizedBox(height: _sc(24)),
                     _buildActionButtons(),
-                    const SizedBox(height: 20),
+                    SizedBox(height: _sc(16)),
                   ],
                 ),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -558,7 +632,10 @@ class _CounterScreenState extends State<CounterScreen>
           colors: [Color(0xFF0A1735), Color(0xFF16305F), Color(0xFF1E3A6E)],
         ),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+      // The gradient runs behind the status bar instead of leaving a pale
+      // strip above it (Android draws edge-to-edge).
+      padding: EdgeInsets.fromLTRB(
+          4, MediaQuery.paddingOf(context).top + 4, 4, 4),
       child: Row(
         children: [
           IconButton(
@@ -589,7 +666,7 @@ class _CounterScreenState extends State<CounterScreen>
   Widget _buildArabicCard() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: _sc(14)),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [Color(0xFFFDFBF3), Color(0xFFF1E8CF)],
@@ -611,8 +688,8 @@ class _CounterScreenState extends State<CounterScreen>
         _dhikr.arabicText,
         textAlign: TextAlign.center,
         textDirection: TextDirection.rtl,
-        style: const TextStyle(
-          fontSize: 18,
+        style: TextStyle(
+          fontSize: _sc(18),
           color: AppColors.greenDark,
           height: 1.9,
           fontWeight: FontWeight.w500,
@@ -627,16 +704,19 @@ class _CounterScreenState extends State<CounterScreen>
     final isComplete = _remaining == 0 && _count > 0;
     final arcColor = isComplete ? AppColors.gold : AppColors.greenMid;
 
+    final outer = _sc(230);
+    final inner = _sc(218);
+
     return SizedBox(
-      width: 230,
-      height: 230,
+      width: outer,
+      height: outer,
       child: Stack(
         alignment: Alignment.center,
         children: [
           // Glow
           Container(
-            width: 230,
-            height: 230,
+            width: outer,
+            height: outer,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               boxShadow: [
@@ -650,19 +730,19 @@ class _CounterScreenState extends State<CounterScreen>
           ),
           // White background
           Container(
-            width: 218,
-            height: 218,
+            width: inner,
+            height: inner,
             decoration: const BoxDecoration(
                 shape: BoxShape.circle, color: Colors.white),
           ),
           // Arc
           CustomPaint(
-            size: const Size(218, 218),
+            size: Size(inner, inner),
             painter: _ArcPainter(
               progress: _progress,
               bgColor: AppColors.greenLight,
               fgColor: arcColor,
-              strokeWidth: 15,
+              strokeWidth: _sc(15),
             ),
           ),
           // Count + target + round badge
@@ -674,7 +754,7 @@ class _CounterScreenState extends State<CounterScreen>
                 Text(
                   '$_count',
                   style: TextStyle(
-                    fontSize: 78,
+                    fontSize: _sc(78),
                     fontWeight: FontWeight.bold,
                     color: isComplete
                         ? const Color(0xFFC9A227)
@@ -684,14 +764,14 @@ class _CounterScreenState extends State<CounterScreen>
                 ),
                 Text(
                   '/ $_targetCount',
-                  style: const TextStyle(
-                      fontSize: 18, color: AppColors.textSecondary),
+                  style: TextStyle(
+                      fontSize: _sc(18), color: AppColors.textSecondary),
                 ),
                 if (_roundCount > 0) ...[
-                  const SizedBox(height: 6),
+                  SizedBox(height: _sc(6)),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 4),
+                    padding: EdgeInsets.symmetric(
+                        horizontal: _sc(12), vertical: _sc(4)),
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
                           colors: [Color(0xFF10234C), Color(0xFF1E3A6E)]),
@@ -706,9 +786,9 @@ class _CounterScreenState extends State<CounterScreen>
                     ),
                     child: Text(
                       '$_roundCount. ${_s("tur", "round", "جولة")}',
-                      style: const TextStyle(
+                      style: TextStyle(
                           color: Colors.white,
-                          fontSize: 12,
+                          fontSize: _sc(12),
                           fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -724,8 +804,9 @@ class _CounterScreenState extends State<CounterScreen>
   // ── Mic / audio visualiser ─────────────────────────────────────────────
 
   Widget _buildMicSection() {
+    final mic = _sc(50);
     return SizedBox(
-      height: 80,
+      height: _sc(78),
       child: AnimatedBuilder(
         animation: _ringCtrl,
         builder: (context, _) {
@@ -737,8 +818,8 @@ class _CounterScreenState extends State<CounterScreen>
                 Opacity(
                   opacity: ((1 - t) * 0.35 * _micLevel).clamp(0.0, 1.0),
                   child: Container(
-                    width: 68 + _micLevel * 20,
-                    height: 68 + _micLevel * 20,
+                    width: _sc(68 + _micLevel * 20),
+                    height: _sc(68 + _micLevel * 20),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
@@ -751,8 +832,8 @@ class _CounterScreenState extends State<CounterScreen>
                       ((1 - ((t + 0.4) % 1.0)) * 0.5 * _micLevel)
                           .clamp(0.0, 1.0),
                   child: Container(
-                    width: 52 + _micLevel * 14,
-                    height: 52 + _micLevel * 14,
+                    width: _sc(52 + _micLevel * 14),
+                    height: _sc(52 + _micLevel * 14),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
@@ -761,8 +842,8 @@ class _CounterScreenState extends State<CounterScreen>
                   ),
                 ),
                 Container(
-                  width: 50,
-                  height: 50,
+                  width: mic,
+                  height: mic,
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       begin: Alignment.topLeft,
@@ -779,18 +860,18 @@ class _CounterScreenState extends State<CounterScreen>
                     ],
                   ),
                   child:
-                      const Icon(Icons.mic, color: Colors.white, size: 26),
+                      Icon(Icons.mic, color: Colors.white, size: _sc(26)),
                 ),
               ],
             );
           } else {
             return Container(
-              width: 50,
-              height: 50,
+              width: mic,
+              height: mic,
               decoration: BoxDecoration(
                   color: Colors.grey.shade200, shape: BoxShape.circle),
-              child: const Icon(Icons.mic_off,
-                  color: AppColors.textSecondary, size: 26),
+              child: Icon(Icons.mic_off,
+                  color: AppColors.textSecondary, size: _sc(26)),
             );
           }
         },
@@ -804,8 +885,8 @@ class _CounterScreenState extends State<CounterScreen>
     return GestureDetector(
       onTap: () => _incrementCount(1),
       child: Container(
-        width: 110,
-        height: 110,
+        width: _sc(108),
+        height: _sc(108),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           gradient: const LinearGradient(
@@ -825,15 +906,15 @@ class _CounterScreenState extends State<CounterScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.touch_app_outlined,
-                color: AppColors.greenDark, size: 28),
-            const SizedBox(height: 2),
+            Icon(Icons.touch_app_outlined,
+                color: AppColors.greenDark, size: _sc(28)),
+            SizedBox(height: _sc(2)),
             Text(
               _s('Dokun', 'Tap', 'لمس'),
-              style: const TextStyle(
+              style: TextStyle(
                   color: AppColors.greenDark,
                   fontWeight: FontWeight.bold,
-                  fontSize: 14),
+                  fontSize: _sc(14)),
             ),
           ],
         ),
@@ -855,6 +936,7 @@ class _CounterScreenState extends State<CounterScreen>
           gradient: const LinearGradient(
               colors: [Color(0xFF10234C), Color(0xFF1E3A6E)]),
           onTap: _toggleListening,
+          scale: _ui,
         ),
         _ActionButton(
           label: _s('Sıfırla', 'Reset', 'إعادة'),
@@ -862,6 +944,7 @@ class _CounterScreenState extends State<CounterScreen>
           gradient: const LinearGradient(
               colors: [Color(0xFFA8861D), Color(0xFFC9A227)]),
           onTap: _reset,
+          scale: _ui,
         ),
         _ActionButton(
           label: _s('Hedef', 'Target', 'الهدف'),
@@ -869,6 +952,7 @@ class _CounterScreenState extends State<CounterScreen>
           gradient: const LinearGradient(
               colors: [Color(0xFF16305F), Color(0xFF2C4A7C)]),
           onTap: _showTargetDialog,
+          scale: _ui,
         ),
       ],
     );
@@ -935,12 +1019,14 @@ class _ActionButton extends StatelessWidget {
   final IconData icon;
   final Gradient gradient;
   final VoidCallback onTap;
+  final double scale;
 
   const _ActionButton({
     required this.label,
     required this.icon,
     required this.gradient,
     required this.onTap,
+    this.scale = 1.0,
   });
 
   @override
@@ -950,8 +1036,8 @@ class _ActionButton extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            width: 58,
-            height: 58,
+            width: 58 * scale,
+            height: 58 * scale,
             decoration: BoxDecoration(
               gradient: gradient,
               shape: BoxShape.circle,
@@ -963,15 +1049,22 @@ class _ActionButton extends StatelessWidget {
                 ),
               ],
             ),
-            child: Icon(icon, color: Colors.white, size: 28),
+            child: Icon(icon, color: Colors.white, size: 28 * scale),
           ),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 12,
-              color: AppColors.textSecondary,
-              fontWeight: FontWeight.w500,
+          SizedBox(height: 6 * scale),
+          // Long localised labels (fr/id/ur) must shrink, not overflow.
+          SizedBox(
+            width: 96 * scale,
+            child: Text(
+              label,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 12 * scale,
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ],
