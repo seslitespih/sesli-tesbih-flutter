@@ -58,7 +58,7 @@ class CounterScreen extends StatefulWidget {
 }
 
 class _CounterScreenState extends State<CounterScreen>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   // ── Dhikr data ─────────────────────────────────────────────────────────
   late Dhikr _dhikr;
   bool _dhikrLoaded = false;
@@ -91,6 +91,17 @@ class _CounterScreenState extends State<CounterScreen>
   /// listen() calls leave the recogniser permanently busy.
   Timer? _restartTimer;
   bool _restartInFlight = false;
+
+  /// STT locale, looked up ONCE. _speech.locales() used to run before every
+  /// session restart; on Android it is an ordered broadcast to the recogniser
+  /// that can take hundreds of ms, and Android restarts after every utterance
+  /// — so each rep waited on it ("voice response very slow", Play review 3 Sep).
+  String? _sttLocaleId;
+
+  /// Mic was on when the app went to the background → turn it back on when
+  /// the user returns. iOS kept getting listen() retries from the background
+  /// and could kill the app ("kendi kendine kapanıyor", App Store review 5 Oct).
+  bool _resumeAfterBackground = false;
 
   // ───────────────────────────────────────────────────────────────────────
   //  ENGINE B — Audio burst segmenter (core logic in BurstSegmenter,
@@ -149,11 +160,28 @@ class _CounterScreenState extends State<CounterScreen>
       vsync: this,
       duration: const Duration(milliseconds: 1600),
     )..repeat();
+    WidgetsBinding.instance.addObserver(this);
     _loadDhikrAndPrefs();
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (!_dhikrLoaded) return;
+    if (state == AppLifecycleState.paused) {
+      _saveCount();
+      if (_isListening) {
+        _resumeAfterBackground = true;
+        _stopListening();
+      }
+    } else if (state == AppLifecycleState.resumed && _resumeAfterBackground) {
+      _resumeAfterBackground = false;
+      if (!_isListening) _toggleListening();
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _isListening = false;
     _restartTimer?.cancel();
     _speech.stop();
@@ -204,11 +232,15 @@ class _CounterScreenState extends State<CounterScreen>
     }
     final prefs = await SharedPreferences.getInstance();
     final savedTarget = prefs.getInt('target_${dhikr.id}') ?? dhikr.targetCount;
+    // Kaldığı yerden devam: sayı her artışta kaydediliyordu ama açılışta 0'dan
+    // başlatılıyordu → uygulama kapanınca sayım kayboluyordu (App Store yorumu
+    // 5 Eki: "saydıklarım kayıt olmuyor"). Sıfırlamak için Sıfırla düğmesi var.
+    final savedCount = prefs.getInt('count_${dhikr.id}') ?? 0;
 
     if (mounted) {
       setState(() {
         _dhikr = dhikr;
-        _count = 0; // her açılışta sıfırdan başla
+        _count = savedCount;
         _targetCount = savedTarget;
         _dhikrLoaded = true;
         _statusText = _s('Başlatılıyor...', 'Starting...', 'جارٍ التحميل...');
@@ -276,15 +308,19 @@ class _CounterScreenState extends State<CounterScreen>
     // olarak en iyi TR tanıyıcı yakalıyor (EN tanıyıcı "i like it" gibi
     // saçmalıyor, AR tanıyıcı Arap harfli çıktı verip eşleşmiyor).
     const prefix = 'tr';
-    String localeId = '';
-    try {
-      final locales = await _speech.locales();
-      final match = locales
-          .where((l) => l.localeId.startsWith(prefix))
-          .map((l) => l.localeId)
-          .firstOrNull;
-      if (match != null) localeId = match;
-    } catch (_) {}
+    if (_sttLocaleId == null) {
+      String localeId = '';
+      try {
+        final locales = await _speech.locales();
+        final match = locales
+            .where((l) => l.localeId.startsWith(prefix))
+            .map((l) => l.localeId)
+            .firstOrNull;
+        if (match != null) localeId = match;
+      } catch (_) {}
+      _sttLocaleId = localeId;
+    }
+    final localeId = _sttLocaleId!;
 
     if (_speech.isListening || !_isListening || !mounted) return;
 
