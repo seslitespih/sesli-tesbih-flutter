@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'services/locale_service.dart';
+import 'services/review_service.dart';
 import 'screens/splash_screen.dart';
 import 'screens/main_screen.dart';
 import 'screens/counter_screen.dart';
@@ -22,6 +23,7 @@ void main() async {
     systemNavigationBarIconBrightness: Brightness.dark,
   ));
   await LocaleService.instance.load();
+  ReviewService.instance.recordAppOpen();
   runApp(const SesliTesbihApp());
 }
 

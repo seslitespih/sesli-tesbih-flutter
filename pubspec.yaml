@@ -1,7 +1,7 @@
 name: sesli_tesbih
 description: Vocal Tasbeeh - Vocal Islamic Dhikr Counter
 publish_to: 'none'
-version: 1.5.3+33
+version: 1.5.4+34
 
 environment:
   sdk: '>=3.2.0 <4.0.0'
@@ -16,6 +16,8 @@ dependencies:
   shared_preferences: ^2.3.3
   permission_handler: ^11.3.1
   flutter_compass: ^0.8.0
+  in_app_review: ^2.0.12
+  package_info_plus: ^10.2.2
 
 dev_dependencies:
   flutter_test:
@@ -32,3 +34,7 @@ flutter_launcher_icons:
 
 flutter:
   uses-material-design: true
+
+# in_app_review -> url_launcher: 6.3.2x androidx.browser 1.9 / core 1.17 ister (AGP 8.9.1+). Proje AGP 8.7.3.
+dependency_overrides:
+  url_launcher_android: 6.3.16

@@ -63,6 +63,15 @@ const Map<String, Map<String, String>> kExtraTranslations = {
         'Kiblat dihitung berdasarkan lokasi GPS-mu.',
     "Source: Surah Al-A'raf 180; Bukhari, Da'awat 68; Tirmidhi, Da'awat 82.":
         "Sumber: Surah Al-A'raf 180; Bukhari, Da'awat 68; Tirmidzi, Da'awat 82.",
+    // Feedback / rating (1.5.4)
+    'Send feedback': 'Saran / laporkan masalah',
+    'Rate the app': 'Beri nilai aplikasi',
+    'Your message goes straight to the developer. If something is wrong, tell us and we will fix it.': 'Pesan Anda langsung sampai ke pengembang. Jika ada masalah, beri tahu kami dan kami akan memperbaikinya.',
+    'Your message…': 'Pesan Anda…',
+    'Your email (optional, if you want a reply)': 'Email Anda (opsional, jika ingin dibalas)',
+    'Send': 'Kirim',
+    'Thank you! Your message was sent.': 'Terima kasih! Pesan Anda terkirim.',
+    'Could not send. Check your internet connection and try again.': 'Gagal mengirim. Periksa koneksi internet Anda lalu coba lagi.',
   },
   'ur': {
     'Starting...': 'شروع ہو رہا ہے...',
@@ -119,6 +128,15 @@ const Map<String, Map<String, String>> kExtraTranslations = {
         'قبلہ آپ کی GPS لوکیشن کی بنیاد پر معلوم کیا گیا ہے۔',
     "Source: Surah Al-A'raf 180; Bukhari, Da'awat 68; Tirmidhi, Da'awat 82.":
         'ماخذ: سورہ الاعراف 180؛ بخاری، دعوات 68؛ ترمذی، دعوات 82۔',
+    // Feedback / rating (1.5.4)
+    'Send feedback': 'تجویز / مسئلہ بتائیں',
+    'Rate the app': 'ایپ کو ریٹ کریں',
+    'Your message goes straight to the developer. If something is wrong, tell us and we will fix it.': 'آپ کا پیغام براہِ راست ڈویلپر تک پہنچتا ہے۔ اگر کوئی مسئلہ ہے تو بتائیں، ہم اسے ٹھیک کریں گے۔',
+    'Your message…': 'آپ کا پیغام…',
+    'Your email (optional, if you want a reply)': 'آپ کا ای میل (اختیاری، اگر جواب چاہتے ہیں)',
+    'Send': 'بھیجیں',
+    'Thank you! Your message was sent.': 'شکریہ! آپ کا پیغام بھیج دیا گیا۔',
+    'Could not send. Check your internet connection and try again.': 'پیغام نہیں بھیجا جا سکا۔ انٹرنیٹ کنکشن چیک کر کے دوبارہ کوشش کریں۔',
   },
   'fr': {
     'Starting...': 'Démarrage...',
@@ -175,5 +193,14 @@ const Map<String, Map<String, String>> kExtraTranslations = {
         "Qibla calculée d'après votre position GPS.",
     "Source: Surah Al-A'raf 180; Bukhari, Da'awat 68; Tirmidhi, Da'awat 82.":
         "Source : Sourate Al-A'raf 180 ; Boukhari, Da'awat 68 ; Tirmidhi, Da'awat 82.",
+    // Feedback / rating (1.5.4)
+    'Send feedback': 'Suggestion / signaler un problème',
+    'Rate the app': "Noter l'application",
+    'Your message goes straight to the developer. If something is wrong, tell us and we will fix it.': 'Votre message arrive directement au développeur. Si quelque chose ne va pas, dites-le-nous et nous le corrigerons.',
+    'Your message…': 'Votre message…',
+    'Your email (optional, if you want a reply)': 'Votre e-mail (facultatif, si vous voulez une réponse)',
+    'Send': 'Envoyer',
+    'Thank you! Your message was sent.': 'Merci ! Votre message a été envoyé.',
+    'Could not send. Check your internet connection and try again.': "Échec de l'envoi. Vérifiez votre connexion Internet et réessayez.",
   },
 };

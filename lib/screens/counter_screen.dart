@@ -15,6 +15,7 @@ import '../services/count_reconciler.dart';
 import '../services/custom_dhikr_manager.dart';
 import '../services/dhikr_matcher.dart';
 import '../services/locale_service.dart';
+import '../services/review_service.dart';
 import '../services/stt_utterance_tracker.dart';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -187,6 +188,8 @@ class _CounterScreenState extends State<CounterScreen>
     _speech.stop();
     _pulseCtrl.dispose();
     _ringCtrl.dispose();
+    // Finished a round and closed the counter: store rating "happy moment".
+    ReviewService.instance.onCounterClosed();
     super.dispose();
   }
 
@@ -438,6 +441,7 @@ class _CounterScreenState extends State<CounterScreen>
       }
     });
     _saveCount();
+    if (_count % _targetCount == 0) ReviewService.instance.noteRoundCompleted();
     HapticFeedback.lightImpact();
     _pulseCtrl.forward().then((_) => _pulseCtrl.reverse());
   }

@@ -4,6 +4,8 @@ import '../models/dhikr.dart';
 import '../data/dhikr_data.dart';
 import '../services/locale_service.dart';
 import '../services/custom_dhikr_manager.dart';
+import '../services/review_service.dart';
+import 'feedback_sheet.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -129,13 +131,33 @@ class _MainScreenState extends State<MainScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 6),
             constraints: const BoxConstraints(minWidth: 38, minHeight: 40),
           ),
-          IconButton(
-            onPressed: () => Navigator.pushNamed(context, '/privacy'),
-            icon: Icon(Icons.info_outline,
-                color: Colors.white.withValues(alpha: 0.75), size: 22),
-            visualDensity: VisualDensity.compact,
-            padding: const EdgeInsets.symmetric(horizontal: 6),
-            constraints: const BoxConstraints(minWidth: 34, minHeight: 40),
+          PopupMenuButton<String>(
+            icon: Icon(Icons.more_vert,
+                color: Colors.white.withValues(alpha: 0.85), size: 24),
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            constraints: const BoxConstraints(minWidth: 210),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12)),
+            onSelected: (v) {
+              switch (v) {
+                case 'feedback':
+                  showFeedbackSheet(context);
+                case 'rate':
+                  ReviewService.instance.openStorePage();
+                case 'privacy':
+                  Navigator.pushNamed(context, '/privacy');
+              }
+            },
+            itemBuilder: (_) => [
+              _menuItem('feedback', Icons.mail_outline,
+                  _ls('Öneri / sorun bildir', 'Send feedback',
+                      'اقتراح / الإبلاغ عن مشكلة')),
+              _menuItem('rate', Icons.star_outline,
+                  _ls('Uygulamayı puanla', 'Rate the app', 'قيّم التطبيق')),
+              _menuItem('privacy', Icons.info_outline,
+                  _ls('Gizlilik Politikası', 'Privacy Policy',
+                      'سياسة الخصوصية')),
+            ],
           ),
         ],
       ),
@@ -262,6 +284,18 @@ class _MainScreenState extends State<MainScreen> {
 
   String _ls(String tr, String en, String ar) =>
       LocaleService.instance.tr(tr, en, ar);
+
+  PopupMenuItem<String> _menuItem(String value, IconData icon, String text) =>
+      PopupMenuItem<String>(
+        value: value,
+        child: Row(
+          children: [
+            Icon(icon, size: 20, color: AppColors.greenMid),
+            const SizedBox(width: 12),
+            Flexible(child: Text(text)),
+          ],
+        ),
+      );
 
   void _confirmDelete(Dhikr dhikr) {
     showDialog(
