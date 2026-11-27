@@ -1,0 +1,24 @@
+11-27 10:36:22.570  7187  7187 I flutter : DIAG 1795775782570 status notListening
+11-27 10:36:22.570  7187  7187 I flutter : DIAG 1795775782570 restart reason=status-notListening delay=350ms chain=1
+11-27 10:36:22.570  7187  7187 I flutter : DIAG 1795775782570 status done
+11-27 10:36:22.571  7187  7187 I flutter : DIAG 1795775782570 restart-merged reason=status-done
+11-27 10:36:22.678  7187  7187 I flutter : DIAG 1795775782677 error error_speech_timeout permanent=true
+11-27 10:36:22.678  7187  7187 I flutter : DIAG 1795775782678 restart-merged reason=error-error_speech_timeout
+11-27 10:36:22.922  7187  7187 I flutter : DIAG 1795775782922 listen locale=tr_TR
+11-27 10:36:22.932  7187  7187 I flutter : DIAG 1795775782932 status listening
+11-27 10:36:30.946  7187  7187 I flutter : DIAG 1795775790946 status notListening
+11-27 10:36:30.947  7187  7187 I flutter : DIAG 1795775790947 restart reason=status-notListening delay=350ms chain=1
+11-27 10:36:30.947  7187  7187 I flutter : DIAG 1795775790947 status done
+11-27 10:36:30.947  7187  7187 I flutter : DIAG 1795775790947 restart-merged reason=status-done
+11-27 10:36:31.048  7187  7187 I flutter : DIAG 1795775791048 error error_speech_timeout permanent=true
+11-27 10:36:31.048  7187  7187 I flutter : DIAG 1795775791048 restart-merged reason=error-error_speech_timeout
+11-27 10:36:31.356  7187  7187 I flutter : DIAG 1795775791356 listen locale=tr_TR
+11-27 10:36:31.357  7187  7187 I flutter : DIAG 1795775791357 status listening
+11-27 10:36:39.368  7187  7187 I flutter : DIAG 1795775799368 status notListening
+11-27 10:36:39.368  7187  7187 I flutter : DIAG 1795775799368 restart reason=status-notListening delay=350ms chain=1
+11-27 10:36:39.369  7187  7187 I flutter : DIAG 1795775799369 status done
+11-27 10:36:39.369  7187  7187 I flutter : DIAG 1795775799369 restart-merged reason=status-done
+11-27 10:36:39.449  7187  7187 I flutter : DIAG 1795775799449 error error_speech_timeout permanent=true
+11-27 10:36:39.450  7187  7187 I flutter : DIAG 1795775799449 restart-merged reason=error-error_speech_timeout
+11-27 10:36:39.757  7187  7187 I flutter : DIAG 1795775799757 listen locale=tr_TR
+11-27 10:36:39.787  7187  7187 I flutter : DIAG 1795775799787 status listening

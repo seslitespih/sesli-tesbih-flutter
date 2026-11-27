@@ -1,0 +1,147 @@
+11-27 10:47:25.710  8322  8322 I flutter : DIAG 1795776445710 status notListening
+11-27 10:47:25.711  8322  8322 I flutter : DIAG 1795776445711 restart reason=status-notListening delay=150ms chain=1
+11-27 10:47:25.711  8322  8322 I flutter : DIAG 1795776445711 status done
+11-27 10:47:25.711  8322  8322 I flutter : DIAG 1795776445711 restart-merged reason=status-done
+11-27 10:47:25.868  8322  8322 I flutter : DIAG 1795776445868 listen locale=tr_TR
+11-27 10:47:25.873  8322  8322 I flutter : DIAG 1795776445873 status listening
+11-27 10:47:25.879  8322  8322 I flutter : DIAG 1795776445879 status notListening
+11-27 10:47:25.879  8322  8322 I flutter : DIAG 1795776445879 restart reason=status-notListening delay=150ms chain=2
+11-27 10:47:25.880  8322  8322 I flutter : DIAG 1795776445880 status done
+11-27 10:47:25.881  8322  8322 I flutter : DIAG 1795776445881 restart-merged reason=status-done
+11-27 10:47:25.881  8322  8322 I flutter : DIAG 1795776445881 error error_speech_timeout permanent=true
+11-27 10:47:25.881  8322  8322 I flutter : DIAG 1795776445881 restart-merged reason=error-error_speech_timeout
+11-27 10:47:26.031  8322  8322 I flutter : DIAG 1795776446031 listen locale=tr_TR
+11-27 10:47:26.037  8322  8322 I flutter : DIAG 1795776446037 status listening
+11-27 10:47:26.044  8322  8322 I flutter : DIAG 1795776446044 status notListening
+11-27 10:47:26.045  8322  8322 I flutter : DIAG 1795776446045 restart reason=status-notListening delay=150ms chain=3
+11-27 10:47:26.045  8322  8322 I flutter : DIAG 1795776446045 status done
+11-27 10:47:26.045  8322  8322 I flutter : DIAG 1795776446045 restart-merged reason=status-done
+11-27 10:47:26.046  8322  8322 I flutter : DIAG 1795776446046 error error_client permanent=true
+11-27 10:47:26.046  8322  8322 I flutter : DIAG 1795776446046 restart-merged reason=error-error_client
+11-27 10:47:26.199  8322  8322 I flutter : DIAG 1795776446199 listen locale=tr_TR
+11-27 10:47:26.200  8322  8322 I flutter : DIAG 1795776446200 status listening
+11-27 10:47:26.202  8322  8322 I flutter : DIAG 1795776446202 status notListening
+11-27 10:47:26.202  8322  8322 I flutter : DIAG 1795776446202 restart reason=status-notListening delay=150ms chain=4
+11-27 10:47:26.204  8322  8322 I flutter : DIAG 1795776446204 status done
+11-27 10:47:26.204  8322  8322 I flutter : DIAG 1795776446204 restart-merged reason=status-done
+11-27 10:47:26.205  8322  8322 I flutter : DIAG 1795776446205 error error_client permanent=true
+11-27 10:47:26.205  8322  8322 I flutter : DIAG 1795776446205 restart-merged reason=error-error_client
+11-27 10:47:26.359  8322  8322 I flutter : DIAG 1795776446358 listen locale=tr_TR
+11-27 10:47:26.361  8322  8322 I flutter : DIAG 1795776446361 status listening
+11-27 10:47:26.366  8322  8322 I flutter : DIAG 1795776446366 status notListening
+11-27 10:47:26.366  8322  8322 I flutter : DIAG 1795776446366 restart reason=status-notListening delay=300ms chain=5 STORM
+11-27 10:47:26.366  8322  8322 I flutter : DIAG 1795776446366 status done
+11-27 10:47:26.366  8322  8322 I flutter : DIAG 1795776446366 restart-merged reason=status-done
+11-27 10:47:26.367  8322  8322 I flutter : DIAG 1795776446367 error error_client permanent=true
+11-27 10:47:26.367  8322  8322 I flutter : DIAG 1795776446367 restart-merged reason=error-error_client
+11-27 10:47:26.671  8322  8322 I flutter : DIAG 1795776446667 listen locale=tr_TR
+11-27 10:47:26.671  8322  8322 I flutter : DIAG 1795776446671 status listening
+11-27 10:47:26.672  8322  8322 I flutter : DIAG 1795776446672 status notListening
+11-27 10:47:26.673  8322  8322 I flutter : DIAG 1795776446673 restart reason=status-notListening delay=600ms chain=6 STORM
+11-27 10:47:26.673  8322  8322 I flutter : DIAG 1795776446673 status done
+11-27 10:47:26.673  8322  8322 I flutter : DIAG 1795776446673 restart-merged reason=status-done
+11-27 10:47:26.677  8322  8322 I flutter : DIAG 1795776446676 error error_client permanent=true
+11-27 10:47:26.677  8322  8322 I flutter : DIAG 1795776446677 restart-merged reason=error-error_client
+11-27 10:47:27.276  8322  8322 I flutter : DIAG 1795776447276 listen locale=tr_TR
+11-27 10:47:27.277  8322  8322 I flutter : DIAG 1795776447277 status listening
+11-27 10:47:27.301  8322  8322 I flutter : DIAG 1795776447301 status notListening
+11-27 10:47:27.301  8322  8322 I flutter : DIAG 1795776447301 restart reason=status-notListening delay=1200ms chain=7 STORM
+11-27 10:47:27.301  8322  8322 I flutter : DIAG 1795776447301 status done
+11-27 10:47:27.302  8322  8322 I flutter : DIAG 1795776447302 restart-merged reason=status-done
+11-27 10:47:27.302  8322  8322 I flutter : DIAG 1795776447302 error error_client permanent=true
+11-27 10:47:27.302  8322  8322 I flutter : DIAG 1795776447302 restart-merged reason=error-error_client
+11-27 10:47:28.504  8322  8322 I flutter : DIAG 1795776448504 listen locale=tr_TR
+11-27 10:47:28.506  8322  8322 I flutter : DIAG 1795776448505 status listening
+11-27 10:47:28.509  8322  8322 I flutter : DIAG 1795776448509 status notListening
+11-27 10:47:28.509  8322  8322 I flutter : DIAG 1795776448509 restart reason=status-notListening delay=2400ms chain=8 STORM
+11-27 10:47:28.511  8322  8322 I flutter : DIAG 1795776448511 status done
+11-27 10:47:28.511  8322  8322 I flutter : DIAG 1795776448511 restart-merged reason=status-done
+11-27 10:47:28.512  8322  8322 I flutter : DIAG 1795776448512 error error_client permanent=true
+11-27 10:47:28.514  8322  8322 I flutter : DIAG 1795776448514 restart-merged reason=error-error_client
+11-27 10:47:30.917  8322  8322 I flutter : DIAG 1795776450917 listen locale=tr_TR
+11-27 10:47:30.921  8322  8322 I flutter : DIAG 1795776450920 status listening
+11-27 10:47:30.947  8322  8322 I flutter : DIAG 1795776450947 status notListening
+11-27 10:47:30.949  8322  8322 I flutter : DIAG 1795776450948 restart reason=status-notListening delay=3000ms chain=9 STORM
+11-27 10:47:30.949  8322  8322 I flutter : DIAG 1795776450949 status done
+11-27 10:47:30.952  8322  8322 I flutter : DIAG 1795776450952 restart-merged reason=status-done
+11-27 10:47:30.953  8322  8322 I flutter : DIAG 1795776450953 error error_client permanent=true
+11-27 10:47:30.953  8322  8322 I flutter : DIAG 1795776450953 restart-merged reason=error-error_client
+11-27 10:47:33.950  8322  8322 I flutter : DIAG 1795776453950 listen locale=tr_TR
+11-27 10:47:33.951  8322  8322 I flutter : DIAG 1795776453951 status listening
+11-27 10:47:33.966  8322  8322 I flutter : DIAG 1795776453966 status notListening
+11-27 10:47:33.967  8322  8322 I flutter : DIAG 1795776453967 restart reason=status-notListening delay=3000ms chain=10 STORM
+11-27 10:47:33.967  8322  8322 I flutter : DIAG 1795776453967 status done
+11-27 10:47:33.967  8322  8322 I flutter : DIAG 1795776453967 restart-merged reason=status-done
+11-27 10:47:33.968  8322  8322 I flutter : DIAG 1795776453968 error error_client permanent=true
+11-27 10:47:33.971  8322  8322 I flutter : DIAG 1795776453971 restart-merged reason=error-error_client
+11-27 10:47:34.428  8322  8322 I flutter : DIAG 1795776454428 error error_speech_timeout permanent=true
+11-27 10:47:34.428  8322  8322 I flutter : DIAG 1795776454428 restart-merged reason=error-error_speech_timeout
+11-27 10:47:37.008  8322  8322 I flutter : DIAG 1795776457008 listen locale=tr_TR
+11-27 10:47:37.034  8322  8322 I flutter : DIAG 1795776457033 status listening
+11-27 10:47:37.351  8322  8322 I flutter : DIAG 1795776457351 burst credit=0
+11-27 10:47:39.878  8322  8322 I flutter : DIAG 1795776459878 status notListening
+11-27 10:47:39.879  8322  8322 I flutter : DIAG 1795776459879 restart reason=status-notListening delay=150ms chain=1
+11-27 10:47:39.879  8322  8322 I flutter : DIAG 1795776459879 status done
+11-27 10:47:39.880  8322  8322 I flutter : DIAG 1795776459880 restart-merged reason=status-done
+11-27 10:47:40.030  8322  8322 I flutter : DIAG 1795776460030 listen locale=tr_TR
+11-27 10:47:40.031  8322  8322 I flutter : DIAG 1795776460030 status listening
+11-27 10:47:40.043  8322  8322 I flutter : DIAG 1795776460043 status notListening
+11-27 10:47:40.043  8322  8322 I flutter : DIAG 1795776460043 restart reason=status-notListening delay=150ms chain=2
+11-27 10:47:40.044  8322  8322 I flutter : DIAG 1795776460044 status done
+11-27 10:47:40.044  8322  8322 I flutter : DIAG 1795776460044 restart-merged reason=status-done
+11-27 10:47:40.045  8322  8322 I flutter : DIAG 1795776460045 error error_client permanent=true
+11-27 10:47:40.045  8322  8322 I flutter : DIAG 1795776460045 restart-merged reason=error-error_client
+11-27 10:47:40.201  8322  8322 I flutter : DIAG 1795776460201 listen locale=tr_TR
+11-27 10:47:40.204  8322  8322 I flutter : DIAG 1795776460204 error error_speech_timeout permanent=true
+11-27 10:47:40.204  8322  8322 I flutter : DIAG 1795776460204 restart reason=error-error_speech_timeout delay=150ms chain=3
+11-27 10:47:40.217  8322  8322 I flutter : DIAG 1795776460217 status listening
+11-27 10:47:40.420  8322  8322 I flutter : DIAG 1795776460420 burst credit=0
+11-27 10:47:42.084  8322  8322 I flutter : DIAG 1795776462084 status notListening
+11-27 10:47:42.084  8322  8322 I flutter : DIAG 1795776462084 restart reason=status-notListening delay=150ms chain=4
+11-27 10:47:42.085  8322  8322 I flutter : DIAG 1795776462085 status done
+11-27 10:47:42.091  8322  8322 I flutter : DIAG 1795776462091 restart-merged reason=status-done
+11-27 10:47:42.189  8322  8322 I flutter : DIAG 1795776462188 error error_no_match permanent=true
+11-27 10:47:42.189  8322  8322 I flutter : DIAG 1795776462189 restart-merged reason=error-error_no_match
+11-27 10:47:42.263  8322  8322 I flutter : DIAG 1795776462263 listen locale=tr_TR
+11-27 10:47:42.264  8322  8322 I flutter : DIAG 1795776462264 status listening
+11-27 10:47:42.458  8322  8322 I flutter : DIAG 1795776462458 burst credit=0
+11-27 10:47:45.070  8322  8322 I flutter : DIAG 1795776465070 status notListening
+11-27 10:47:45.070  8322  8322 I flutter : DIAG 1795776465070 restart reason=status-notListening delay=300ms chain=5 STORM
+11-27 10:47:45.070  8322  8322 I flutter : DIAG 1795776465070 status done
+11-27 10:47:45.070  8322  8322 I flutter : DIAG 1795776465070 restart-merged reason=status-done
+11-27 10:47:45.169  8322  8322 I flutter : DIAG 1795776465169 error error_no_match permanent=true
+11-27 10:47:45.169  8322  8322 I flutter : DIAG 1795776465169 restart-merged reason=error-error_no_match
+11-27 10:47:45.374  8322  8322 I flutter : DIAG 1795776465374 listen locale=tr_TR
+11-27 10:47:45.376  8322  8322 I flutter : DIAG 1795776465376 status listening
+11-27 10:47:48.232  8322  8322 I flutter : DIAG 1795776468232 status notListening
+11-27 10:47:48.232  8322  8322 I flutter : DIAG 1795776468232 restart reason=status-notListening delay=600ms chain=6 STORM
+11-27 10:47:48.233  8322  8322 I flutter : DIAG 1795776468233 status done
+11-27 10:47:48.234  8322  8322 I flutter : DIAG 1795776468234 restart-merged reason=status-done
+11-27 10:47:48.473  8322  8322 I flutter : DIAG 1795776468473 error error_speech_timeout permanent=true
+11-27 10:47:48.473  8322  8322 I flutter : DIAG 1795776468473 restart-merged reason=error-error_speech_timeout
+11-27 10:47:48.844  8322  8322 I flutter : DIAG 1795776468844 listen locale=tr_TR
+11-27 10:47:48.845  8322  8322 I flutter : DIAG 1795776468845 status listening
+11-27 10:47:53.315  8322  8322 I flutter : DIAG 1795776473315 status notListening
+11-27 10:47:53.319  8322  8322 I flutter : DIAG 1795776473319 restart reason=status-notListening delay=150ms chain=1
+11-27 10:47:53.319  8322  8322 I flutter : DIAG 1795776473319 status done
+11-27 10:47:53.320  8322  8322 I flutter : DIAG 1795776473320 restart-merged reason=status-done
+11-27 10:47:53.481  8322  8322 I flutter : DIAG 1795776473481 listen locale=tr_TR
+11-27 10:47:53.482  8322  8322 I flutter : DIAG 1795776473482 status listening
+11-27 10:47:53.485  8322  8322 I flutter : DIAG 1795776473485 status notListening
+11-27 10:47:53.485  8322  8322 I flutter : DIAG 1795776473485 restart reason=status-notListening delay=150ms chain=2
+11-27 10:47:53.487  8322  8322 I flutter : DIAG 1795776473487 status done
+11-27 10:47:53.487  8322  8322 I flutter : DIAG 1795776473487 restart-merged reason=status-done
+11-27 10:47:53.487  8322  8322 I flutter : DIAG 1795776473487 error error_client permanent=true
+11-27 10:47:53.487  8322  8322 I flutter : DIAG 1795776473487 restart-merged reason=error-error_client
+11-27 10:47:53.526  8322  8322 I flutter : DIAG 1795776473526 error error_speech_timeout permanent=true
+11-27 10:47:53.527  8322  8322 I flutter : DIAG 1795776473527 restart-merged reason=error-error_speech_timeout
+11-27 10:47:53.664  8322  8322 I flutter : DIAG 1795776473658 listen locale=tr_TR
+11-27 10:47:53.665  8322  8322 I flutter : DIAG 1795776473665 status listening
+11-27 10:47:56.849  8322  8322 I flutter : DIAG 1795776476849 status notListening
+11-27 10:47:56.853  8322  8322 I flutter : DIAG 1795776476853 restart reason=status-notListening delay=150ms chain=3
+11-27 10:47:56.854  8322  8322 I flutter : DIAG 1795776476854 status done
+11-27 10:47:56.854  8322  8322 I flutter : DIAG 1795776476854 restart-merged reason=status-done
+11-27 10:47:57.013  8322  8322 I flutter : DIAG 1795776477013 listen locale=tr_TR
+11-27 10:47:57.013  8322  8322 I flutter : DIAG 1795776477013 status listening
+11-27 10:47:57.014  8322  8322 I flutter : DIAG 1795776477014 error error_speech_timeout permanent=true
+11-27 10:47:57.014  8322  8322 I flutter : DIAG 1795776477014 restart reason=error-error_speech_timeout delay=150ms chain=4

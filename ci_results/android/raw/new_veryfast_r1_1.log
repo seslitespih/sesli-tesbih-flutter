@@ -1,0 +1,160 @@
+listen locale=tr_TR
+status listening
+status notListening
+restart reason=status-notListening delay=150ms chain=3
+status done
+restart-merged reason=status-done
+error error_client permanent=true
+restart-merged reason=error-error_client
+error error_speech_timeout permanent=true
+restart-merged reason=error-error_speech_timeout
+listen locale=tr_TR
+status listening
+status notListening
+restart reason=status-notListening delay=150ms chain=1
+status done
+restart-merged reason=status-done
+listen locale=tr_TR
+status listening
+status notListening
+restart reason=status-notListening delay=150ms chain=2
+status done
+restart-merged reason=status-done
+error error_speech_timeout permanent=true
+restart-merged reason=error-error_speech_timeout
+listen locale=tr_TR
+status listening
+status notListening
+restart reason=status-notListening delay=150ms chain=3
+status done
+restart-merged reason=status-done
+error error_client permanent=true
+restart-merged reason=error-error_client
+listen locale=tr_TR
+status listening
+status notListening
+restart reason=status-notListening delay=150ms chain=4
+status done
+restart-merged reason=status-done
+error error_client permanent=true
+restart-merged reason=error-error_client
+listen locale=tr_TR
+status listening
+status notListening
+restart reason=status-notListening delay=300ms chain=5 STORM
+status done
+restart-merged reason=status-done
+error error_client permanent=true
+restart-merged reason=error-error_client
+listen locale=tr_TR
+status listening
+status notListening
+restart reason=status-notListening delay=600ms chain=6 STORM
+status done
+restart-merged reason=status-done
+error error_client permanent=true
+restart-merged reason=error-error_client
+listen locale=tr_TR
+status listening
+status notListening
+restart reason=status-notListening delay=1200ms chain=7 STORM
+status done
+restart-merged reason=status-done
+error error_client permanent=true
+restart-merged reason=error-error_client
+listen locale=tr_TR
+status listening
+status notListening
+restart reason=status-notListening delay=2400ms chain=8 STORM
+status done
+restart-merged reason=status-done
+error error_client permanent=true
+restart-merged reason=error-error_client
+listen locale=tr_TR
+status listening
+status notListening
+restart reason=status-notListening delay=3000ms chain=9 STORM
+status done
+restart-merged reason=status-done
+error error_client permanent=true
+restart-merged reason=error-error_client
+listen locale=tr_TR
+status listening
+status notListening
+restart reason=status-notListening delay=3000ms chain=10 STORM
+status done
+restart-merged reason=status-done
+error error_client permanent=true
+restart-merged reason=error-error_client
+error error_speech_timeout permanent=true
+restart-merged reason=error-error_speech_timeout
+listen locale=tr_TR
+status listening
+status notListening
+restart reason=status-notListening delay=150ms chain=1
+status done
+restart-merged reason=status-done
+listen locale=tr_TR
+status listening
+status notListening
+restart reason=status-notListening delay=150ms chain=2
+status done
+restart-merged reason=status-done
+error error_speech_timeout permanent=true
+restart-merged reason=error-error_speech_timeout
+listen locale=tr_TR
+status listening
+status notListening
+restart reason=status-notListening delay=150ms chain=3
+status done
+restart-merged reason=status-done
+error error_client permanent=true
+restart-merged reason=error-error_client
+listen locale=tr_TR
+status listening
+status notListening
+restart reason=status-notListening delay=150ms chain=4
+status done
+restart-merged reason=status-done
+error error_client permanent=true
+restart-merged reason=error-error_client
+listen locale=tr_TR
+status listening
+status notListening
+restart reason=status-notListening delay=300ms chain=5 STORM
+status done
+restart-merged reason=status-done
+error error_client permanent=true
+restart-merged reason=error-error_client
+listen locale=tr_TR
+status listening
+status notListening
+restart reason=status-notListening delay=600ms chain=6 STORM
+status done
+restart-merged reason=status-done
+error error_client permanent=true
+restart-merged reason=error-error_client
+listen locale=tr_TR
+status listening
+status notListening
+restart reason=status-notListening delay=1200ms chain=7 STORM
+status done
+restart-merged reason=status-done
+error error_client permanent=true
+restart-merged reason=error-error_client
+listen locale=tr_TR
+status listening
+status notListening
+restart reason=status-notListening delay=2400ms chain=8 STORM
+status done
+restart-merged reason=status-done
+error error_client permanent=true
+restart-merged reason=error-error_client
+listen locale=tr_TR
+status listening
+status notListening
+restart reason=status-notListening delay=3000ms chain=9 STORM
+status done
+restart-merged reason=status-done
+error error_client permanent=true
+restart-merged reason=error-error_client

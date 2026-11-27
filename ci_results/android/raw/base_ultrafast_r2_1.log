@@ -1,0 +1,40 @@
+status notListening
+restart reason=status-notListening delay=350ms chain=1
+status done
+restart-merged reason=status-done
+listen locale=tr_TR
+status listening
+status notListening
+restart reason=status-notListening delay=350ms chain=2
+status done
+restart-merged reason=status-done
+error error_client permanent=true
+restart-merged reason=error-error_client
+error error_speech_timeout permanent=true
+restart-merged reason=error-error_speech_timeout
+listen locale=tr_TR
+status listening
+status notListening
+restart reason=status-notListening delay=350ms chain=1
+status done
+restart-merged reason=status-done
+error error_speech_timeout permanent=true
+restart-merged reason=error-error_speech_timeout
+listen locale=tr_TR
+status listening
+status notListening
+restart reason=status-notListening delay=350ms chain=1
+status done
+restart-merged reason=status-done
+listen locale=tr_TR
+status listening
+status notListening
+restart reason=status-notListening delay=350ms chain=2
+status done
+restart-merged reason=status-done
+error error_client permanent=true
+restart-merged reason=error-error_client
+error error_speech_timeout permanent=true
+restart-merged reason=error-error_speech_timeout
+listen locale=tr_TR
+status listening

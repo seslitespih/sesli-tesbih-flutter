@@ -1,120 +1,120 @@
-[        ] 	at org.gradle.internal.buildprocess.execution.BuildSessionLifecycleBuildActionExecutor.execute(BuildSessionLifecycleBuildActionExecutor.java:62)
-[        ] 	at org.gradle.internal.buildprocess.execution.BuildSessionLifecycleBuildActionExecutor.execute(BuildSessionLifecycleBuildActionExecutor.java:41)
-[        ] 	at org.gradle.internal.buildprocess.execution.StartParamsValidatingActionExecutor.execute(StartParamsValidatingActionExecutor.java:64)
-[        ] 	at org.gradle.internal.buildprocess.execution.StartParamsValidatingActionExecutor.execute(StartParamsValidatingActionExecutor.java:32)
-[        ] 	at org.gradle.internal.buildprocess.execution.SessionFailureReportingActionExecutor.execute(SessionFailureReportingActionExecutor.java:51)
-[        ] 	at org.gradle.internal.buildprocess.execution.SessionFailureReportingActionExecutor.execute(SessionFailureReportingActionExecutor.java:39)
-[        ] 	at org.gradle.internal.buildprocess.execution.SetupLoggingActionExecutor.execute(SetupLoggingActionExecutor.java:47)
-[        ] 	at org.gradle.internal.buildprocess.execution.SetupLoggingActionExecutor.execute(SetupLoggingActionExecutor.java:31)
-[        ] 	at org.gradle.launcher.daemon.server.exec.ExecuteBuild.doBuild(ExecuteBuild.java:70)
-[   +2 ms] 	at org.gradle.launcher.daemon.server.exec.BuildCommandOnly.execute(BuildCommandOnly.java:37)
-[        ] 	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
-[        ] 	at org.gradle.launcher.daemon.server.exec.WatchForDisconnection.execute(WatchForDisconnection.java:39)
-[        ] 	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
-[        ] 	at org.gradle.launcher.daemon.server.exec.ResetDeprecationLogger.execute(ResetDeprecationLogger.java:29)
-[        ] 	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
-[        ] 	at org.gradle.launcher.daemon.server.exec.RequestStopIfSingleUsedDaemon.execute(RequestStopIfSingleUsedDaemon.java:35)
-[        ] 	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
-[        ] 	at org.gradle.launcher.daemon.server.exec.ForwardClientInput.lambda$execute$0(ForwardClientInput.java:40)
-[        ] 	at org.gradle.internal.daemon.clientinput.ClientInputForwarder.forwardInput(ClientInputForwarder.java:80)
-[        ] 	at org.gradle.launcher.daemon.server.exec.ForwardClientInput.execute(ForwardClientInput.java:37)
-[        ] 	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
-[        ] 	at org.gradle.launcher.daemon.server.exec.LogAndCheckHealth.execute(LogAndCheckHealth.java:64)
-[        ] 	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
-[        ] 	at org.gradle.launcher.daemon.server.exec.LogToClient.doBuild(LogToClient.java:63)
-[        ] 	at org.gradle.launcher.daemon.server.exec.BuildCommandOnly.execute(BuildCommandOnly.java:37)
-[        ] 	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
-[        ] 	at org.gradle.launcher.daemon.server.exec.EstablishBuildEnvironment.doBuild(EstablishBuildEnvironment.java:84)
-[        ] 	at org.gradle.launcher.daemon.server.exec.BuildCommandOnly.execute(BuildCommandOnly.java:37)
-[        ] 	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
-[        ] 	at org.gradle.launcher.daemon.server.exec.StartBuildOrRespondWithBusy$1.run(StartBuildOrRespondWithBusy.java:52)
-[        ] 	at org.gradle.launcher.daemon.server.DaemonStateCoordinator.lambda$runCommand$0(DaemonStateCoordinator.java:320)
-[        ] 	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
-[        ] 	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:48)
-[        ] 	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
-[        ] 	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
-[        ] 	at java.base/java.lang.Thread.run(Thread.java:840)
-[        ] Caused by: org.gradle.api.internal.plugins.PluginApplicationException: Failed to apply plugin 'dev.flutter.flutter-gradle-plugin'.
-[        ] 	at org.gradle.api.internal.plugins.DefaultPluginManager.doApply(DefaultPluginManager.java:176)
-[        ] 	at org.gradle.api.internal.plugins.DefaultPluginManager.apply(DefaultPluginManager.java:139)
-[        ] 	at org.gradle.plugin.use.resolve.internal.ClassPathPluginResolution.applyTo(ClassPathPluginResolution.java:50)
-[        ] 	at org.gradle.plugin.use.internal.DefaultPluginRequestApplicator$ApplyAction.apply(DefaultPluginRequestApplicator.java:156)
-[        ] 	... 256 more
-[        ] Caused by: org.gradle.internal.operations.BuildOperationInvocationException: Error: Your project's Gradle version (8.9.0) is lower than Flutter's minimum supported version of 9.3.1. Please upgrade your Gradle version. 
-[        ] Alternatively, use the flag "--android-skip-build-dependency-validation" to bypass this check.
-[        ] Potential fix: Your project's gradle version is typically defined in the gradle wrapper file. By default, this can be found at /home/runner/work/sesli-tesbih-flutter/sesli-tesbih-flutter/android/gradle/wrapper/gradle-wrapper.properties. 
-[   +3 ms] For more information, see https://docs.gradle.org/current/userguide/gradle_wrapper.html.
-[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.throwAsBuildOperationInvocationException(DefaultBuildOperationRunner.java:197)
-[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.access$100(DefaultBuildOperationRunner.java:24)
-[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:75)
-[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:59)
-[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:166)
-[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:59)
-[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.run(DefaultBuildOperationRunner.java:47)
-[        ] 	at org.gradle.api.internal.plugins.DefaultPluginManager.lambda$doApply$0(DefaultPluginManager.java:170)
-[        ] 	at org.gradle.internal.code.DefaultUserCodeApplicationContext.apply(DefaultUserCodeApplicationContext.java:44)
-[        ] 	at org.gradle.api.internal.plugins.DefaultPluginManager.doApply(DefaultPluginManager.java:169)
-[        ] 	... 259 more
-[        ] Caused by: com.flutter.gradle.DependencyValidationException: Error: Your project's Gradle version (8.9.0) is lower than Flutter's minimum supported version of 9.3.1. Please upgrade your Gradle version. 
-[        ] Alternatively, use the flag "--android-skip-build-dependency-validation" to bypass this check.
-[        ] Potential fix: Your project's gradle version is typically defined in the gradle wrapper file. By default, this can be found at /home/runner/work/sesli-tesbih-flutter/sesli-tesbih-flutter/android/gradle/wrapper/gradle-wrapper.properties. 
-[        ] For more information, see https://docs.gradle.org/current/userguide/gradle_wrapper.html.
-[        ] 	at com.flutter.gradle.DependencyVersionChecker.checkGradleVersion$gradle(DependencyVersionChecker.kt:239)
-[        ] 	at com.flutter.gradle.DependencyVersionChecker.checkDependencyVersions(DependencyVersionChecker.kt:121)
-[        ] 	at com.flutter.gradle.FlutterPlugin.apply(FlutterPlugin.kt:60)
-[        ] 	at com.flutter.gradle.FlutterPlugin.apply(FlutterPlugin.kt:34)
-[        ] 	at org.gradle.api.internal.plugins.ImperativeOnlyPluginTarget.applyImperative(ImperativeOnlyPluginTarget.java:43)
-[        ] 	at org.gradle.api.internal.plugins.RuleBasedPluginTarget.applyImperative(RuleBasedPluginTarget.java:51)
-[        ] 	at org.gradle.api.internal.plugins.AddSoftwareTypesAsExtensionsPluginTarget.applyImperative(AddSoftwareTypesAsExtensionsPluginTarget.java:94)
-[        ] 	at org.gradle.api.internal.plugins.DefaultPluginManager.addPlugin(DefaultPluginManager.java:190)
-[        ] 	at org.gradle.api.internal.plugins.DefaultPluginManager.access$100(DefaultPluginManager.java:54)
-[        ] 	at org.gradle.api.internal.plugins.DefaultPluginManager$AddPluginBuildOperation.run(DefaultPluginManager.java:285)
-[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:29)
-[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:26)
-[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:66)
-[        ] 	... 266 more
-[        ] BUILD FAILED in 1m 21s
-[   +3 ms] 4 actionable tasks: 4 executed
-[ +459 ms] Running Gradle task 'assembleDebug'... (completed in 82.4s)
-[   +1 ms] executing: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-2/x64/bin/java --version
-[  +40 ms] Exit code 0 from: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-2/x64/bin/java --version
-[        ] openjdk 17.0.21.1 2026-11-17
-           OpenJDK Runtime Environment Temurin-17.0.21.1+2 (build 17.0.21.1+2)
-           OpenJDK 64-Bit Server VM Temurin-17.0.21.1+2 (build 17.0.21.1+2, mixed mode, sharing)
-[   +5 ms] "flutter apk" took 82,862ms.
-[   +2 ms] Gradle task assembleDebug failed with exit code 1
-[        ] 
-           #0      throwToolExit (package:flutter_tools/src/base/common.dart:36:3)
-           #1      AndroidGradleBuilder.buildGradleApp (package:flutter_tools/src/android/gradle.dart:678:7)
-           <asynchronous suspension>
-           #2      AndroidGradleBuilder.buildApk (package:flutter_tools/src/android/gradle.dart:256:5)
-           <asynchronous suspension>
-           #3      BuildApkCommand.runCommand (package:flutter_tools/src/commands/build_apk.dart:177:5)
-           <asynchronous suspension>
-           #4      FlutterCommand.run.<anonymous closure> (package:flutter_tools/src/runner/flutter_command.dart:1268:27)
-           <asynchronous suspension>
-           #5      AppContext.run.<anonymous closure> (package:flutter_tools/src/base/context.dart:154:19)
-           <asynchronous suspension>
-           #6      CommandRunner.runCommand (package:args/command_runner.dart:212:13)
-           <asynchronous suspension>
-           #7      FlutterCommandRunner.runCommand.<anonymous closure> (package:flutter_tools/src/runner/flutter_command_runner.dart:651:9)
-           <asynchronous suspension>
-           #8      AppContext.run.<anonymous closure> (package:flutter_tools/src/base/context.dart:154:19)
-           <asynchronous suspension>
-           #9      FlutterCommandRunner.runCommand (package:flutter_tools/src/runner/flutter_command_runner.dart:585:5)
-           <asynchronous suspension>
-           #10     FlutterCommandRunner.run (package:flutter_tools/src/runner/flutter_command_runner.dart:355:5)
-           <asynchronous suspension>
-           #11     run.<anonymous closure>.<anonymous closure>.<anonymous closure> (package:flutter_tools/runner.dart:167:15)
-           <asynchronous suspension>
-           #12     AppContext.run.<anonymous closure> (package:flutter_tools/src/base/context.dart:154:19)
-           <asynchronous suspension>
-           #13     AppContext.run.<anonymous closure> (package:flutter_tools/src/base/context.dart:154:19)
-           <asynchronous suspension>
-           #14     main (package:flutter_tools/executable.dart:115:3)
-           <asynchronous suspension>
-
-
-[        ] Running 2 shutdown hooks
+[        ] file or directory '/home/runner/.pub-cache/hosted/pub.dev/url_launcher_android-6.3.16/android/src/debug/java', not found
+[        ] Resolve mutations for :url_launcher_android:extractDeepLinksForAarDebug (Thread[Execution worker Thread 2,5,main]) started.
+[        ] :url_launcher_android:extractDeepLinksForAarDebug (Thread[Execution worker Thread 2,5,main]) started.
+[        ] > Task :url_launcher_android:extractDeepLinksForAarDebug
+[        ] Caching disabled for task ':url_launcher_android:extractDeepLinksForAarDebug' because:
+[        ]   Build cache is disabled
+[        ] Task ':url_launcher_android:extractDeepLinksForAarDebug' is not up-to-date because:
+[        ]   No history is available.
+[        ] Resolve mutations for :url_launcher_android:mergeDebugGeneratedProguardFiles (Thread[Execution worker Thread 2,5,main]) started.
+[        ] :url_launcher_android:mergeDebugGeneratedProguardFiles (Thread[Execution worker Thread 2,5,main]) started.
+[        ] > Task :url_launcher_android:mergeDebugGeneratedProguardFiles
+[        ] Caching disabled for task ':url_launcher_android:mergeDebugGeneratedProguardFiles' because:
+[        ]   Build cache is disabled
+[        ]   Simple merging task
+[        ] Task ':url_launcher_android:mergeDebugGeneratedProguardFiles' is not up-to-date because:
+[        ]   No history is available.
+[        ] Resolve mutations for :url_launcher_android:mergeDebugConsumerProguardFiles (Thread[Execution worker Thread 2,5,main]) started.
+[        ] :url_launcher_android:mergeDebugConsumerProguardFiles (Thread[Execution worker Thread 2,5,main]) started.
+[        ] > Task :url_launcher_android:mergeDebugConsumerProguardFiles
+[        ] Caching disabled for task ':url_launcher_android:mergeDebugConsumerProguardFiles' because:
+[        ]   Build cache is disabled
+[        ]   Simple merging task
+[        ] Task ':url_launcher_android:mergeDebugConsumerProguardFiles' is not up-to-date because:
+[        ]   No history is available.
+[        ] Resolve mutations for :url_launcher_android:prepareDebugArtProfile (Thread[Execution worker,5,main]) started.
+[        ] :url_launcher_android:prepareDebugArtProfile (Thread[Execution worker Thread 3,5,main]) started.
+[        ] > Task :url_launcher_android:prepareDebugArtProfile
+[        ] Caching disabled for task ':url_launcher_android:prepareDebugArtProfile' because:
+[        ]   Build cache is disabled
+[        ]   Caching has been disabled for the task
+[        ] Task ':url_launcher_android:prepareDebugArtProfile' is not up-to-date because:
+[        ]   No history is available.
+[        ] Resolve mutations for :url_launcher_android:prepareLintJarForPublish (Thread[Execution worker Thread 3,5,main]) started.
+[        ] :url_launcher_android:prepareLintJarForPublish (Thread[Execution worker Thread 3,5,main]) started.
+[        ] Resolve mutations for :url_launcher_android:mergeDebugJavaResource (Thread[Execution worker Thread 2,5,main]) started.
+[        ] :url_launcher_android:mergeDebugJavaResource (Thread[Execution worker,5,main]) started.
+[        ] > Task :url_launcher_android:prepareLintJarForPublish
+[        ] Caching disabled for task ':url_launcher_android:prepareLintJarForPublish' because:
+[        ]   Build cache is disabled
+[        ]   Caching has been disabled for the task
+[        ] Task ':url_launcher_android:prepareLintJarForPublish' is not up-to-date because:
+[        ]   No history is available.
+[        ] > Task :url_launcher_android:mergeDebugJavaResource
+[        ] Caching disabled for task ':url_launcher_android:mergeDebugJavaResource' because:
+[        ]   Build cache is disabled
+[        ]   Caching has been disabled for the task
+[        ] Task ':url_launcher_android:mergeDebugJavaResource' is not up-to-date because:
+[        ]   No history is available.
+[        ] The input changes require a full rebuild for incremental task ':url_launcher_android:mergeDebugJavaResource'.
+[        ] Resolve mutations for :url_launcher_android:syncDebugLibJars (Thread[Execution worker,5,main]) started.
+[        ] :url_launcher_android:syncDebugLibJars (Thread[Execution worker,5,main]) started.
+[        ] > Task :url_launcher_android:syncDebugLibJars
+[        ] Caching disabled for task ':url_launcher_android:syncDebugLibJars' because:
+[        ]   Build cache is disabled
+[        ] Task ':url_launcher_android:syncDebugLibJars' is not up-to-date because:
+[        ]   No history is available.
+[        ] Resolve mutations for :url_launcher_android:bundleDebugAar (Thread[Execution worker Thread 2,5,main]) started.
+[        ] :url_launcher_android:bundleDebugAar (Thread[Execution worker Thread 2,5,main]) started.
+[        ] > Task :url_launcher_android:bundleDebugAar
+[        ] Caching disabled for task ':url_launcher_android:bundleDebugAar' because:
+[        ]   Build cache is disabled
+[        ]   Caching has been disabled for the task
+[        ] Task ':url_launcher_android:bundleDebugAar' is not up-to-date because:
+[        ]   No history is available.
+[        ] file or directory '/home/runner/work/sesli-tesbih-flutter/sesli-tesbih-flutter/build/url_launcher_android/intermediates/public_res/debug/packageDebugResources/public.txt', not found
+[        ] file or directory '/home/runner/work/sesli-tesbih-flutter/sesli-tesbih-flutter/build/url_launcher_android/intermediates/navigation_json_for_aar/debug/extractDeepLinksForAarDebug/navigation.json', not found
+[        ] file or directory '/home/runner/work/sesli-tesbih-flutter/sesli-tesbih-flutter/build/url_launcher_android/intermediates/annotations_zip/debug/extractDebugAnnotations/annotations.zip', not found
+[        ] file or directory '/home/runner/work/sesli-tesbih-flutter/sesli-tesbih-flutter/build/url_launcher_android/intermediates/merged_consumer_proguard_file/debug/mergeDebugConsumerProguardFiles/proguard.txt', not found
+[        ] file or directory '/home/runner/work/sesli-tesbih-flutter/sesli-tesbih-flutter/build/url_launcher_android/intermediates/lint_publish_jar/global/prepareLintJarForPublish/lint.jar', not found
+[        ] file or directory '/home/runner/work/sesli-tesbih-flutter/sesli-tesbih-flutter/build/url_launcher_android/intermediates/library_art_profile/debug/prepareDebugArtProfile/baseline-prof.txt', not found
+[        ] Resolve mutations for :url_launcher_android:assembleDebug (Thread[Execution worker Thread 2,5,main]) started.
+[        ] :url_launcher_android:assembleDebug (Thread[Execution worker Thread 2,5,main]) started.
+[        ] > Task :url_launcher_android:assembleDebug
+[        ] Skipping task ':url_launcher_android:assembleDebug' as it has no actions.
+[+1691 ms] > Task :permission_handler_android:extractDebugAnnotations
+[        ] Caching disabled for task ':permission_handler_android:extractDebugAnnotations' because:
+[        ]   Build cache is disabled
+[        ] Task ':permission_handler_android:extractDebugAnnotations' is not up-to-date because:
+[        ]   No history is available.
+[        ] file or directory '/home/runner/.pub-cache/hosted/pub.dev/permission_handler_android-12.1.0/android/src/debug/java', not found
+[        ] Android Lint: Creating lint class loader 31.7.3_false
+[ +599 ms] Extracted 3 Annotations:
+[        ]  @IntDef: 3
+[        ] Annotations written to /home/runner/work/sesli-tesbih-flutter/sesli-tesbih-flutter/build/permission_handler_android/intermediates/annotations_zip/debug/extractDebugAnnotations/annotations.zip
+[        ] Resolve mutations for :permission_handler_android:syncDebugLibJars (Thread[included builds Thread 2,5,main]) started.
+[        ] :permission_handler_android:syncDebugLibJars (Thread[included builds Thread 2,5,main]) started.
+[        ] > Task :permission_handler_android:syncDebugLibJars
+[        ] Caching disabled for task ':permission_handler_android:syncDebugLibJars' because:
+[        ]   Build cache is disabled
+[        ] Task ':permission_handler_android:syncDebugLibJars' is not up-to-date because:
+[        ]   No history is available.
+[        ] Resolve mutations for :permission_handler_android:bundleDebugAar (Thread[included builds Thread 2,5,main]) started.
+[        ] :permission_handler_android:bundleDebugAar (Thread[included builds Thread 2,5,main]) started.
+[        ] > Task :permission_handler_android:bundleDebugAar
+[        ] Caching disabled for task ':permission_handler_android:bundleDebugAar' because:
+[        ]   Build cache is disabled
+[        ]   Caching has been disabled for the task
+[        ] Task ':permission_handler_android:bundleDebugAar' is not up-to-date because:
+[        ]   No history is available.
+[        ] file or directory '/home/runner/work/sesli-tesbih-flutter/sesli-tesbih-flutter/build/permission_handler_android/intermediates/public_res/debug/packageDebugResources/public.txt', not found
+[        ] file or directory '/home/runner/work/sesli-tesbih-flutter/sesli-tesbih-flutter/build/permission_handler_android/intermediates/navigation_json_for_aar/debug/extractDeepLinksForAarDebug/navigation.json', not found
+[        ] file or directory '/home/runner/work/sesli-tesbih-flutter/sesli-tesbih-flutter/build/permission_handler_android/intermediates/merged_consumer_proguard_file/debug/mergeDebugConsumerProguardFiles/proguard.txt', not found
+[        ] file or directory '/home/runner/work/sesli-tesbih-flutter/sesli-tesbih-flutter/build/permission_handler_android/intermediates/lint_publish_jar/global/prepareLintJarForPublish/lint.jar', not found
+[        ] file or directory '/home/runner/work/sesli-tesbih-flutter/sesli-tesbih-flutter/build/permission_handler_android/intermediates/library_art_profile/debug/prepareDebugArtProfile/baseline-prof.txt', not found
+[        ] Resolve mutations for :permission_handler_android:assembleDebug (Thread[included builds Thread 2,5,main]) started.
+[        ] :permission_handler_android:assembleDebug (Thread[included builds Thread 2,5,main]) started.
+[        ] > Task :permission_handler_android:assembleDebug
+[        ] Skipping task ':permission_handler_android:assembleDebug' as it has no actions.
+[  +93 ms] AAPT2 aapt2-8.7.3-12006047-linux Daemon #0: shutdown
+[   +1 ms] AAPT2 aapt2-8.7.3-12006047-linux Daemon #1: shutdown
+[        ] Android Lint: Disposing Uast application environment in lint classloader [31.7.3_false]
+[        ] BUILD SUCCESSFUL in 4m 32s
+[        ] 312 actionable tasks: 311 executed, 1 up-to-date
+[ +341 ms] Running Gradle task 'assembleDebug'... (completed in 274.2s)
+[   +1 ms] Calculate SHA1: LocalDirectory: '/home/runner/work/sesli-tesbih-flutter/sesli-tesbih-flutter/build/app/outputs/flutter-apk'/app-debug.apk
+[ +592 ms] ✓ Built build/app/outputs/flutter-apk/app-debug.apk
+[   +3 ms] "flutter apk" took 275,453ms.
+[   +8 ms] Running 1 shutdown hook
 [        ] Shutdown hooks complete
-[        ] exiting with code 1
+[        ] exiting with code 0

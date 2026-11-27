@@ -1,0 +1,119 @@
+status notListening
+restart reason=status-notListening delay=150ms chain=1
+status done
+restart-merged reason=status-done
+listen locale=tr_TR
+status listening
+status notListening
+restart reason=status-notListening delay=150ms chain=2
+status done
+restart-merged reason=status-done
+error error_client permanent=true
+restart-merged reason=error-error_client
+error error_speech_timeout permanent=true
+restart-merged reason=error-error_speech_timeout
+listen locale=tr_TR
+status listening
+burst credit=0
+status notListening
+restart reason=status-notListening delay=150ms chain=3
+status done
+restart-merged reason=status-done
+listen locale=tr_TR
+status listening
+status notListening
+restart reason=status-notListening delay=150ms chain=4
+status done
+restart-merged reason=status-done
+error error_client permanent=true
+restart-merged reason=error-error_client
+listen locale=tr_TR
+status listening
+status notListening
+restart reason=status-notListening delay=300ms chain=5 STORM
+status done
+restart-merged reason=status-done
+error error_busy permanent=true
+restart reason=error-busy delay=800ms chain=5 STORM
+listen locale=tr_TR
+status listening
+burst credit=0
+status notListening
+restart reason=status-notListening delay=150ms chain=1
+status done
+restart-merged reason=status-done
+listen locale=tr_TR
+error error_no_match permanent=true
+restart reason=error-error_no_match delay=150ms chain=2
+status listening
+burst credit=0
+status notListening
+restart reason=status-notListening delay=150ms chain=1
+status done
+restart-merged reason=status-done
+error error_no_match permanent=true
+restart-merged reason=error-error_no_match
+listen locale=tr_TR
+status listening
+burst credit=0
+burst credit=0
+status notListening
+restart reason=status-notListening delay=150ms chain=1
+status done
+restart-merged reason=status-done
+listen locale=tr_TR
+status listening
+status notListening
+restart reason=status-notListening delay=150ms chain=2
+status done
+restart-merged reason=status-done
+error error_client permanent=true
+restart-merged reason=error-error_client
+listen locale=tr_TR
+status listening
+error error_speech_timeout permanent=true
+restart reason=error-error_speech_timeout delay=150ms chain=3
+status notListening
+restart reason=status-notListening delay=150ms chain=1
+status done
+restart-merged reason=status-done
+listen locale=tr_TR
+status listening
+status notListening
+restart reason=status-notListening delay=150ms chain=2
+status done
+restart-merged reason=status-done
+error error_client permanent=true
+restart-merged reason=error-error_client
+error error_speech_timeout permanent=true
+restart-merged reason=error-error_speech_timeout
+listen locale=tr_TR
+status listening
+status notListening
+restart reason=status-notListening delay=150ms chain=3
+status done
+restart-merged reason=status-done
+error error_speech_timeout permanent=true
+restart-merged reason=error-error_speech_timeout
+listen locale=tr_TR
+status listening
+status notListening
+restart reason=status-notListening delay=150ms chain=1
+status done
+restart-merged reason=status-done
+listen locale=tr_TR
+status listening
+status notListening
+restart reason=status-notListening delay=150ms chain=2
+status done
+restart-merged reason=status-done
+error error_speech_timeout permanent=true
+restart-merged reason=error-error_speech_timeout
+listen locale=tr_TR
+status listening
+status notListening
+restart reason=status-notListening delay=150ms chain=3
+status done
+restart-merged reason=status-done
+error error_busy permanent=true
+restart reason=error-busy delay=800ms chain=3
