@@ -81,8 +81,8 @@ jobs:
       - name: Commit results back to the branch
         if: always()
         run: |
-          mkdir -p ci_results/ios
-          cp -r ci_out/*.txt ci_out/*.png ci_results/ios/ 2>/dev/null || true
+          mkdir -p ci_results/ios_${GITHUB_RUN_NUMBER}
+          cp -r ci_out/*.txt ci_out/*.png ci_out/*.yaml ci_results/ios_${GITHUB_RUN_NUMBER}/ 2>/dev/null || true
           git config user.name  "pace-test-bot"
           git config user.email "pace-test-bot@users.noreply.github.com"
           git add -f ci_results

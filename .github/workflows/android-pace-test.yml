@@ -1,0 +1,103 @@
+# ═══════════════════════════════════════════════════════════════════════
+#  Android pace test (NOT a release workflow)
+#  Alternates the BASE and NEW debug builds on one emulator and plays
+#  synthetic Turkish "Sübhanallah" at several speeds into its microphone.
+#  Trigger: push to the ios-sim-test branch only. Never touches main.
+#  Results are committed back to this branch under ci_results/.
+# ═══════════════════════════════════════════════════════════════════════
+name: Android pace test
+
+on:
+  push:
+    branches: [ios-sim-test]
+    paths:
+      - 'ci/android/**'
+      - 'ci/baseline/**'
+      - '.github/workflows/android-pace-test.yml'
+      - 'lib/**'
+      - 'ci_audio/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  android:
+    name: Android pace matrix
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Python deps
+        run: pip install grpcio grpcio-tools protobuf
+
+      - name: flutter pub get
+        run: flutter pub get
+
+      - name: Build NEW debug APK
+        run: |
+          mkdir -p ci_out
+          flutter build apk --debug --target-platform android-x64
+          cp build/app/outputs/flutter-apk/app-debug.apk ci_out/new.apk
+
+      - name: Build BASE debug APK (before the watchdog / faster restart)
+        run: |
+          cp lib/screens/counter_screen.dart /tmp/counter_screen.new.dart
+          cp ci/baseline/counter_screen.dart lib/screens/counter_screen.dart
+          flutter build apk --debug --target-platform android-x64
+          cp build/app/outputs/flutter-apk/app-debug.apk ci_out/base.apk
+          cp /tmp/counter_screen.new.dart lib/screens/counter_screen.dart
+
+      - name: Run the pace matrix on an emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        env:
+          QEMU_AUDIO_DRV: none
+          ROUNDS: ${{ vars.ROUNDS || '2' }}
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          ram-size: 3072M
+          force-avd-creation: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -no-boot-anim -grpc 8554 -camera-back none -camera-front none
+          disable-animations: true
+          script: bash ci/android/run_matrix.sh
+
+      - name: Commit results back to the branch
+        if: always()
+        run: |
+          mkdir -p ci_results/android
+          cp -r ci_out/results.csv ci_out/raw ci_out/screens ci_results/android/ 2>/dev/null || true
+          git config user.name  "pace-test-bot"
+          git config user.email "pace-test-bot@users.noreply.github.com"
+          git add -f ci_results
+          git commit -m "ci: android pace results [skip ci]" || echo "nothing to commit"
+          git pull --rebase origin ios-sim-test || true
+          git push origin HEAD:ios-sim-test || true
