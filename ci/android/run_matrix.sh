@@ -4,6 +4,8 @@
 # gRPC injectAudio) and records what the counter showed. Runs inside
 # reactivecircus/android-emulator-runner (emulator already booted).
 set -u
+mkdir -p ci_out
+exec > >(tee ci_out/full.log) 2>&1
 PKG=com.sesliTesbih.app
 ACT=com.sesliTesbih.sesli_tesbih.MainActivity
 OUT=ci_out
