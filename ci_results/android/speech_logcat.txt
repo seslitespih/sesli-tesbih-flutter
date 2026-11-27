@@ -1,60 +1,60 @@
-11-27 11:35:39.942  1656  2050 I SP.AiAi : <==== Finishing job {W:b:u:l, bg}, 48961 ms. elapsed since start
-11-27 11:35:39.942  1656  2050 I SP.AiAi : Download stopped: captions_i18n_v0_en-US:asr_en-US_v3003, succeeded, size: 38498810
-11-27 11:35:41.547  2503  2503 I RecognitionService: #startListening received when the service's capacity is full - ignoring this call.
-11-27 11:35:43.272  1656  2050 I SP.AiAi : Scheduling job with delay of 0s for {W:C:I:l, bg}, 5 candidates
-11-27 11:35:43.277  1656  2050 I SP.AiAi : Scheduling: download stopped, 0 started, 0 paused, 5 scheduled, 5 pending: manifests:kg_collections_table-21051103 * {W:C:I:l, bg}, manifests:spelling_correction-22110320 * {W:C:I:l, bg}, manifests:text-classifier-annotator-272525175 * {W:C:I:l, bg}, manifests:text-classifier-actions-1140547708 * {W:C:I:l, bg}, manifests:text-classifier-langid-1941001461 * {W:C:I:l, bg}
-11-27 11:35:43.497  2503  3059 I RecognitionServiceImpl: RecognitionService#onMicrophoneCloseRequested
-11-27 11:35:44.797  2503  2503 I RecognitionService: #startListening received when the service's capacity is full - ignoring this call.
-11-27 11:35:45.161  2503  3059 I RecognitionClient: #onResults withSpeech: false
-11-27 11:35:45.245  2503  3059 W RecognitionClient: #onRecognitionFinished no speech - erroring
-11-27 11:35:45.245  2503  3059 W RecognitionClient: #onError space agsa_transcription_NO_SPEECH_DETECTED code -1!
-11-27 11:35:45.245  2503  3059 W RecognitionServiceImpl: Speech recognition error type NO_SPEECH_DETECTED with error code -1
-11-27 11:35:47.215  1656  2817 I AiAiEcho: AppIndexer Package:[com.google.android.apps.messaging] UserProfile:[0] Enabled:[true].
-11-27 11:35:47.215  1656  2817 I AiAiEcho: AppFetcherImplV2 updateApps package:[com.google.android.apps.messaging], userId:[0], reason:[package is updated.].
-11-27 11:35:47.769  1656  2272 I AiAiEcho: AppIndexer Package:[com.google.android.gms] UserProfile:[0] Enabled:[true].
-11-27 11:35:47.769  1656  2272 I AiAiEcho: AppFetcherImplV2 updateApps package:[com.google.android.gms], userId:[0], reason:[package is updated.].
-11-27 11:35:48.227  2503  2503 I RecognitionServiceImpl: RecognitionService#onStartListening
-11-27 11:35:48.227  2503  2503 I RecognitionServiceInten: Trigger application overridden to com.sesliTesbih.app
-11-27 11:35:48.228  2503  2503 I RecognitionServiceImpl: Create an attribution context to skip platform permission check
-11-27 11:35:48.228  2503  2503 I RecognitionServiceImpl: RecognitionService#logStartListening: callingApp: com.sesliTesbih.app, locale: en-US
-11-27 11:35:48.266  2584  2734 I DialerSingletonScopedExternalsLogging: com.google.android.dialershared.externals.logging.SingletonScopedExternalsLogging.recordCallMethodInvocation:75 event: TIKTOK_WORK_EXECUTION_MONITOR_ON_WORK_STARTED, function parameters: [4d09a28f-b049-4dd6-9213-e559df42b2d7,com.android.dialer.voicemail.service.impl.VvmTaskWorker], return value: <empty>
-11-27 11:35:48.277  2584  2734 I DialerVvmTaskWorkerDelegate: com.android.dialer.voicemail.service.impl.scheduler.VvmTaskWorker$VvmTaskWorkerDelegate.executeVvmJob:191 Beginning execution of job ID: 2
-11-27 11:35:48.320  2584  2794 I DialerVvmCarrierIdentifierImpl: com.android.dialer.voicemail.service.impl.carriermapping.VvmCarrierIdentifierImpl.getVvmCarrierNameBlocking:120 Looking up carrier name for phone account handle: 1 [CONTEXT ratelimit_period="1 MINUTES" skipped=146 ]
-11-27 11:35:48.321  2584  2734 I DialerRestVoicemailEnabledFn: com.android.dialer.voicemail.service.impl.vvmclients.rest.RestVoicemailEnabledFn.isEnabled:67 device is supported, enabling. [CONTEXT ratelimit_period="1 MINUTES" skipped=876 ]
-11-27 11:35:48.358  2503  2503 I NetworkSpeechRecognizer: Online recognizer - start listening
-11-27 11:35:48.362  2503  2503 I NetworkSpeechRecognizer: #startSendingS3Requests, multi = true, entrypoint = VOICE_IME
-11-27 11:35:48.409  2584  2734 I DialerVvmExecutorImpl: com.android.dialer.voicemail.service.impl.scheduler.VvmExecutorImpl.execute:229 Beginning VVM action: SYNC with retryCount: 0 for ComponentInfo{com.android.phone/com.android.services.telephony.TelephonyConnectionService}, 1, UserHandle{0} [CONTEXT enable_persistent_logger=true ]
-11-27 11:35:48.429  2503  2612 I SodaSpeechRecognizer: Offline recognizer - start listening
-11-27 11:35:48.429  2503  2612 I SodaSpeechRecognizer: Initialize Soda [locale: en-US], [applicationDomain: AMBIENT_CONTINUOUS]
-11-27 11:35:48.774  1656  2818 I AiAiEcho: Settings changed for uri: content://settings/secure/autofill_user_data_max_category_count
-11-27 11:35:48.775  1656  2046 I AiAiEcho: Predicting[0]:  [CONTEXT sampling_count=5 ]
-11-27 11:35:48.776  1656  2046 I AiAiEcho: EchoTargets: 
-11-27 11:35:48.776  1656  2046 I AiAiEcho: Filtered by AiAi flag check: 
-11-27 11:35:48.776  1656  2046 I AiAiEcho: [CONTEXT ratelimit_period="10 SECONDS" ]
-11-27 11:35:48.777  1656  2046 I AiAiEcho: #remoteViewsTwiddler: feature disabled.
-11-27 11:35:48.777  1656  2046 I AiAiEcho: Predicting[0]:  [CONTEXT sampling_count=5 ]
-11-27 11:35:48.777  1656  2046 I AiAiEcho: EchoTargets: 
-11-27 11:35:48.777  1656  2046 I AiAiEcho: Filtered by AiAi flag check: 
-11-27 11:35:48.777  1656  2046 I AiAiEcho: [CONTEXT ratelimit_period="10 SECONDS" ]
-11-27 11:35:48.777  1656  2046 I AiAiEcho: #remoteViewsTwiddler: feature disabled.
-11-27 11:35:48.785  1656  2818 I AiAiEcho: Settings changed for uri: content://settings/secure/config_update_certificate
-11-27 11:35:48.788  1656  2046 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface home with targets# 0 (types=[])
-11-27 11:35:48.789  1656  2818 I AiAiEcho: Settings changed for uri: content://settings/secure/print_service_search_uri
-11-27 11:35:48.789  1656  2818 I AiAiEcho: Settings changed for uri: content://settings/secure/autofill_service_search_uri
-11-27 11:35:48.872  2503  3059 I RecognitionServiceImpl: RecognitionService#onMicrophoneOpened
-11-27 11:35:48.895  1656  2046 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface lockscreen with targets# 0 (types=[])
-11-27 11:35:48.900  1656  2046 I AiAiEcho: Predicting[0]:  [CONTEXT sampling_count=5 ]
-11-27 11:35:48.900  1656  2046 I AiAiEcho: EchoTargets: 
-11-27 11:35:48.900  1656  2046 I AiAiEcho: Filtered by AiAi flag check: 
-11-27 11:35:48.900  1656  2046 I AiAiEcho: [CONTEXT ratelimit_period="10 SECONDS" ]
-11-27 11:35:48.900  1656  2046 I AiAiEcho: #remoteViewsTwiddler: feature disabled.
-11-27 11:35:48.900  1656  2046 I AiAiEcho: Predicting[0]:  [CONTEXT sampling_count=5 ]
-11-27 11:35:48.900  1656  2046 I AiAiEcho: EchoTargets: 
-11-27 11:35:48.900  1656  2046 I AiAiEcho: Filtered by AiAi flag check: 
-11-27 11:35:48.900  1656  2046 I AiAiEcho: [CONTEXT ratelimit_period="10 SECONDS" ]
-11-27 11:35:48.900  1656  2046 I AiAiEcho: #remoteViewsTwiddler: feature disabled.
-11-27 11:35:49.032  1656  2046 I AiAiEcho: Predicting[0]:  [CONTEXT sampling_count=5 ]
-11-27 11:35:49.032  1656  2046 I AiAiEcho: EchoTargets: 
-11-27 11:35:49.032  1656  2046 I AiAiEcho: Filtered by AiAi flag check: 
-11-27 11:35:49.032  1656  2046 I AiAiEcho: [CONTEXT ratelimit_period="10 SECONDS" ]
-11-27 11:35:49.081  2503  3059 E SodaSpeechRecognizer: Failed to get language pack of required locale: error 13
+11-27 12:20:46.469  2675  2675 I RecognitionService: #startListening received for a listener which is already in session - ignoring this call.
+11-27 12:20:46.541  2675  2898 I RecognitionClient: #onResults withSpeech: false
+11-27 12:20:46.546  2675  2898 W RecognitionClient: #onRecognitionFinished no speech - erroring
+11-27 12:20:46.549  2675  2898 W RecognitionClient: #onError space agsa_transcription_NO_SPEECH_DETECTED code -1!
+11-27 12:20:46.555  2675  2898 W RecognitionServiceImpl: Speech recognition error type NO_SPEECH_DETECTED with error code -1
+11-27 12:20:46.566  2831  2831 I flutter : DIAG 1795782046566 error error_speech_timeout permanent=true
+11-27 12:20:46.566  2831  2831 I flutter : DIAG 1795782046566 restart-merged reason=error-error_speech_timeout
+11-27 12:20:46.639  2675  2675 I RecognitionServiceImpl: RecognitionService#onStartListening
+11-27 12:20:46.642  2675  2675 I RecognitionServiceInten: Trigger application overridden to com.sesliTesbih.app
+11-27 12:20:46.647  2675  2675 I RecognitionServiceImpl: Create an attribution context to skip platform permission check
+11-27 12:20:46.674  2675  2675 I RecognitionServiceImpl: RecognitionService#logStartListening: callingApp: com.sesliTesbih.app, locale: en-US
+11-27 12:20:46.960  1678  1701 I AiAiEcho: Settings changed for uri: content://settings/secure/mandatory_biometrics_requirements_satisfied
+11-27 12:20:46.986  2675  2675 I NetworkSpeechRecognizer: Online recognizer - start listening
+11-27 12:20:46.987  2675  2675 I NetworkSpeechRecognizer: #startSendingS3Requests, multi = true, entrypoint = VOICE_IME
+11-27 12:20:47.080  1678  2082 I AiAiEcho: Predicting[0]:  [CONTEXT sampling_count=5 ]
+11-27 12:20:47.080  1678  2082 I AiAiEcho: EchoTargets: 
+11-27 12:20:47.080  1678  2082 I AiAiEcho: Filtered by AiAi flag check: 
+11-27 12:20:47.080  1678  2082 I AiAiEcho: [CONTEXT ratelimit_period="10 SECONDS" ]
+11-27 12:20:47.080  1678  2082 I AiAiEcho: #remoteViewsTwiddler: feature disabled.
+11-27 12:20:47.080  1678  2082 I AiAiEcho: Predicting[0]:  [CONTEXT sampling_count=5 ]
+11-27 12:20:47.080  1678  2082 I AiAiEcho: EchoTargets: 
+11-27 12:20:47.080  1678  2082 I AiAiEcho: Filtered by AiAi flag check: 
+11-27 12:20:47.080  1678  2082 I AiAiEcho: [CONTEXT ratelimit_period="10 SECONDS" ]
+11-27 12:20:47.080  1678  2082 I AiAiEcho: #remoteViewsTwiddler: feature disabled.
+11-27 12:20:47.080  1678  2082 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface home with targets# 0 (types=[])
+11-27 12:20:47.080  1678  2082 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface lockscreen with targets# 0 (types=[])
+11-27 12:20:47.153  2675  2861 I SodaSpeechRecognizer: Offline recognizer - start listening
+11-27 12:20:47.153  2675  2861 I SodaSpeechRecognizer: Initialize Soda [locale: en-US], [applicationDomain: AMBIENT_CONTINUOUS]
+11-27 12:20:47.263  2675  3235 E SodaSpeechRecognizer: Failed to get language pack of required locale: error 13
+11-27 12:20:47.269  3115  3224 I DialerVvmTaskWorkerDelegate: com.android.dialer.voicemail.service.impl.scheduler.VvmTaskWorker$VvmTaskWorkerDelegate.executeVvmJob:191 Beginning execution of job ID: 2
+11-27 12:20:47.270  3115  3275 I DialerSingletonScopedExternalsLogging: com.google.android.dialershared.externals.logging.SingletonScopedExternalsLogging.recordCallMethodInvocation:75 event: TIKTOK_WORK_EXECUTION_MONITOR_ON_WORK_STARTED, function parameters: [3f1ec3a0-88b9-4129-b5d3-9c007e334e18,com.android.dialer.voicemail.service.impl.VvmTaskWorker], return value: <empty>
+11-27 12:20:47.272  3115  3229 I DialerVvmCarrierIdentifierImpl: com.android.dialer.voicemail.service.impl.carriermapping.VvmCarrierIdentifierImpl.getVvmCarrierNameBlocking:120 Looking up carrier name for phone account handle: 1 [CONTEXT ratelimit_period="1 MINUTES" skipped=146 ]
+11-27 12:20:47.272  3115  3275 I DialerRestVoicemailEnabledFn: com.android.dialer.voicemail.service.impl.vvmclients.rest.RestVoicemailEnabledFn.isEnabled:67 device is supported, enabling. [CONTEXT ratelimit_period="1 MINUTES" skipped=876 ]
+11-27 12:20:47.325  3115  3224 I DialerVvmExecutorImpl: com.android.dialer.voicemail.service.impl.scheduler.VvmExecutorImpl.execute:229 Beginning VVM action: SYNC with retryCount: 0 for ComponentInfo{com.android.phone/com.android.services.telephony.TelephonyConnectionService}, 1, UserHandle{0} [CONTEXT enable_persistent_logger=true ]
+11-27 12:20:47.751  3115  3275 E DialerRestVvmCarrierService: com.android.dialer.voicemail.service.impl.vvmclients.rest.RestVvmCarrierService.getMsisdn:420 Retrieved phone number in an unexpected format: +15551234567 [CONTEXT disable_client_error_logging=true ]
+11-27 12:20:47.764  3115  3275 W DialerGbaCredentialProvider: com.android.dialer.voicemail.service.impl.vvmclients.rest.GbaCredentialProvider$1.onAuthenticationFailure:93 GBA failed with reason: 1 [CONTEXT disable_client_error_logging=true ]
+11-27 12:20:47.767  3115  3275 W DialerVvmExecutorImpl: com.android.dialer.voicemail.service.impl.scheduler.VvmExecutorImpl.executeWorkOnCarrierService:444 Could not complete vvm work with action: SYNC. Error: [GeneralFailureReason: UNSPECIFIED, RestFailureReason: GBA_AUTHENTICATION_FAILURE_FEATURE_NOT_SUPPORTED, OmtpFailureReason: OMTP_UNSPECIFIED] for ComponentInfo{com.android.phone/com.android.services.telephony.TelephonyConnectionService}, 1, UserHandle{0} [CONTEXT disable_client_error_logging=true enable_persistent_logger=true ]
+11-27 12:20:47.768  3115  3275 I DialerVvmExecutorImpl: com.android.dialer.voicemail.service.impl.scheduler.VvmExecutorImpl.executeWork:204 VvmResult is: # pug@1db0ddb for ComponentInfo{com.android.phone/com.android.services.telephony.TelephonyConnectionService}, 1, UserHandle{0}
+11-27 12:20:47.771  3115  3224 I DialerSingletonScopedExternalsLogging: com.google.android.dialershared.externals.logging.SingletonScopedExternalsLogging.recordCallMethodInvocation:75 event: TIKTOK_WORK_EXECUTION_MONITOR_ON_WORK_FINISHED, function parameters: [3f1ec3a0-88b9-4129-b5d3-9c007e334e18,com.android.dialer.voicemail.service.impl.VvmTaskWorker], return value: Retry
+11-27 12:20:47.772  3115  3181 I WM-WorkerWrapper: Worker result RETRY for Work [ id=3f1ec3a0-88b9-4129-b5d3-9c007e334e18, tags={ com.google.apps.tiktok.contrib.work.TikTokListenableWorker,1,SYNC,TikTokWorker#com.android.dialer.voicemail.service.impl.VvmTaskWorker } ]
+11-27 12:20:48.172  2675  3235 I RecognitionServiceImpl: RecognitionService#onMicrophoneOpened
+11-27 12:20:49.640  2675  2675 I RecognitionServiceImpl: RecognitionService#onStopListening
+11-27 12:20:49.640  2675  2675 I RecognitionServiceImpl: RecognitionService#onMicrophoneCloseRequested
+11-27 12:20:49.744  2675  2675 I RecognitionService: #startListening received for a listener which is already in session - ignoring this call.
+11-27 12:20:49.876  2675  2898 I RecognitionClient: #onResults withSpeech: false
+11-27 12:20:49.876  2675  2898 W RecognitionClient: #onRecognitionFinished no speech - erroring
+11-27 12:20:49.876  2675  2898 W RecognitionClient: #onError space agsa_transcription_NO_SPEECH_DETECTED code -1!
+11-27 12:20:49.876  2675  2898 W RecognitionServiceImpl: Speech recognition error type NO_SPEECH_DETECTED with error code -1
+11-27 12:20:49.895  2831  2831 I flutter : DIAG 1795782049895 error error_speech_timeout permanent=true
+11-27 12:20:49.895  2831  2831 I flutter : DIAG 1795782049895 restart-merged reason=error-error_speech_timeout
+11-27 12:20:49.949  1678  2454 I AiAiEcho: AppIndexer Package:[com.google.android.gms] UserProfile:[0] Enabled:[true].
+11-27 12:20:49.953  1678  2454 I AiAiEcho: AppFetcherImplV2 updateApps package:[com.google.android.gms], userId:[0], reason:[package is updated.].
+11-27 12:20:50.038  2675  2675 I RecognitionServiceImpl: RecognitionService#onStartListening
+11-27 12:20:50.081  2675  2675 I RecognitionServiceInten: Trigger application overridden to com.sesliTesbih.app
+11-27 12:20:50.139  2675  2675 I RecognitionServiceImpl: Create an attribution context to skip platform permission check
+11-27 12:20:50.172  2675  2675 I RecognitionServiceImpl: RecognitionService#logStartListening: callingApp: com.sesliTesbih.app, locale: en-US
+11-27 12:20:50.663  2675  2675 I NetworkSpeechRecognizer: Online recognizer - start listening
+11-27 12:20:50.801  2675  2675 I NetworkSpeechRecognizer: #startSendingS3Requests, multi = true, entrypoint = VOICE_IME
+11-27 12:20:50.801  2675  2854 I SodaSpeechRecognizer: Offline recognizer - start listening
+11-27 12:20:50.801  2675  2854 I SodaSpeechRecognizer: Initialize Soda [locale: en-US], [applicationDomain: AMBIENT_CONTINUOUS]
