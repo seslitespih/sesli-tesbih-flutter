@@ -81,10 +81,24 @@ jobs:
           cp build/app/outputs/flutter-apk/app-debug.apk ci_out/base.apk
           cp /tmp/counter_screen.new.dart lib/screens/counter_screen.dart
 
+      # `QEMU_AUDIO_DRV=none` switches the emulator's audio INPUT off entirely, so
+      # injected speech never reached the recogniser (it answered
+      # NO_SPEECH_DETECTED). Give it a real backend: a PulseAudio null sink.
+      - name: Virtual audio device (PulseAudio null sink)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq pulseaudio pulseaudio-utils
+          pulseaudio -D --exit-idle-time=-1 || true
+          sleep 3
+          pactl load-module module-null-sink sink_name=virtmic sink_properties=device.description=VirtMic
+          pactl set-default-sink virtmic
+          pactl set-default-source virtmic.monitor
+          pactl info | head -14
+
       - name: Run the pace matrix on an emulator
         uses: reactivecircus/android-emulator-runner@v2
         env:
-          QEMU_AUDIO_DRV: none
+          QEMU_AUDIO_DRV: pa
           ROUNDS: ${{ vars.ROUNDS || '2' }}
           PLAN: ${{ vars.PLAN || 'normal:3 slow:2 fast:2 veryfast:2 eight:1 noise:1 fast33:1 ultrafast:1' }}
           VARIANTS: ${{ vars.VARIANTS || 'base new' }}
@@ -95,7 +109,7 @@ jobs:
           profile: pixel_6
           ram-size: 3072M
           force-avd-creation: true
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -no-boot-anim -grpc 8554 -camera-back none -camera-front none
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -no-boot-anim -allow-host-audio -grpc 8554 -camera-back none -camera-front none
           disable-animations: true
           script: bash ci/android/run_matrix.sh
 
