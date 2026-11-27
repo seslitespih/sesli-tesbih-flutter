@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io' show Platform;
 import 'dart:math' as math;
+import 'package:flutter/foundation.dart' show kDebugMode, debugPrint;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart' show openAppSettings;
@@ -20,6 +21,7 @@ import '../services/locale_service.dart';
 import '../services/review_service.dart';
 import '../services/stt_diagnostics.dart';
 import '../services/stt_restart_policy.dart';
+import '../services/stt_stall_watchdog.dart';
 import '../services/stt_utterance_tracker.dart';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -104,7 +106,15 @@ class _CounterScreenState extends State<CounterScreen>
 
   /// Slows restarts down while the recogniser keeps failing instantly, so a
   /// broken session cannot flicker the mic on and off several times a second.
-  final SttRestartPolicy _restartPolicy = SttRestartPolicy();
+  /// 150 ms (was 350): on a real recogniser every ms of this gap is speech the
+  /// counter never hears. The tracker already treats a late final from the old
+  /// session as a re-delivery, so the extra wait bought nothing.
+  final SttRestartPolicy _restartPolicy = SttRestartPolicy(baseDelayMs: 150);
+
+  /// Renews a session that went deaf while the user is still chanting (the
+  /// recogniser stops returning results but the mic still hears speech).
+  final SttStallWatchdog _watchdog = SttStallWatchdog();
+  Timer? _watchdogTimer;
 
   /// Flight recorder for the counting engine. Long-press the status line to
   /// copy it — the only way to see what the phone's recogniser really did.
@@ -115,8 +125,12 @@ class _CounterScreenState extends State<CounterScreen>
   bool _micDenied = false;
 
   int _nowMs() => DateTime.now().millisecondsSinceEpoch;
-  void _log(String tag, [String detail = '']) =>
-      _diag.log(_nowMs(), tag, detail);
+  void _log(String tag, [String detail = '']) {
+    _diag.log(_nowMs(), tag, detail);
+    // Debug builds only: lets an emulator test read the same timeline from
+    // `adb logcat` that the user copies from the app.
+    if (kDebugMode) debugPrint('DIAG ${_nowMs()} $tag $detail');
+  }
 
   /// STT locale, looked up ONCE. _speech.locales() used to run before every
   /// session restart; on Android it is an ordered broadcast to the recogniser
@@ -136,6 +150,7 @@ class _CounterScreenState extends State<CounterScreen>
   late final BurstSegmenter _segmenter = BurstSegmenter(
     onRep: (nowMs) {
       if (!_isListening || !mounted) return;
+      _watchdog.noteBurst();
       final credit = _reconciler.onAudioRep(nowMs);
       _log('burst', 'credit=$credit');
       if (credit > 0) _incrementCount(credit, 'audio');
@@ -188,6 +203,8 @@ class _CounterScreenState extends State<CounterScreen>
       duration: const Duration(milliseconds: 1600),
     )..repeat();
     WidgetsBinding.instance.addObserver(this);
+    _watchdogTimer =
+        Timer.periodic(const Duration(seconds: 1), (_) => _watchdogTick());
     _loadDhikrAndPrefs();
   }
 
@@ -220,6 +237,7 @@ class _CounterScreenState extends State<CounterScreen>
     WidgetsBinding.instance.removeObserver(this);
     _isListening = false;
     _restartTimer?.cancel();
+    _watchdogTimer?.cancel();
     _speech.stop();
     _pulseCtrl.dispose();
     _ringCtrl.dispose();
@@ -419,7 +437,14 @@ class _CounterScreenState extends State<CounterScreen>
           listenMode: ListenMode.dictation,
           localeId: localeId,
           listenFor: const Duration(minutes: 5),
-          pauseFor: const Duration(seconds: 8),
+          // iOS keeps ONE long task alive, and speech_to_text stops it itself
+          // after pauseFor of silence — so with 8 s the mic closed and reopened
+          // every 8 s of quiet (measured in the iOS simulator: listening at
+          // +1.2 s, notListening at +9.3 s, restart, again at +17.8 s …). Results
+          // keep the task alive while the user chants, so a long pauseFor only
+          // changes what happens in silence: one renewal a minute instead of
+          // seven. Android ends its own sessions, so it keeps 8 s.
+          pauseFor: Duration(seconds: Platform.isIOS ? 55 : 8),
         ),
       );
     } catch (e) {
@@ -430,10 +455,24 @@ class _CounterScreenState extends State<CounterScreen>
     }
   }
 
+  /// Once a second: has the recogniser gone mute while the user keeps
+  /// chanting? If so, give it a fresh session (rate-limited by the watchdog).
+  void _watchdogTick() {
+    if (!mounted || !_isListening || _restartInFlight) return;
+    if (_restartTimer?.isActive ?? false) return;
+    final now = _nowMs();
+    if (!_watchdog.shouldRenew(now)) return;
+    _log('watchdog',
+        'renew session (bursts heard, no result) #${_watchdog.renewals}');
+    _speech.cancel();
+    _scheduleRestart('watchdog');
+  }
+
   void _onStatus(String status) {
     if (!mounted) return;
     _log('status', status);
     if (status == SpeechToText.listeningStatus) {
+      _watchdog.noteSessionStart(_nowMs());
       // NOTE: nothing is reset here. Android reports the new session as
       // listening BEFORE the previous session's final result arrives, and
       // resetting the occurrence counter at this point was what made every
@@ -481,6 +520,7 @@ class _CounterScreenState extends State<CounterScreen>
     final normalized = normalizeDhikrText(text);
     final count = countDhikrOccurrences(text, _dhikr.keywords);
     final nowMs = DateTime.now().millisecondsSinceEpoch;
+    _watchdog.noteResult(nowMs, matched: count > 0);
 
     // Rolling gate: an STT match keeps Engine B unlocked for a few seconds.
     if (count > 0) _reconciler.noteSttMatch(nowMs);
@@ -597,6 +637,7 @@ class _CounterScreenState extends State<CounterScreen>
       _log('start');
       _utterances.reset();
       _restartPolicy.reset();
+      _watchdog.reset();
       setState(() {
         _isListening = true;
         _statusText = _s('Başlatılıyor...', 'Starting...', 'جارٍ البدء...');

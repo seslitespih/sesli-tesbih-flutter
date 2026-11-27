@@ -14,6 +14,11 @@ const List<Dhikr> kDhikrList = [
       'sübhan', 'subhan', 'süphan', 'suphan',
       'siphan', 'sifan', 'sipan',
       'nallah', 'bhan', 'ubhan', 'sub', 'sub han',
+      // Every rep ENDS in "allah", and the iOS recogniser often writes a rep as
+      // just "allah" ("…subhanallah subhanallah allah allah suphanallah…"),
+      // dropping the "subhan". Measured in the iOS simulator: counting "allah"
+      // took normal pace from 8 → 10 of 10 without a single over-count.
+      'allah',
     ],
     source: 'Müslim, Mesâcid 146',
   ),
