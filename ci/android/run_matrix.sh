@@ -20,6 +20,15 @@ log "screen $W x $H"
 TAPX=$((W * 26 / 100)); TAPY=$((H * 29 / 100))
 RSTX=$((W / 2));        RSTY=$((H * 879 / 1000))
 
+{
+  echo "== device";  adb shell getprop ro.product.model; adb shell getprop ro.build.version.release; adb shell getprop ro.build.version.sdk
+  echo "== recognition services"; adb shell cmd package query-services -a android.speech.RecognitionService 2>&1 | grep -E "packageName=|name=" | sort -u
+  echo "== default recogniser"; adb shell settings get secure voice_recognition_service
+  echo "== google / speech packages"; adb shell pm list packages 2>/dev/null | grep -iE "google|speech|tts|\.as$"
+  echo "== network"; adb shell dumpsys connectivity 2>/dev/null | grep -iE "Active default network|VALIDATED" | head -3
+} > "$OUT/env.txt" 2>&1
+cat "$OUT/env.txt"
+
 adb shell settings put global hide_error_dialogs 1
 adb shell svc power stayon true
 adb shell input keyevent KEYCODE_WAKEUP
@@ -68,7 +77,20 @@ for r in $(seq 1 "$ROUNDS"); do
     for item in $PLAN; do
       s=${item%%:*}; n=${item##*:}
       case "$s" in eight) exp=8;; noise) exp=0;; fast33|veryfast33) exp=33;; *) exp=10;; esac
-      for i in $(seq 1 "$n"); do run_one "$v" "$s" "$r" "$i" "$exp"; done
+      for i in $(seq 1 "$n"); do
+        run_one "$v" "$s" "$r" "$i" "$exp"
+        # Sanity gate: if the very first run produced no recogniser result at
+        # all, the environment has no working speech service — stop instead of
+        # burning an hour on meaningless zeros.
+        if [ ! -f "$OUT/sanity_done" ]; then
+          touch "$OUT/sanity_done"
+          if ! grep -q "^result" "$OUT/raw/${v}_${s}_r${r}_${i}.log"; then
+            log "ABORT: no recogniser result in the first run — environment has no working speech recogniser"
+            adb logcat -d 2>/dev/null | grep -iE "SpeechRecogni|RecognitionService|AiAi|speech|voice" | tail -60 > "$OUT/speech_logcat.txt"
+            exit 0
+          fi
+        fi
+      done
     done
   done
 done

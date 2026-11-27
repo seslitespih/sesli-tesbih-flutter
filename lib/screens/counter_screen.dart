@@ -291,7 +291,9 @@ class _CounterScreenState extends State<CounterScreen>
     // Kaldığı yerden devam: sayı her artışta kaydediliyordu ama açılışta 0'dan
     // başlatılıyordu → uygulama kapanınca sayım kayboluyordu (App Store yorumu
     // 5 Eki: "saydıklarım kayıt olmuyor"). Sıfırlamak için Sıfırla düğmesi var.
-    final savedCount = prefs.getInt('count_${dhikr.id}') ?? 0;
+    // Test builds only (--dart-define=AUTO_RESET=true): every launch starts at 0.
+    const autoReset = bool.fromEnvironment('AUTO_RESET');
+    final savedCount = autoReset ? 0 : (prefs.getInt('count_${dhikr.id}') ?? 0);
 
     if (mounted) {
       setState(() {

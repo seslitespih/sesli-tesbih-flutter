@@ -70,7 +70,7 @@ jobs:
             ios/Runner.xcodeproj/project.pbxproj
 
       - name: Build simulator app (debug)
-        run: flutter build ios --simulator --debug
+        run: flutter build ios --simulator --debug --dart-define=AUTO_OPEN_DHIKR=1 --dart-define=AUTO_RESET=true
 
       - name: Run pace test in the simulator
         run: bash ci/ios_sim_test.sh

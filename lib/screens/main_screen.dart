@@ -21,6 +21,16 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     _loadDhikr();
+    // Test builds only (--dart-define=AUTO_OPEN_DHIKR=<id>): open that counter
+    // straight away so an automated test needs no taps. Defaults to off.
+    const autoOpen = int.fromEnvironment('AUTO_OPEN_DHIKR', defaultValue: 0);
+    if (autoOpen > 0) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Navigator.pushNamed(context, '/counter', arguments: autoOpen);
+        }
+      });
+    }
   }
 
   @override
