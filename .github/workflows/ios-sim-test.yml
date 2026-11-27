@@ -69,20 +69,25 @@ jobs:
           sed -i '' "s/PRODUCT_BUNDLE_IDENTIFIER = .*/PRODUCT_BUNDLE_IDENTIFIER = $BUNDLE_ID;/g" \
             ios/Runner.xcodeproj/project.pbxproj
 
-      - name: Build simulator app (debug)
-        run: flutter build ios --simulator --debug --dart-define=AUTO_OPEN_DHIKR=1 --dart-define=AUTO_RESET=true
+      - name: Build simulator apps (fixed + legacy tracker)
+        run: |
+          mkdir -p ci_app
+          flutter build ios --simulator --debug --dart-define=AUTO_OPEN_DHIKR=1 --dart-define=AUTO_RESET=true
+          cp -R build/ios/iphonesimulator/Runner.app ci_app/fixed.app
+          flutter build ios --simulator --debug --dart-define=AUTO_OPEN_DHIKR=1 --dart-define=AUTO_RESET=true --dart-define=LEGACY_TRACKER=true
+          cp -R build/ios/iphonesimulator/Runner.app ci_app/legacy.app
 
       - name: Run pace test in the simulator
         run: bash ci/ios_sim_test.sh
         env:
-          SCENARIOS: ${{ vars.SCENARIOS || 'normal fast veryfast slow eight noise fast33 veryfast33' }}
+          SCENARIOS: ${{ vars.IOS_SCENARIOS || 'pause normal fast veryfast slow eight noise fast33 veryfast33' }}
           REPEATS:   ${{ vars.REPEATS || '2' }}
 
       - name: Commit results back to the branch
         if: always()
         run: |
           mkdir -p ci_results/ios_${GITHUB_RUN_NUMBER}
-          cp -r ci_out/*.txt ci_out/*.png ci_out/*.yaml ci_results/ios_${GITHUB_RUN_NUMBER}/ 2>/dev/null || true
+          cp -r ci_out/*.txt ci_out/*.png ci_out/*.csv ci_out/full.log ci_results/ios_${GITHUB_RUN_NUMBER}/ 2>/dev/null || true
           git config user.name  "pace-test-bot"
           git config user.email "pace-test-bot@users.noreply.github.com"
           git add -f ci_results

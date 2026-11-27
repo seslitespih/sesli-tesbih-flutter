@@ -95,7 +95,11 @@ class _CounterScreenState extends State<CounterScreen>
   /// split into "utterances" — doing so re-counted everything said before a
   /// pause (said 10 → showed 15; see SttUtteranceTracker.cumulativeTranscript).
   final SttUtteranceTracker _utterances =
-      SttUtteranceTracker(cumulativeTranscript: Platform.isIOS);
+      SttUtteranceTracker(
+          // Test builds only (--dart-define=LEGACY_TRACKER=true): the pre-1.5.5
+          // per-utterance rules on iOS, to compare against the fix.
+          cumulativeTranscript:
+              Platform.isIOS && !const bool.fromEnvironment('LEGACY_TRACKER'));
 
   /// Single-flight session restart: Android fires BOTH an error and a
   /// status change for the same dropped session, and two overlapping
@@ -439,7 +443,14 @@ class _CounterScreenState extends State<CounterScreen>
           listenMode: ListenMode.dictation,
           localeId: localeId,
           listenFor: const Duration(minutes: 5),
-          pauseFor: const Duration(seconds: 8),
+          // iOS keeps ONE long task alive, and speech_to_text stops it itself
+          // after pauseFor of silence — so with 8 s the mic closed and reopened
+          // every 8 s of quiet (measured in the iOS simulator: listening at
+          // +1.2 s, notListening at +9.3 s, restart, again at +17.8 s …). Results
+          // keep the task alive while the user chants, so a long pauseFor only
+          // changes what happens in silence: one renewal a minute instead of
+          // seven. Android ends its own sessions, so it keeps 8 s.
+          pauseFor: Duration(seconds: Platform.isIOS ? 55 : 8),
         ),
       );
     } catch (e) {
