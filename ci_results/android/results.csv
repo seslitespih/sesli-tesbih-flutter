@@ -1,2 +1,2 @@
 variant,scenario,round,idx,counted,expected,restarts,watchdog
-new,normal,1,1,0,10,23,0
+new,normal,1,1,0,10,28,0
