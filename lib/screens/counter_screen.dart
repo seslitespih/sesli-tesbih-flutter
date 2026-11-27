@@ -3,6 +3,7 @@ import 'dart:io' show Platform;
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart' show openAppSettings;
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
@@ -17,6 +18,8 @@ import '../services/custom_dhikr_manager.dart';
 import '../services/dhikr_matcher.dart';
 import '../services/locale_service.dart';
 import '../services/review_service.dart';
+import '../services/stt_diagnostics.dart';
+import '../services/stt_restart_policy.dart';
 import '../services/stt_utterance_tracker.dart';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -97,6 +100,23 @@ class _CounterScreenState extends State<CounterScreen>
   /// listen() calls leave the recogniser permanently busy.
   Timer? _restartTimer;
   bool _restartInFlight = false;
+  int _pendingDelayMs = 0;
+
+  /// Slows restarts down while the recogniser keeps failing instantly, so a
+  /// broken session cannot flicker the mic on and off several times a second.
+  final SttRestartPolicy _restartPolicy = SttRestartPolicy();
+
+  /// Flight recorder for the counting engine. Long-press the status line to
+  /// copy it — the only way to see what the phone's recogniser really did.
+  final SttDiagnostics _diag = SttDiagnostics();
+
+  /// Mic / speech-recognition permission was refused. Without this the screen
+  /// only said "not supported" and gave no way out.
+  bool _micDenied = false;
+
+  int _nowMs() => DateTime.now().millisecondsSinceEpoch;
+  void _log(String tag, [String detail = '']) =>
+      _diag.log(_nowMs(), tag, detail);
 
   /// STT locale, looked up ONCE. _speech.locales() used to run before every
   /// session restart; on Android it is an ordered broadcast to the recogniser
@@ -117,7 +137,8 @@ class _CounterScreenState extends State<CounterScreen>
     onRep: (nowMs) {
       if (!_isListening || !mounted) return;
       final credit = _reconciler.onAudioRep(nowMs);
-      if (credit > 0) _incrementCount(credit);
+      _log('burst', 'credit=$credit');
+      if (credit > 0) _incrementCount(credit, 'audio');
     },
   );
 
@@ -173,15 +194,24 @@ class _CounterScreenState extends State<CounterScreen>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (!_dhikrLoaded) return;
+    _log('lifecycle', state.name);
     if (state == AppLifecycleState.paused) {
       _saveCount();
       if (_isListening) {
         _resumeAfterBackground = true;
         _stopListening();
       }
-    } else if (state == AppLifecycleState.resumed && _resumeAfterBackground) {
-      _resumeAfterBackground = false;
-      if (!_isListening) _toggleListening();
+    } else if (state == AppLifecycleState.resumed) {
+      if (!_speechAvailable) {
+        // Back from Settings after granting the mic / speech permission (or
+        // after a failed first start): try again instead of staying dead
+        // until the user leaves and re-enters the screen.
+        _resumeAfterBackground = false;
+        _initSpeech();
+      } else if (_resumeAfterBackground) {
+        _resumeAfterBackground = false;
+        if (!_isListening) _toggleListening();
+      }
     }
   }
 
@@ -263,19 +293,42 @@ class _CounterScreenState extends State<CounterScreen>
   // ═══════════════════════════════════════════════════════════════════════
 
   Future<void> _initSpeech() async {
-    _speechAvailable = await _speech.initialize(
-      onStatus: _onStatus,
-      onError: _onError,
-    );
+    try {
+      _speechAvailable = await _speech.initialize(
+        onStatus: _onStatus,
+        onError: _onError,
+      );
+    } catch (e) {
+      _speechAvailable = false;
+      _log('init-error', '$e');
+    }
+    var hasPermission = true;
+    if (!_speechAvailable) {
+      try {
+        hasPermission = await _speech.hasPermission;
+      } catch (_) {}
+    }
+    _log('init',
+        'available=$_speechAvailable permission=$hasPermission os=${Platform.operatingSystem}');
     if (!_speechAvailable && mounted) {
-      setState(() => _statusText = _s(
-            'Ses tanıma desteklenmiyor',
-            'Speech recognition not available',
-            'التعرف على الصوت غير متاح',
-          ));
+      setState(() {
+        _micDenied = !hasPermission;
+        _statusText = _micDenied
+            ? _s(
+                'Mikrofon izni gerekli · Ayarlar\'ı aç',
+                'Microphone permission needed · Open Settings',
+                'مطلوب إذن الميكروفون · فتح الإعدادات',
+              )
+            : _s(
+                'Ses tanıma desteklenmiyor',
+                'Speech recognition not available',
+                'التعرف على الصوت غير متاح',
+              );
+      });
       return;
     }
     if (mounted) {
+      if (_micDenied) setState(() => _micDenied = false);
       // Auto-start counts from the first spoken dhikr: previously the mic
       // session opened here but _isListening stayed false, so the UI showed
       // "Başlat" while the mic was already recording and nothing counted.
@@ -288,8 +341,29 @@ class _CounterScreenState extends State<CounterScreen>
   /// the same drop. Android delivers `error_no_match` + `notListening` +
   /// `done` for a single ended session; firing listen() three times made the
   /// recogniser return "busy" and stop counting altogether.
-  void _scheduleRestart(int delayMs) {
+  ///
+  /// [reason] is only for the diagnostics log. [minDelayMs] is a back-off the
+  /// caller needs on top of the policy's own (e.g. after a "busy" error).
+  void _scheduleRestart(String reason, {int minDelayMs = 0}) {
     if (!_isListening || !mounted) return;
+    final now = _nowMs();
+    int delayMs;
+    if (_restartTimer?.isActive ?? false) {
+      // The same dropped session is reported as error + notListening + done.
+      // It is ONE restart: count it once, and let only a longer back-off
+      // (busy) replace the timer already running.
+      if (minDelayMs <= _pendingDelayMs) {
+        _log('restart-merged', 'reason=$reason');
+        return;
+      }
+      delayMs = minDelayMs;
+    } else {
+      delayMs = _restartPolicy.nextDelayMs(now, minDelayMs: minDelayMs);
+    }
+    _pendingDelayMs = delayMs;
+    _log('restart',
+        'reason=$reason delay=${delayMs}ms chain=${_restartPolicy.chainLength}'
+        '${_restartPolicy.isStorm(now) ? " STORM" : ""}');
     _restartTimer?.cancel();
     _restartTimer = Timer(Duration(milliseconds: delayMs), () async {
       if (!_isListening || !mounted || _restartInFlight) return;
@@ -333,6 +407,7 @@ class _CounterScreenState extends State<CounterScreen>
     if (_speech.isListening || !_isListening || !mounted) return;
 
     // Start STT session
+    _log('listen', 'locale=$localeId');
     try {
       await _speech.listen(
         onResult: _onResult,
@@ -347,15 +422,17 @@ class _CounterScreenState extends State<CounterScreen>
           pauseFor: const Duration(seconds: 8),
         ),
       );
-    } catch (_) {
+    } catch (e) {
       // Android throws if the recogniser is still tearing the old session
       // down — back off and try again instead of dying silently.
-      _scheduleRestart(600);
+      _log('listen-failed', '$e');
+      _scheduleRestart('listen-threw', minDelayMs: 600);
     }
   }
 
   void _onStatus(String status) {
     if (!mounted) return;
+    _log('status', status);
     if (status == SpeechToText.listeningStatus) {
       // NOTE: nothing is reset here. Android reports the new session as
       // listening BEFORE the previous session's final result arrives, and
@@ -374,20 +451,22 @@ class _CounterScreenState extends State<CounterScreen>
       }
       // Android ends the session after every utterance; keep the mic alive.
       // The delay also gives the pending final result time to land.
-      _scheduleRestart(350);
+      _scheduleRestart('status-$status');
     }
   }
 
   void _onError(SpeechRecognitionError error) {
-    if (!mounted || !_isListening) return;
+    if (!mounted) return;
+    _log('error', '${error.errorMsg} permanent=${error.permanent}');
+    if (!_isListening) return;
     // "busy" means the previous session is still shutting down — a longer
     // back-off (and a cancel) is the only thing that clears it.
     if (error.errorMsg.contains('busy')) {
       _speech.cancel();
-      _scheduleRestart(800);
+      _scheduleRestart('error-busy', minDelayMs: 800);
     } else {
       // no-match / speech-timeout are normal between reps.
-      _scheduleRestart(350);
+      _scheduleRestart('error-${error.errorMsg}');
     }
   }
 
@@ -395,6 +474,9 @@ class _CounterScreenState extends State<CounterScreen>
     if (!mounted || !_isListening) return;
     final text = result.recognizedWords;
     if (text.isEmpty) return;
+    // Any text means the recogniser is alive and hearing speech: whatever
+    // restarted before was healthy, not a failure loop.
+    _restartPolicy.noteProgress();
 
     final normalized = normalizeDhikrText(text);
     final count = countDhikrOccurrences(text, _dhikr.keywords);
@@ -413,10 +495,16 @@ class _CounterScreenState extends State<CounterScreen>
       isFinal: result.finalResult,
     );
 
-    if (delta > 0) {
-      final credit = _reconciler.onSttDelta(delta, nowMs);
-      if (credit > 0) _incrementCount(credit);
-    }
+    final credit =
+        delta > 0 ? _reconciler.onSttDelta(delta, nowMs) : 0;
+    // Last 48 chars only: the end of the transcript is what changed.
+    final tail = normalized.length > 48
+        ? '…${normalized.substring(normalized.length - 48)}'
+        : normalized;
+    _log('result',
+        '${result.finalResult ? "FINAL" : "part"} n=$count delta=$delta '
+        'credit=$credit len=${normalized.length} "$tail"');
+    if (credit > 0) _incrementCount(credit, 'stt');
   }
 
   // ═══════════════════════════════════════════════════════════════════════
@@ -435,8 +523,9 @@ class _CounterScreenState extends State<CounterScreen>
   //  COUNTING HELPERS
   // ═══════════════════════════════════════════════════════════════════════
 
-  void _incrementCount(int by) {
+  void _incrementCount(int by, [String source = '']) {
     if (by <= 0) return;
+    _log('count', '+$by via $source → ${_count + by}');
 
     setState(() {
       _count += by;
@@ -456,6 +545,24 @@ class _CounterScreenState extends State<CounterScreen>
     _pulseCtrl.forward().then((_) => _pulseCtrl.reverse());
   }
 
+  /// Copies the diagnostics timeline to the clipboard (status-line long-press).
+  Future<void> _copyDiagnostics() async {
+    final header = 'sesli_tesbih diagnostics\n'
+        'platform=${Platform.operatingSystem} ${Platform.operatingSystemVersion}\n'
+        'dhikr=${_dhikrLoaded ? _dhikr.id : -1} count=$_count target=$_targetCount\n'
+        'speechAvailable=$_speechAvailable listening=$_isListening '
+        'locale=$_sttLocaleId chain=${_restartPolicy.chainLength}\n'
+        'tracker=${_utterances.cumulativeTranscript ? "cumulative" : "per-utterance"}';
+    await Clipboard.setData(ClipboardData(text: _diag.dump(header: header)));
+    HapticFeedback.mediumImpact();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(_s('Tanılama kaydı kopyalandı', 'Diagnostics copied',
+          'تم نسخ سجل التشخيص')),
+      duration: const Duration(seconds: 2),
+    ));
+  }
+
   Future<void> _saveCount() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('count_${_dhikr.id}', _count);
@@ -471,6 +578,7 @@ class _CounterScreenState extends State<CounterScreen>
   // ═══════════════════════════════════════════════════════════════════════
 
   void _stopListening() {
+    _log('stop');
     _isListening = false;
     _restartTimer?.cancel();
     _speech.stop();
@@ -486,7 +594,9 @@ class _CounterScreenState extends State<CounterScreen>
       _stopListening();
     } else {
       // Resuming is a clean break: whatever text the recogniser had is gone.
+      _log('start');
       _utterances.reset();
+      _restartPolicy.reset();
       setState(() {
         _isListening = true;
         _statusText = _s('Başlatılıyor...', 'Starting...', 'جارٍ البدء...');
@@ -653,13 +763,29 @@ class _CounterScreenState extends State<CounterScreen>
                     SizedBox(height: _sc(22)),
                     _buildMicSection(),
                     SizedBox(height: _sc(6)),
-                    Text(
-                      _statusText,
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                          fontSize: _sc(13), color: AppColors.textSecondary),
+                    // Long-press copies the engine's flight recorder, so a
+                    // counting problem can be pasted back for diagnosis.
+                    // When the mic permission was refused the same line is the
+                    // way out: tap it to open the app's Settings page. (No
+                    // extra row — that pushed the controls off small phones.)
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: _micDenied ? openAppSettings : null,
+                      onLongPress: _copyDiagnostics,
+                      child: Text(
+                        _statusText,
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: _sc(13),
+                          color: _micDenied
+                              ? AppColors.greenAccent
+                              : AppColors.textSecondary,
+                          decoration:
+                              _micDenied ? TextDecoration.underline : null,
+                        ),
+                      ),
                     ),
                     SizedBox(height: _sc(20)),
                     _buildTapButton(),

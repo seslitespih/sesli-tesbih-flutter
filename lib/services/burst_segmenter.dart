@@ -44,6 +44,8 @@ class BurstSegmenter {
   final List<double> _lvlBuf = List.filled(30, 0.0);
   int _lvlBufIdx = 0;
 
+  double _lastLevel = 0.0;
+
   // Hysteresis burst state
   bool _inBurst = false;
   double _burstPeak = 0.0;
@@ -64,6 +66,12 @@ class BurstSegmenter {
   /// Feeds one raw mic-level frame at [nowMs].
   /// Returns the normalised level (0..1) for UI visualisation.
   double process(double raw, int nowMs) {
+    // 0 — iOS reports 20·log10(rms): a buffer of pure digital silence is
+    //     −Infinity (engine warm-up, a call muting the mic). One such frame
+    //     poisons the running min/max and produced a phantom rep. It carries
+    //     no information, so skip it and keep the last level for the UI.
+    if (!raw.isFinite) return _lastLevel;
+
     // 1 — auto-ranging normalisation
     if (raw < _rawMin) {
       _rawMin = raw;
@@ -112,6 +120,7 @@ class BurstSegmenter {
         _registerOnset(nowMs);
       }
     }
+    _lastLevel = level;
     return level;
   }
 

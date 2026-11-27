@@ -109,4 +109,31 @@ void main() {
       expect(sim.reps, greaterThanOrEqualTo(13));
     });
   });
+
+  // iOS computes the level as 20·log10(rms). A buffer of pure digital silence
+  // (audio engine warming up, a phone call muting the mic) makes that
+  // −Infinity; unguarded, it poisoned the running min/max with NaN and the
+  // segmenter then never saw a burst again ("sesi algılamıyor").
+  group('BurstSegmenter — non-finite mic levels', () {
+    test('a −Infinity frame does not stop later reps from counting', () {
+      final sim = MicSim();
+      sim.feed(-50.0, 2000); // warmup
+      sim.seg.process(double.negativeInfinity, sim.t);
+      sim.t += 50;
+      sim.seg.process(double.nan, sim.t);
+      sim.t += 50;
+      for (var i = 0; i < 5; i++) {
+        sim.feed(-12.0, 300); // word
+        sim.feed(-50.0, 700); // silence
+      }
+      expect(sim.reps, 5);
+    });
+
+    test('non-finite frames return a usable level for the UI meter', () {
+      final seg = BurstSegmenter();
+      seg.process(-50.0, 0);
+      expect(seg.process(double.negativeInfinity, 50).isFinite, isTrue);
+      expect(seg.process(double.nan, 100).isFinite, isTrue);
+    });
+  });
 }
