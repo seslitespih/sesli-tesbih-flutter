@@ -51,20 +51,21 @@ play() {  # scenario tag
 # counter every minute and look at the locale it picked.
 wait_for_locale() {
   [ -f "$OUT/locale_ready" ] && return 0
-  local i loc
+  local i n
   for i in $(seq 1 14); do
     adb shell am force-stop "$PKG"; adb logcat -c
     adb shell am start -n "$PKG/$ACT" >/dev/null 2>&1; sleep 22
     adb shell input tap "$TAPX" "$TAPY"; sleep 8
-    loc=$(adb logcat -d 2>/dev/null | grep "flutter : DIAG" | grep -m1 "listen locale=" | sed -E 's/.*locale=//' | tr -d '
-')
-    log "locale probe $i: '$loc'"
-    echo "probe $i: locale='$loc'" >> "$OUT/locale_probe.txt"
-    adb logcat -d 2>/dev/null | grep -iE "language pack|SodaSpeech|download|offline|Soda" | tail -6 | cut -c1-210 >> "$OUT/locale_probe.txt"
-    if [ -n "$loc" ]; then touch "$OUT/locale_ready"; return 0; fi
+    play probe "probe_$i"
+    sleep 5
+    n=$(adb logcat -d 2>/dev/null | grep "flutter : DIAG" | grep -c " result ")
+    log "recogniser probe $i: results=$n"
+    echo "probe $i: results=$n" >> "$OUT/locale_probe.txt"
+    adb logcat -d 2>/dev/null | grep -iE "language pack|SodaSpeech.*(error|fail|Initialize)" | tail -3 | cut -c1-210 >> "$OUT/locale_probe.txt"
+    if [ "$n" -gt 0 ]; then touch "$OUT/locale_ready"; return 0; fi
     sleep 40
   done
-  log "no locale after the wait — continuing anyway"
+  log "recogniser never produced a result during the wait — continuing anyway"
 }
 
 open_counter() {
