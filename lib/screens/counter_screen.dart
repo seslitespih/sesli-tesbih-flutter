@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -85,7 +86,11 @@ class _CounterScreenState extends State<CounterScreen>
   /// Turns raw STT results into "how many NEW reps" — platform-independent,
   /// unit-tested in test/stt_utterance_tracker_test.dart. Replaces the old
   /// per-session counter that double-counted on Android (see the class doc).
-  final SttUtteranceTracker _utterances = SttUtteranceTracker();
+  /// iOS returns one cumulative transcript per session, so it must not be
+  /// split into "utterances" — doing so re-counted everything said before a
+  /// pause (said 10 → showed 15; see SttUtteranceTracker.cumulativeTranscript).
+  final SttUtteranceTracker _utterances =
+      SttUtteranceTracker(cumulativeTranscript: Platform.isIOS);
 
   /// Single-flight session restart: Android fires BOTH an error and a
   /// status change for the same dropped session, and two overlapping
@@ -362,6 +367,11 @@ class _CounterScreenState extends State<CounterScreen>
       });
     } else if (status == SpeechToText.notListeningStatus ||
         status == SpeechToText.doneStatus) {
+      // The plugin only forwards `done` after the session's final result, so
+      // the transcript we were tracking is over (no-op on Android).
+      if (status == SpeechToText.doneStatus) {
+        _utterances.markSessionEnded(DateTime.now().millisecondsSinceEpoch);
+      }
       // Android ends the session after every utterance; keep the mic alive.
       // The delay also gives the pending final result time to land.
       _scheduleRestart(350);

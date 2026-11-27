@@ -59,6 +59,128 @@ void main() {
     });
   });
 
+  // iOS keeps ONE session open and returns the WHOLE transcript every time
+  // (the plugin even stitches the text after a pause onto what came before).
+  // The per-utterance rules re-counted everything said before a pause:
+  // said 10 → 15, said 33 → 55.
+  group('iOS cumulative transcript', () {
+    SttUtteranceTracker ios() =>
+        SttUtteranceTracker(minRepMs: 420, cumulativeTranscript: true);
+    String words(int n) => List.filled(n, 'sübhanallah').join(' ');
+
+    test('a pause between rounds does not re-count what was said (10 → 15)',
+        () {
+      final t = ios();
+      var total = 0;
+      var now = 0;
+      for (var i = 1; i <= 5; i++) {
+        total += feed(t, words(i), now += 1000);
+      }
+      now += 6000; // user pauses, the session stays open
+      for (var i = 6; i <= 10; i++) {
+        total += feed(t, words(i), now += 1000);
+      }
+      expect(total, 10);
+    });
+
+    test('33 in rounds of 11 with 5 s pauses counts 33 (was 55)', () {
+      final t = ios();
+      var total = 0;
+      var now = 0;
+      var n = 0;
+      for (var round = 0; round < 3; round++) {
+        for (var i = 0; i < 11; i++) {
+          total += feed(t, words(++n), now += 900);
+        }
+        now += 5000;
+      }
+      expect(total, 33);
+    });
+
+    test('a very long pause (minutes) still adds only the new reps', () {
+      final t = ios();
+      var total = 0;
+      total += feed(t, words(3), 3000); // first result: pace-capped to 1
+      total += feed(t, '${words(3)} sü', 4200); // text grows → the other two
+      expect(total, 3);
+      // minutes of silence, then the recogniser repeats itself: nothing new
+      expect(feed(t, words(3), 90000), 0);
+      // one more rep afterwards is exactly one
+      expect(feed(t, words(4), 95000), 1);
+    });
+
+    test('a final that only re-spells the tail adds nothing (3 → 4)', () {
+      final t = ios();
+      var total = 0;
+      var now = 0;
+      for (var i = 1; i <= 3; i++) {
+        total += feed(t, words(i), now += 1000);
+      }
+      total += feed(t, '${words(3)} allah', now += 600);
+      total += feed(t, words(3), now += 1500, isFinal: true);
+      expect(total, 3);
+    });
+
+    test('a hypothesis that flips down and back up is counted once', () {
+      final t = ios();
+      var total = 0;
+      var now = 0;
+      total += feed(t, words(2), now += 1000);
+      total += feed(t, 'sübhanallah sultan allah', now += 1200); // 2 → 1
+      total += feed(t, words(2), now += 1200); //                   1 → 2
+      expect(total, 2);
+    });
+
+    test('a new session starts a new transcript, even if it repeats the old',
+        () {
+      final t = ios();
+      var total = 0;
+      var now = 0;
+      total += feed(t, words(1), now += 1000);
+      total += feed(t, words(1), now += 400, isFinal: true);
+      t.markSessionEnded(now += 100);
+      // session 2: the user says it twice — text extends the old transcript
+      now += 9000;
+      total += feed(t, words(1), now += 500);
+      total += feed(t, words(2), now += 700);
+      expect(total, 3);
+    });
+
+    test("the old session's late final is not new speech", () {
+      final t = ios();
+      var total = 0;
+      var now = 0;
+      for (var i = 1; i <= 3; i++) {
+        total += feed(t, words(i), now += 1000);
+      }
+      t.markSessionEnded(now += 8000); // pauseFor → stop()
+      // new session already running when the old final lands, re-spelled
+      total += feed(t, '${words(3)} allah', now += 300, isFinal: true);
+      // …then the new session hears one fresh rep
+      total += feed(t, words(1), now += 2500);
+      expect(total, 4);
+    });
+
+    test('a transcript that collapses without a final starts over', () {
+      final t = ios();
+      var total = 0;
+      var now = 0;
+      for (var i = 1; i <= 5; i++) {
+        total += feed(t, words(i), now += 1000);
+      }
+      // reset the plugin did not stitch: only the post-pause words remain
+      total += feed(t, words(1), now += 6000);
+      expect(total, 6);
+    });
+
+    test('Android mode is untouched: the per-utterance rules still apply', () {
+      final t = SttUtteranceTracker(minRepMs: 420); // cumulative: false
+      t.markSessionEnded(0); // no-op outside cumulative mode
+      expect(feed(t, words(1), 1000), 1);
+      expect(feed(t, words(1), 1000 + 3000), 1);
+    });
+  });
+
   group('continuous chanting', () {
     test('growing text credits only the new occurrences', () {
       final t = SttUtteranceTracker();
