@@ -1,0 +1,60 @@
+11-27 11:00:07.607  2898  2963 I WM-WorkerWrapper: Worker result RETRY for Work [ id=c80b7fa6-5505-4c75-9b06-7bb584d60159, tags={ com.google.apps.tiktok.contrib.work.TikTokListenableWorker,1,UPDATE_STATUS,TikTokWorker#com.android.dialer.voicemail.service.impl.VvmTaskWorker } ]
+11-27 11:00:07.732  1735  2599 I AiAiEcho: AppIndexer Package:[com.google.android.gms] UserProfile:[0] Enabled:[true].
+11-27 11:00:07.732  1735  2599 I AiAiEcho: AppFetcherImplV2 updateApps package:[com.google.android.gms], userId:[0], reason:[package is updated.].
+11-27 11:00:08.142  1735  2326 I AiAiEcho: AppIndexer Package:[com.google.android.apps.messaging] UserProfile:[0] Enabled:[true].
+11-27 11:00:08.142  1735  2326 I AiAiEcho: AppFetcherImplV2 updateApps package:[com.google.android.apps.messaging], userId:[0], reason:[package is updated.].
+11-27 11:00:08.147  1735  2369 I AiAiEcho: AppIndexer Package:[com.google.android.gms] UserProfile:[0] Enabled:[true].
+11-27 11:00:08.147  1735  2369 I AiAiEcho: AppFetcherImplV2 updateApps package:[com.google.android.gms], userId:[0], reason:[package is updated.].
+11-27 11:00:09.060  2500  2693 I RecognitionServiceImpl: RecognitionService#onMicrophoneOpened
+11-27 11:00:09.980  2500  2500 I RecognitionService: #startListening received when the service's capacity is full - ignoring this call.
+11-27 11:00:12.481  1735  2201 I AiAiEcho: Settings changed for uri: content://settings/secure/active_unlock_provider
+11-27 11:00:12.518  1735  1955 I AiAiEcho: Predicting[0]:  [CONTEXT sampling_count=5 ]
+11-27 11:00:12.568  1735  1955 I AiAiEcho: EchoTargets: 
+11-27 11:00:12.568  1735  1955 I AiAiEcho: Filtered by AiAi flag check: 
+11-27 11:00:12.568  1735  1955 I AiAiEcho: [CONTEXT ratelimit_period="10 SECONDS" ]
+11-27 11:00:12.568  1735  1955 I AiAiEcho: #remoteViewsTwiddler: feature disabled.
+11-27 11:00:12.656  1735  1955 I AiAiEcho: Predicting[0]:  [CONTEXT sampling_count=5 ]
+11-27 11:00:12.689  1735  1955 I AiAiEcho: EchoTargets: 
+11-27 11:00:12.689  1735  1955 I AiAiEcho: Filtered by AiAi flag check: 
+11-27 11:00:12.689  1735  1955 I AiAiEcho: [CONTEXT ratelimit_period="10 SECONDS" ]
+11-27 11:00:12.706  1735  1955 I AiAiEcho: #remoteViewsTwiddler: feature disabled.
+11-27 11:00:12.750  1735  1955 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface home with targets# 0 (types=[])
+11-27 11:00:12.751  1735  1769 I AiAiEcho: Settings changed for uri: content://settings/secure/active_unlock_target
+11-27 11:00:12.864  1735  2599 I AiAiEcho: AppIndexer Package:[com.google.android.gms] UserProfile:[0] Enabled:[true].
+11-27 11:00:12.864  1735  2599 I AiAiEcho: AppFetcherImplV2 updateApps package:[com.google.android.gms], userId:[0], reason:[package is updated.].
+11-27 11:00:12.905  1735  1955 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface lockscreen with targets# 0 (types=[])
+11-27 11:00:12.934  1735  1955 I AiAiEcho: Predicting[0]:  [CONTEXT sampling_count=5 ]
+11-27 11:00:12.934  1735  1955 I AiAiEcho: EchoTargets: 
+11-27 11:00:12.934  1735  1955 I AiAiEcho: Filtered by AiAi flag check: 
+11-27 11:00:12.934  1735  1955 I AiAiEcho: [CONTEXT ratelimit_period="10 SECONDS" ]
+11-27 11:00:12.935  1735  1955 I AiAiEcho: #remoteViewsTwiddler: feature disabled.
+11-27 11:00:12.935  1735  1955 I AiAiEcho: Predicting[0]:  [CONTEXT sampling_count=5 ]
+11-27 11:00:12.935  1735  1955 I AiAiEcho: EchoTargets: 
+11-27 11:00:12.935  1735  1955 I AiAiEcho: Filtered by AiAi flag check: 
+11-27 11:00:12.935  1735  1955 I AiAiEcho: [CONTEXT ratelimit_period="10 SECONDS" ]
+11-27 11:00:12.935  1735  1955 I AiAiEcho: #remoteViewsTwiddler: feature disabled.
+11-27 11:00:13.068  1735  1955 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface home with targets# 0 (types=[])
+11-27 11:00:13.077  1735  1955 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface lockscreen with targets# 0 (types=[])
+11-27 11:00:13.331  2500  2500 I RecognitionService: #startListening received when the service's capacity is full - ignoring this call.
+11-27 11:00:15.555  1735  2326 I AiAiEcho: AppIndexer Package:[com.google.android.gms] UserProfile:[0] Enabled:[true].
+11-27 11:00:15.556  1735  2326 I AiAiEcho: AppFetcherImplV2 updateApps package:[com.google.android.gms], userId:[0], reason:[package is updated.].
+11-27 11:00:16.831  1735  2370 I AiAiEcho: AppIndexer Package:[com.google.android.apps.messaging] UserProfile:[0] Enabled:[true].
+11-27 11:00:16.831  1735  2370 I AiAiEcho: AppFetcherImplV2 updateApps package:[com.google.android.apps.messaging], userId:[0], reason:[package is updated.].
+11-27 11:00:17.290  2500  2693 I RecognitionServiceImpl: RecognitionService#onMicrophoneCloseRequested
+11-27 11:00:17.383  2898  2960 I DialerSingletonScopedExternalsLogging: com.google.android.dialershared.externals.logging.SingletonScopedExternalsLogging.recordCallMethodInvocation:75 event: TIKTOK_WORK_EXECUTION_MONITOR_ON_WORK_STARTED, function parameters: [004251fb-c681-4ed6-a5ff-af70754dee7c,com.android.dialer.voicemail.service.impl.VvmTaskWorker], return value: <empty>
+11-27 11:00:17.384  2898  2960 I DialerVvmTaskWorkerDelegate: com.android.dialer.voicemail.service.impl.scheduler.VvmTaskWorker$VvmTaskWorkerDelegate.executeVvmJob:191 Beginning execution of job ID: 2
+11-27 11:00:17.566  1735  2326 I AiAiEcho: AppIndexer Package:[com.google.android.gms] UserProfile:[0] Enabled:[true].
+11-27 11:00:17.566  1735  2326 I AiAiEcho: AppFetcherImplV2 updateApps package:[com.google.android.gms], userId:[0], reason:[package is updated.].
+11-27 11:00:17.625  2898  2987 I DialerVvmExecutorImpl: com.android.dialer.voicemail.service.impl.scheduler.VvmExecutorImpl.execute:229 Beginning VVM action: SYNC with retryCount: 0 for ComponentInfo{com.android.phone/com.android.services.telephony.TelephonyConnectionService}, 1, UserHandle{0} [CONTEXT enable_persistent_logger=true ]
+11-27 11:00:17.681  2500  2500 I RecognitionService: #startListening received when the service's capacity is full - ignoring this call.
+11-27 11:00:18.157  1735  2599 I AiAiEcho: AppIndexer Package:[com.google.android.gms] UserProfile:[0] Enabled:[true].
+11-27 11:00:18.157  1735  2599 I AiAiEcho: AppFetcherImplV2 updateApps package:[com.google.android.gms], userId:[0], reason:[package is updated.].
+11-27 11:00:18.822  2500  2716 I RecognitionClient: #onResults withSpeech: false
+11-27 11:00:18.831  2500  2716 W RecognitionClient: #onRecognitionFinished no speech - erroring
+11-27 11:00:18.831  2500  2716 W RecognitionClient: #onError space agsa_transcription_NO_SPEECH_DETECTED code -1!
+11-27 11:00:18.831  2500  2716 W RecognitionServiceImpl: Speech recognition error type NO_SPEECH_DETECTED with error code -1
+11-27 11:00:18.860  2558  2558 I flutter : DIAG 1795777218860 error error_speech_timeout permanent=true
+11-27 11:00:18.860  2558  2558 I flutter : DIAG 1795777218860 restart-merged reason=error-error_speech_timeout
+11-27 11:00:19.780  1735  2369 I AiAiEcho: AppIndexer Package:[com.google.android.gms] UserProfile:[0] Enabled:[true].
+11-27 11:00:19.780  1735  2369 I AiAiEcho: AppFetcherImplV2 updateApps package:[com.google.android.gms], userId:[0], reason:[package is updated.].
+11-27 11:00:20.453  2408  2692 W GetConfigSnapshotOp: Succeeded but not registered: com.google.android.libraries.search.voicesearch#com.google.android.googlequicksearchbox [CONTEXT service_id=51 ]

@@ -47,5 +47,5 @@ Downloading packages...
 Got dependencies!
 44 packages have newer versions incompatible with dependency constraints.
 Try `flutter pub outdated` for more information.
-Running Gradle task 'assembleDebug'...                             10.1s
+Running Gradle task 'assembleDebug'...                              9.5s
 ✓ Built build/app/outputs/flutter-apk/app-debug.apk
