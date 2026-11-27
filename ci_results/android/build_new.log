@@ -1,37 +1,37 @@
-[        ] Resolve mutations for :url_launcher_android:prepareDebugArtProfile (Thread[Execution worker,5,main]) started.
-[        ] :url_launcher_android:prepareDebugArtProfile (Thread[Execution worker,5,main]) started.
+[        ] Resolve mutations for :url_launcher_android:prepareDebugArtProfile (Thread[included builds Thread 2,5,main]) started.
+[        ] :url_launcher_android:prepareDebugArtProfile (Thread[included builds Thread 2,5,main]) started.
 [        ] > Task :url_launcher_android:prepareDebugArtProfile
 [        ] Caching disabled for task ':url_launcher_android:prepareDebugArtProfile' because:
 [        ]   Build cache is disabled
 [        ]   Caching has been disabled for the task
 [        ] Task ':url_launcher_android:prepareDebugArtProfile' is not up-to-date because:
 [        ]   No history is available.
-[        ] Resolve mutations for :url_launcher_android:prepareLintJarForPublish (Thread[included builds Thread 2,5,main]) started.
-[        ] :url_launcher_android:prepareLintJarForPublish (Thread[included builds Thread 2,5,main]) started.
-[        ] Resolve mutations for :url_launcher_android:mergeDebugJavaResource (Thread[Execution worker,5,main]) started.
-[        ] :url_launcher_android:mergeDebugJavaResource (Thread[Execution worker,5,main]) started.
+[        ] Resolve mutations for :url_launcher_android:prepareLintJarForPublish (Thread[Execution worker Thread 3,5,main]) started.
+[        ] :url_launcher_android:prepareLintJarForPublish (Thread[Execution worker Thread 3,5,main]) started.
+[        ] Resolve mutations for :url_launcher_android:mergeDebugJavaResource (Thread[included builds Thread 2,5,main]) started.
+[        ] :url_launcher_android:mergeDebugJavaResource (Thread[included builds Thread 2,5,main]) started.
 [        ] > Task :url_launcher_android:prepareLintJarForPublish
 [        ] Caching disabled for task ':url_launcher_android:prepareLintJarForPublish' because:
 [        ]   Build cache is disabled
 [        ]   Caching has been disabled for the task
 [        ] Task ':url_launcher_android:prepareLintJarForPublish' is not up-to-date because:
 [        ]   No history is available.
-[  +95 ms] > Task :url_launcher_android:mergeDebugJavaResource
-[   +1 ms] Caching disabled for task ':url_launcher_android:mergeDebugJavaResource' because:
+[        ] > Task :url_launcher_android:mergeDebugJavaResource
+[        ] Caching disabled for task ':url_launcher_android:mergeDebugJavaResource' because:
 [        ]   Build cache is disabled
 [        ]   Caching has been disabled for the task
 [        ] Task ':url_launcher_android:mergeDebugJavaResource' is not up-to-date because:
 [        ]   No history is available.
 [        ] The input changes require a full rebuild for incremental task ':url_launcher_android:mergeDebugJavaResource'.
-[        ] Resolve mutations for :url_launcher_android:syncDebugLibJars (Thread[Execution worker,5,main]) started.
-[        ] :url_launcher_android:syncDebugLibJars (Thread[Execution worker,5,main]) started.
+[        ] Resolve mutations for :url_launcher_android:syncDebugLibJars (Thread[Execution worker Thread 3,5,main]) started.
+[        ] :url_launcher_android:syncDebugLibJars (Thread[Execution worker Thread 3,5,main]) started.
 [        ] > Task :url_launcher_android:syncDebugLibJars
 [        ] Caching disabled for task ':url_launcher_android:syncDebugLibJars' because:
 [        ]   Build cache is disabled
 [        ] Task ':url_launcher_android:syncDebugLibJars' is not up-to-date because:
 [        ]   No history is available.
-[        ] Resolve mutations for :url_launcher_android:bundleDebugAar (Thread[Execution worker,5,main]) started.
-[        ] :url_launcher_android:bundleDebugAar (Thread[Execution worker,5,main]) started.
+[        ] Resolve mutations for :url_launcher_android:bundleDebugAar (Thread[included builds Thread 2,5,main]) started.
+[        ] :url_launcher_android:bundleDebugAar (Thread[included builds Thread 2,5,main]) started.
 [        ] > Task :url_launcher_android:bundleDebugAar
 [        ] Caching disabled for task ':url_launcher_android:bundleDebugAar' because:
 [        ]   Build cache is disabled
@@ -44,11 +44,11 @@
 [        ] file or directory '/home/runner/work/sesli-tesbih-flutter/sesli-tesbih-flutter/build/url_launcher_android/intermediates/merged_consumer_proguard_file/debug/mergeDebugConsumerProguardFiles/proguard.txt', not found
 [        ] file or directory '/home/runner/work/sesli-tesbih-flutter/sesli-tesbih-flutter/build/url_launcher_android/intermediates/lint_publish_jar/global/prepareLintJarForPublish/lint.jar', not found
 [        ] file or directory '/home/runner/work/sesli-tesbih-flutter/sesli-tesbih-flutter/build/url_launcher_android/intermediates/library_art_profile/debug/prepareDebugArtProfile/baseline-prof.txt', not found
-[        ] Resolve mutations for :url_launcher_android:assembleDebug (Thread[Execution worker,5,main]) started.
-[        ] :url_launcher_android:assembleDebug (Thread[Execution worker,5,main]) started.
+[        ] Resolve mutations for :url_launcher_android:assembleDebug (Thread[Execution worker Thread 3,5,main]) started.
+[        ] :url_launcher_android:assembleDebug (Thread[Execution worker Thread 3,5,main]) started.
 [        ] > Task :url_launcher_android:assembleDebug
 [        ] Skipping task ':url_launcher_android:assembleDebug' as it has no actions.
-[ +300 ms] > Task :app:packageDebug
+[ +193 ms] > Task :app:packageDebug
 [        ] Custom actions are attached to task ':app:packageDebug'.
 [        ] Caching disabled for task ':app:packageDebug' because:
 [        ]   Build cache is disabled
@@ -56,40 +56,40 @@
 [        ] Task ':app:packageDebug' is not up-to-date because:
 [        ]   No history is available.
 [        ] The input changes require a full rebuild for incremental task ':app:packageDebug'.
-[        ] Resolve mutations for :app:createDebugApkListingFileRedirect (Thread[Execution worker Thread 3,5,main]) started.
-[        ] :app:createDebugApkListingFileRedirect (Thread[Execution worker Thread 3,5,main]) started.
+[        ] Resolve mutations for :app:createDebugApkListingFileRedirect (Thread[Execution worker Thread 2,5,main]) started.
+[        ] :app:createDebugApkListingFileRedirect (Thread[Execution worker Thread 2,5,main]) started.
 [        ] > Task :app:createDebugApkListingFileRedirect
 [        ] Caching disabled for task ':app:createDebugApkListingFileRedirect' because:
 [        ]   Build cache is disabled
 [        ]   Caching has been disabled for the task
 [        ] Task ':app:createDebugApkListingFileRedirect' is not up-to-date because:
 [        ]   No history is available.
-[        ] Resolve mutations for :app:assembleDebug (Thread[Execution worker,5,main]) started.
-[        ] :app:assembleDebug (Thread[Execution worker,5,main]) started.
-[        ] > Task :app:assembleDebug
+[        ] Resolve mutations for :app:assembleDebug (Thread[Execution worker Thread 2,5,main]) started.
+[        ] :app:assembleDebug (Thread[Execution worker Thread 2,5,main]) started.
+[  +98 ms] > Task :app:assembleDebug
 [        ] Caching disabled for task ':app:assembleDebug' because:
 [        ]   Build cache is disabled
 [        ] Task ':app:assembleDebug' is not up-to-date because:
 [        ]   Task has not declared any outputs despite executing actions.
-[+1396 ms] > Task :permission_handler_android:extractDebugAnnotations
+[+1499 ms] > Task :permission_handler_android:extractDebugAnnotations
 [        ] Caching disabled for task ':permission_handler_android:extractDebugAnnotations' because:
 [        ]   Build cache is disabled
 [        ] Task ':permission_handler_android:extractDebugAnnotations' is not up-to-date because:
 [        ]   No history is available.
 [        ] file or directory '/home/runner/.pub-cache/hosted/pub.dev/permission_handler_android-12.1.0/android/src/debug/java', not found
 [        ] Android Lint: Creating lint class loader 31.7.3_false
-[ +299 ms] Extracted 3 Annotations:
+[        ] Extracted 3 Annotations:
 [        ]  @IntDef: 3
 [        ] Annotations written to /home/runner/work/sesli-tesbih-flutter/sesli-tesbih-flutter/build/permission_handler_android/intermediates/annotations_zip/debug/extractDebugAnnotations/annotations.zip
-[        ] Resolve mutations for :permission_handler_android:syncDebugLibJars (Thread[Execution worker Thread 2,5,main]) started.
-[        ] :permission_handler_android:syncDebugLibJars (Thread[Execution worker Thread 2,5,main]) started.
+[        ] Resolve mutations for :permission_handler_android:syncDebugLibJars (Thread[Execution worker,5,main]) started.
+[        ] :permission_handler_android:syncDebugLibJars (Thread[Execution worker,5,main]) started.
 [        ] > Task :permission_handler_android:syncDebugLibJars
 [        ] Caching disabled for task ':permission_handler_android:syncDebugLibJars' because:
 [        ]   Build cache is disabled
 [        ] Task ':permission_handler_android:syncDebugLibJars' is not up-to-date because:
 [        ]   No history is available.
-[        ] Resolve mutations for :permission_handler_android:bundleDebugAar (Thread[Execution worker Thread 2,5,main]) started.
-[        ] :permission_handler_android:bundleDebugAar (Thread[Execution worker Thread 2,5,main]) started.
+[        ] Resolve mutations for :permission_handler_android:bundleDebugAar (Thread[Execution worker,5,main]) started.
+[        ] :permission_handler_android:bundleDebugAar (Thread[Execution worker,5,main]) started.
 [        ] > Task :permission_handler_android:bundleDebugAar
 [        ] Caching disabled for task ':permission_handler_android:bundleDebugAar' because:
 [        ]   Build cache is disabled
@@ -101,20 +101,20 @@
 [        ] file or directory '/home/runner/work/sesli-tesbih-flutter/sesli-tesbih-flutter/build/permission_handler_android/intermediates/merged_consumer_proguard_file/debug/mergeDebugConsumerProguardFiles/proguard.txt', not found
 [        ] file or directory '/home/runner/work/sesli-tesbih-flutter/sesli-tesbih-flutter/build/permission_handler_android/intermediates/lint_publish_jar/global/prepareLintJarForPublish/lint.jar', not found
 [        ] file or directory '/home/runner/work/sesli-tesbih-flutter/sesli-tesbih-flutter/build/permission_handler_android/intermediates/library_art_profile/debug/prepareDebugArtProfile/baseline-prof.txt', not found
-[        ] Resolve mutations for :permission_handler_android:assembleDebug (Thread[Execution worker Thread 2,5,main]) started.
-[        ] :permission_handler_android:assembleDebug (Thread[Execution worker Thread 2,5,main]) started.
+[        ] Resolve mutations for :permission_handler_android:assembleDebug (Thread[Execution worker,5,main]) started.
+[        ] :permission_handler_android:assembleDebug (Thread[Execution worker,5,main]) started.
 [        ] > Task :permission_handler_android:assembleDebug
 [        ] Skipping task ':permission_handler_android:assembleDebug' as it has no actions.
 [        ] AAPT2 aapt2-8.7.3-12006047-linux Daemon #0: shutdown
 [        ] AAPT2 aapt2-8.7.3-12006047-linux Daemon #1: shutdown
 [        ] AAPT2 aapt2-8.7.3-12006047-linux Daemon #2: shutdown
 [        ] Android Lint: Disposing Uast application environment in lint classloader [31.7.3_false]
-[        ] BUILD SUCCESSFUL in 4m 32s
-[        ] 312 actionable tasks: 307 executed, 5 up-to-date
-[ +436 ms] Running Gradle task 'assembleDebug'... (completed in 274.0s)
-[   +1 ms] Calculate SHA1: LocalDirectory: '/home/runner/work/sesli-tesbih-flutter/sesli-tesbih-flutter/build/app/outputs/flutter-apk'/app-debug.apk
-[ +551 ms] ✓ Built build/app/outputs/flutter-apk/app-debug.apk
-[   +4 ms] "flutter apk" took 275,088ms.
-[   +9 ms] Running 1 shutdown hook
+[  +83 ms] BUILD SUCCESSFUL in 3m 53s
+[   +1 ms] 312 actionable tasks: 307 executed, 5 up-to-date
+[ +334 ms] Running Gradle task 'assembleDebug'... (completed in 236.6s)
+[        ] Calculate SHA1: LocalDirectory: '/home/runner/work/sesli-tesbih-flutter/sesli-tesbih-flutter/build/app/outputs/flutter-apk'/app-debug.apk
+[ +495 ms] ✓ Built build/app/outputs/flutter-apk/app-debug.apk
+[  +10 ms] "flutter apk" took 237,920ms.
+[   +5 ms] Running 1 shutdown hook
 [        ] Shutdown hooks complete
 [        ] exiting with code 0
