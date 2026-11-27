@@ -35,6 +35,36 @@ adb shell input keyevent KEYCODE_WAKEUP
 adb shell wm dismiss-keyguard >/dev/null 2>&1
 echo "speech services:"; adb shell cmd package query-services -a android.speech.RecognitionService 2>&1 | grep -E "packageName=" | sort -u
 
+AUDIO_MODE="${AUDIO_MODE:-auto}"   # grpc | host | auto (try grpc, fall back to host)
+play() {  # scenario tag
+  local s=$1 tag=$2
+  if [ "$AUDIO_MODE" = host ]; then
+    afplay "ci_audio/$s.wav" > "$OUT/raw/inj_$tag.txt" 2>&1
+  else
+    play "$s" "$tag"
+  fi
+}
+
+# The on-device recogniser needs a language pack that Play services downloads
+# AFTER first boot ("Failed to get language pack of required locale: error 13").
+# Until it is there the app sees no locales and counts nothing. Re-open the
+# counter every minute and look at the locale it picked.
+wait_for_locale() {
+  [ -f "$OUT/locale_ready" ] && return 0
+  local i loc
+  for i in $(seq 1 14); do
+    adb shell am force-stop "$PKG"; adb logcat -c
+    adb shell am start -n "$PKG/$ACT" >/dev/null 2>&1; sleep 22
+    adb shell input tap "$TAPX" "$TAPY"; sleep 8
+    loc=$(adb logcat -d 2>/dev/null | grep "flutter : DIAG" | grep -m1 "listen locale=" | sed -E 's/.*locale=//' | tr -d '')
+    log "locale probe $i: '$loc'"
+    echo "probe $i: locale='$loc'" >> "$OUT/locale_probe.txt"
+    if [ -n "$loc" ]; then touch "$OUT/locale_ready"; return 0; fi
+    sleep 40
+  done
+  log "no locale after the wait — continuing anyway"
+}
+
 open_counter() {
   adb shell am force-stop "$PKG"
   adb shell pm grant "$PKG" android.permission.RECORD_AUDIO
@@ -73,6 +103,7 @@ for r in $(seq 1 "$ROUNDS"); do
     adb uninstall "$PKG" >/dev/null 2>&1
     adb install -r -g "$OUT/$v.apk" 2>&1 | tail -1
     open_counter
+    wait_for_locale
     adb exec-out screencap -p > "$OUT/screens/${v}_r${r}_counter.png"
     for item in $PLAN; do
       s=${item%%:*}; n=${item##*:}
@@ -83,7 +114,14 @@ for r in $(seq 1 "$ROUNDS"); do
         # all, the environment has no working speech service — stop instead of
         # burning an hour on meaningless zeros.
         if [ ! -f "$OUT/sanity_done" ]; then
+          if [ "$AUDIO_MODE" = auto ] && ! grep -q "^burst" "$OUT/raw/${v}_${s}_r${r}_${i}.log"; then
+            log "no mic activity with gRPC injection — switching to host audio (afplay -> BlackHole)"
+            AUDIO_MODE=host
+            echo "audio mode: host (gRPC injection produced no mic activity)" >> "$OUT/env.txt"
+            run_one "$v" "$s" "$r" "$i" "$exp"
+          fi
           touch "$OUT/sanity_done"
+          echo "audio mode used: $AUDIO_MODE" >> "$OUT/env.txt"
           if ! grep -q "^result" "$OUT/raw/${v}_${s}_r${r}_${i}.log"; then
             log "ABORT: no recogniser result in the first run — environment has no working speech recogniser"
             adb logcat -d 2>/dev/null | grep -iE "SpeechRecogni|RecognitionService|AiAi|speech|voice" | tail -60 > "$OUT/speech_logcat.txt"

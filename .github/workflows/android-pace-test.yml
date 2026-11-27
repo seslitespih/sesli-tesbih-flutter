@@ -24,18 +24,14 @@ permissions:
 jobs:
   android:
     name: Android pace matrix
-    runs-on: ubuntu-latest
+    # macOS Intel: has a real audio backend (CoreAudio) and hardware-accelerated
+    # x86_64 emulation. The Linux job's emulator never heard the injected audio.
+    runs-on: macos-15-intel
     timeout-minutes: 150
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Enable KVM
-        run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -81,24 +77,21 @@ jobs:
           cp build/app/outputs/flutter-apk/app-debug.apk ci_out/base.apk
           cp /tmp/counter_screen.new.dart lib/screens/counter_screen.dart
 
-      # `QEMU_AUDIO_DRV=none` switches the emulator's audio INPUT off entirely, so
-      # injected speech never reached the recogniser (it answered
-      # NO_SPEECH_DETECTED). Give it a real backend: a PulseAudio null sink.
-      - name: Virtual audio device (PulseAudio null sink)
+      - name: Virtual audio device (BlackHole) as the default input
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq pulseaudio pulseaudio-utils
-          pulseaudio -D --exit-idle-time=-1 || true
-          sleep 3
-          pactl load-module module-null-sink sink_name=virtmic sink_properties=device.description=VirtMic
-          pactl set-default-sink virtmic
-          pactl set-default-source virtmic.monitor
-          pactl info | head -14
+          brew install --cask blackhole-2ch
+          brew install switchaudio-osx
+          sudo killall coreaudiod || true
+          sleep 8
+          SwitchAudioSource -t input  -s "BlackHole 2ch" || true
+          SwitchAudioSource -t output -s "BlackHole 2ch" || true
+          echo "input : $(SwitchAudioSource -c -t input)"
+          echo "output: $(SwitchAudioSource -c -t output)"
 
       - name: Run the pace matrix on an emulator
         uses: reactivecircus/android-emulator-runner@v2
         env:
-          QEMU_AUDIO_DRV: pa
+          AUDIO_MODE: ${{ vars.AUDIO_MODE || 'auto' }}
           ROUNDS: ${{ vars.ROUNDS || '2' }}
           PLAN: ${{ vars.PLAN || 'normal:3 slow:2 fast:2 veryfast:2 eight:1 noise:1 fast33:1 ultrafast:1' }}
           VARIANTS: ${{ vars.VARIANTS || 'base new' }}
@@ -119,7 +112,7 @@ jobs:
           mkdir -p ci_results/android
           # build logs: only the tail of the verbose build (the error is at the end)
           for f in ci_out/build_*.log; do [ -f "$f" ] && tail -n 120 "$f" > "ci_results/android/$(basename "$f")"; done
-          cp -r ci_out/results.csv ci_out/env.txt ci_out/speech_logcat.txt ci_out/raw ci_out/screens ci_results/android/ 2>/dev/null || true
+          cp -r ci_out/results.csv ci_out/env.txt ci_out/locale_probe.txt ci_out/speech_logcat.txt ci_out/raw ci_out/screens ci_results/android/ 2>/dev/null || true
           git config user.name  "pace-test-bot"
           git config user.email "pace-test-bot@users.noreply.github.com"
           git add -f ci_results
