@@ -9,7 +9,15 @@ name: iOS simulator pace test
 on:
   push:
     branches: [ios-sim-test]
+    paths-ignore:
+      - 'ci/android/**'
+      - 'ci/baseline/**'
+      - 'ci_results/**'
+      - '.github/workflows/android-pace-test.yml'
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 env:
   BUNDLE_ID: com.sesliTesbih.app
@@ -69,6 +77,18 @@ jobs:
         env:
           SCENARIOS: ${{ vars.SCENARIOS || 'normal fast veryfast slow eight noise fast33 veryfast33' }}
           REPEATS:   ${{ vars.REPEATS || '2' }}
+
+      - name: Commit results back to the branch
+        if: always()
+        run: |
+          mkdir -p ci_results/ios
+          cp -r ci_out/*.txt ci_out/*.png ci_results/ios/ 2>/dev/null || true
+          git config user.name  "pace-test-bot"
+          git config user.email "pace-test-bot@users.noreply.github.com"
+          git add -f ci_results
+          git commit -m "ci: ios simulator pace results [skip ci]" || echo "nothing to commit"
+          git pull --rebase origin ios-sim-test || true
+          git push origin HEAD:ios-sim-test || true
 
       - name: Upload results
         if: always()
