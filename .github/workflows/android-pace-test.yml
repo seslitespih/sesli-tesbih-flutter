@@ -61,16 +61,19 @@ jobs:
         run: flutter pub get
 
       - name: Build NEW debug APK
+        shell: bash
         run: |
           mkdir -p ci_out
-          flutter build apk --debug --target-platform android-x64
+          flutter --version | tee ci_out/build_new.log
+          flutter build apk --debug --target-platform android-x64 -v 2>&1 | tee -a ci_out/build_new.log
           cp build/app/outputs/flutter-apk/app-debug.apk ci_out/new.apk
 
       - name: Build BASE debug APK (before the watchdog / faster restart)
+        shell: bash
         run: |
           cp lib/screens/counter_screen.dart /tmp/counter_screen.new.dart
           cp ci/baseline/counter_screen.dart lib/screens/counter_screen.dart
-          flutter build apk --debug --target-platform android-x64
+          flutter build apk --debug --target-platform android-x64 2>&1 | tee ci_out/build_base.log
           cp build/app/outputs/flutter-apk/app-debug.apk ci_out/base.apk
           cp /tmp/counter_screen.new.dart lib/screens/counter_screen.dart
 
@@ -94,6 +97,8 @@ jobs:
         if: always()
         run: |
           mkdir -p ci_results/android
+          # build logs: only the tail of the verbose build (the error is at the end)
+          for f in ci_out/build_*.log; do [ -f "$f" ] && tail -n 120 "$f" > "ci_results/android/$(basename "$f")"; done
           cp -r ci_out/results.csv ci_out/raw ci_out/screens ci_results/android/ 2>/dev/null || true
           git config user.name  "pace-test-bot"
           git config user.email "pace-test-bot@users.noreply.github.com"
