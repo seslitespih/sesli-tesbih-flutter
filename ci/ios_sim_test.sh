@@ -110,11 +110,14 @@ for k in $(seq 1 "$REPS"); do
 done
 run_one fixed fixed silence60 1
 
-log "--- B. legacy tracker (pre-1.5.5 rules) on the over-count scenarios"
-for k in $(seq 1 "$REPS"); do
-  run_one legacy legacy pause "$k"
-  run_one legacy legacy normal "$k"
-done
+LEGACY_REPS="${LEGACY_REPS:-0}"
+if [ "$LEGACY_REPS" -gt 0 ]; then
+  log "--- B. legacy tracker (pre-1.5.5 rules) on the over-count scenarios"
+  for k in $(seq 1 "$LEGACY_REPS"); do
+    run_one legacy legacy pause "$k"
+    run_one legacy legacy normal "$k"
+  done
+fi
 
 log "=================== 4. summary ==================="
 python3 - <<'PY'
