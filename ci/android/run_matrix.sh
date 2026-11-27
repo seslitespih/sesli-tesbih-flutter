@@ -56,9 +56,11 @@ wait_for_locale() {
     adb shell am force-stop "$PKG"; adb logcat -c
     adb shell am start -n "$PKG/$ACT" >/dev/null 2>&1; sleep 22
     adb shell input tap "$TAPX" "$TAPY"; sleep 8
-    loc=$(adb logcat -d 2>/dev/null | grep "flutter : DIAG" | grep -m1 "listen locale=" | sed -E 's/.*locale=//' | tr -d '')
+    loc=$(adb logcat -d 2>/dev/null | grep "flutter : DIAG" | grep -m1 "listen locale=" | sed -E 's/.*locale=//' | tr -d '
+')
     log "locale probe $i: '$loc'"
     echo "probe $i: locale='$loc'" >> "$OUT/locale_probe.txt"
+    adb logcat -d 2>/dev/null | grep -iE "language pack|SodaSpeech|download|offline|Soda" | tail -6 | cut -c1-210 >> "$OUT/locale_probe.txt"
     if [ -n "$loc" ]; then touch "$OUT/locale_ready"; return 0; fi
     sleep 40
   done

@@ -24,14 +24,18 @@ permissions:
 jobs:
   android:
     name: Android pace matrix
-    # macOS Intel: has a real audio backend (CoreAudio) and hardware-accelerated
-    # x86_64 emulation. The Linux job's emulator never heard the injected audio.
-    runs-on: macos-15-intel
+    runs-on: ubuntu-latest
     timeout-minutes: 150
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -77,21 +81,25 @@ jobs:
           cp build/app/outputs/flutter-apk/app-debug.apk ci_out/base.apk
           cp /tmp/counter_screen.new.dart lib/screens/counter_screen.dart
 
-      - name: Virtual audio device (BlackHole) as the default input
+      # `QEMU_AUDIO_DRV=none` switches the emulator's audio INPUT off entirely, so
+      # injected speech never reached the recogniser (it answered
+      # NO_SPEECH_DETECTED). Give it a real backend: a PulseAudio null sink.
+      - name: Virtual audio device (PulseAudio null sink)
         run: |
-          brew install --cask blackhole-2ch
-          brew install switchaudio-osx
-          sudo killall coreaudiod || true
-          sleep 8
-          SwitchAudioSource -t input  -s "BlackHole 2ch" || true
-          SwitchAudioSource -t output -s "BlackHole 2ch" || true
-          echo "input : $(SwitchAudioSource -c -t input)"
-          echo "output: $(SwitchAudioSource -c -t output)"
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq pulseaudio pulseaudio-utils
+          pulseaudio -D --exit-idle-time=-1 || true
+          sleep 3
+          pactl load-module module-null-sink sink_name=virtmic sink_properties=device.description=VirtMic
+          pactl set-default-sink virtmic
+          pactl set-default-source virtmic.monitor
+          pactl info | head -14
 
       - name: Run the pace matrix on an emulator
         uses: reactivecircus/android-emulator-runner@v2
         env:
-          AUDIO_MODE: ${{ vars.AUDIO_MODE || 'auto' }}
+          QEMU_AUDIO_DRV: pa
+          AUDIO_MODE: grpc
           ROUNDS: ${{ vars.ROUNDS || '2' }}
           PLAN: ${{ vars.PLAN || 'normal:3 slow:2 fast:2 veryfast:2 eight:1 noise:1 fast33:1 ultrafast:1' }}
           VARIANTS: ${{ vars.VARIANTS || 'base new' }}
@@ -100,7 +108,7 @@ jobs:
           target: google_apis
           arch: x86_64
           profile: pixel_6
-          ram-size: 3072M
+          ram-size: 4096M
           force-avd-creation: true
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -no-boot-anim -allow-host-audio -grpc 8554 -camera-back none -camera-front none
           disable-animations: true
