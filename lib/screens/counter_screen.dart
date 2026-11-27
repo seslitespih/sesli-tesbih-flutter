@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io' show Platform;
 import 'dart:math' as math;
+import 'package:flutter/foundation.dart' show kDebugMode, debugPrint;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart' show openAppSettings;
@@ -115,8 +116,12 @@ class _CounterScreenState extends State<CounterScreen>
   bool _micDenied = false;
 
   int _nowMs() => DateTime.now().millisecondsSinceEpoch;
-  void _log(String tag, [String detail = '']) =>
-      _diag.log(_nowMs(), tag, detail);
+  void _log(String tag, [String detail = '']) {
+    _diag.log(_nowMs(), tag, detail);
+    // Debug builds only: lets an emulator test read the same timeline from
+    // `adb logcat` that the user copies from the app.
+    if (kDebugMode) debugPrint('DIAG ${_nowMs()} $tag $detail');
+  }
 
   /// STT locale, looked up ONCE. _speech.locales() used to run before every
   /// session restart; on Android it is an ordered broadcast to the recogniser

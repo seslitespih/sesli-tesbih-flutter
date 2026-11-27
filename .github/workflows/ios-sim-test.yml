@@ -1,0 +1,79 @@
+# ═══════════════════════════════════════════════════════════════════════
+#  iOS simulator pace test (NOT a release workflow)
+#  Plays synthetic Turkish "Sübhanallah" at several speeds into the iOS
+#  Simulator microphone and records what the counter showed.
+#  Trigger: push to the ios-sim-test branch only. Never touches main.
+# ═══════════════════════════════════════════════════════════════════════
+name: iOS simulator pace test
+
+on:
+  push:
+    branches: [ios-sim-test]
+  workflow_dispatch:
+
+env:
+  BUNDLE_ID: com.sesliTesbih.app
+  APP_ORG:   com.sesliTesbih
+  APP_PROJ:  sesli_tesbih
+
+jobs:
+  sim-test:
+    name: Simulator pace test
+    runs-on: macos-15
+    timeout-minutes: 75
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode 26
+        run: |
+          XCODE=$(ls /Applications | grep "^Xcode_26" | sort -V | tail -1)
+          if [ -n "$XCODE" ]; then
+            sudo xcode-select -s "/Applications/$XCODE/Contents/Developer"
+          fi
+          xcodebuild -version
+          xcrun simctl list runtimes | head -10
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: flutter pub get
+        run: flutter pub get
+
+      - name: Create iOS project
+        run: |
+          flutter create --platforms ios --org "$APP_ORG" --project-name "$APP_PROJ" .
+
+      - name: Patch Info.plist and bundle id
+        run: |
+          P=ios/Runner/Info.plist
+          plb() { /usr/libexec/PlistBuddy -c "$1" "$P" 2>/dev/null || true; }
+          plb "Add :NSMicrophoneUsageDescription string 'Microphone is required for voice dhikr counting.'"
+          plb "Add :NSSpeechRecognitionUsageDescription string 'Speech recognition is used to count dhikr words.'"
+          plb "Add :NSLocationWhenInUseUsageDescription string 'Location is used for Qibla.'"
+          plb "Add :NSLocationAlwaysAndWhenInUseUsageDescription string 'Location is used for Qibla.'"
+          /usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName 'Vocal Tasbeeh'" "$P" 2>/dev/null || \
+          /usr/libexec/PlistBuddy -c "Add :CFBundleDisplayName string 'Vocal Tasbeeh'" "$P"
+          sed -i '' "s/PRODUCT_BUNDLE_IDENTIFIER = .*/PRODUCT_BUNDLE_IDENTIFIER = $BUNDLE_ID;/g" \
+            ios/Runner.xcodeproj/project.pbxproj
+
+      - name: Build simulator app (debug)
+        run: flutter build ios --simulator --debug
+
+      - name: Run pace test in the simulator
+        run: bash ci/ios_sim_test.sh
+        env:
+          SCENARIOS: ${{ vars.SCENARIOS || 'normal fast veryfast slow eight noise fast33 veryfast33' }}
+          REPEATS:   ${{ vars.REPEATS || '2' }}
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-sim-results
+          path: ci_out/
+          if-no-files-found: ignore
