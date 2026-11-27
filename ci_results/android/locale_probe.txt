@@ -1,0 +1,14 @@
+probe 1: locale=''
+11-27 13:51:40.799  3532  4411 D ConfigUpdater: Loaded SharedPreferences: SmartSelectionDownload
+11-27 13:51:40.799  3532  4411 D ConfigUpdater: Using Lollipop+ download directory: /data/user/0/com.google.android.configupdater/files/downloads
+11-27 13:51:40.799  3532  4411 D ConfigUpdater: Got DownloadManager service
+11-27 13:51:40.799  3532  4411 D ConfigUpdater: handleCompletedContentDownload
+11-27 13:51:40.799  3532  4411 I ConfigUpdater: handleCompletedContentDownload: uri=/all_downloads/8
+11-27 13:51:40.881  1978  4631 D DownloadManager: [11] Starting
+probe 2: locale='tr_TR'
+11-27 13:52:53.059  3868  4111 D eatg    : Starting download: https://www.gstatic.com/messages/smarts/penpal_ml_models_mp_mobilebert/20250404_v4_penpal-model.tflite_1744129404068
+11-27 13:52:53.059  3868  4111 V eatg    : Is http uri, downloading (uri: https://www.gstatic.com/messages/smarts/penpal_ml_models_mp_mobilebert/20250404_v4_penpal-model.tflite_1744129404068)
+11-27 13:52:53.086  3868  4275 D eatg    : Starting download: https://www.gstatic.com/messages/smarts/smart_actions_grammars/FindRestaurants_android.far_1565913559556
+11-27 13:52:53.086  3868  4275 V eatg    : Is http uri, downloading (uri: https://www.gstatic.com/messages/smarts/smart_actions_grammars/FindRestaurants_android.far_1565913559556)
+11-27 13:52:53.180  3868  4089 D eatg    : Starting download: https://www.gstatic.com/messages/smarts/smart_actions_grammars/pumpkin_model_config_no_about_movie_grammar_2019060600.pb_1565913559556
+11-27 13:52:53.180  3868  4089 V eatg    : Is http uri, downloading (uri: https://www.gstatic.com/messages/smarts/smart_actions_grammars/pumpkin_model_config_no_about_movie_grammar_2019060600.pb_1565913559556)
