@@ -110,7 +110,7 @@ jobs:
           profile: pixel_6
           ram-size: 4096M
           force-avd-creation: true
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -no-boot-anim -allow-host-audio -grpc 8554 -camera-back none -camera-front none
+          emulator-options: -no-window -gpu guest -no-snapshot -no-boot-anim -allow-host-audio -grpc 8554 -camera-back none -camera-front none
           disable-animations: true
           script: bash ci/android/run_matrix.sh
 
